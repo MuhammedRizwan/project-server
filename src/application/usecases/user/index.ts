@@ -94,12 +94,11 @@ export class UserUseCase {
       password,
       user.password
     );
-    if (verifiedPassword) {
+    if (!verifiedPassword) {
       throw new Error("Invalid password");
     }
     const accessToken = this.JwtService.generateAccessToken(user._id);
     const refreshToken = this.JwtService.generateRefreshToken(user._id);
-
     return {
       userDetails: user,
       accessToken,

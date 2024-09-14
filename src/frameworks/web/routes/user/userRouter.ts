@@ -14,4 +14,7 @@ router.post("/signup",validateSchema(userSignupSchema),(req:Request, res:Respons
 router.post('/login',(req:Request,res:Response)=>{
     controller.user.loginUser(req,res)
 })
+router.post('/refreshToken',(req:Request,res:Response)=>{
+  controller.user.RefreshAccessToken(req,res)
+})
 export default router;
