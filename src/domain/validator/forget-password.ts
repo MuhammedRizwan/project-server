@@ -1,18 +1,11 @@
-import * as yup from "yup";
-const userSignupSchema = yup.object({
-  username: yup
-    .string()
-    .trim()
-    .required("Username is required")
-    .min(5, "Username must be at least 5 characters"),
-
-  email: yup
+import * as yup from "yup"
+export const passwordValidationSchema = yup.object().shape({
+    email: yup
     .string()
     .trim()
     .required("Email is required")
     .email("Invalid email format"),
-
-  password: yup
+    password: yup
     .string()
     .trim()
     .required("Password is required")
@@ -22,17 +15,9 @@ const userSignupSchema = yup.object({
       /[!@#$%^&*(),.?":{}|<>]/,
       "Password must contain at least one special character"
     ),
-
-  phone: yup
-    .string()
-    .trim()
-    .required("Phone number is required")
-    .matches(/^\d{10}$/, "Phone number must be exactly 10 digits"),
-
-  confirmPassword: yup
+    confirmPassword: yup
     .string()
     .trim()
     .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Confirm password is required"),
-});
-export default userSignupSchema;
+    .required("Confirm password is required")
+  });

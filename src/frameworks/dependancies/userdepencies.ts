@@ -1,5 +1,5 @@
 import { UserUseCase } from "../../application/usecases/user";
-import { RefreshToken } from "../../application/usecases/refreshToken";
+import { Verification } from "../../application/usecases/user/userVerification";
 import { MongoUserRepository } from "../../adapters/repositories/userRepositories";
 import { MongoOTPRepository } from "../../adapters/repositories/otpRepositories";
 import { EmailService } from "../services/emailService";
@@ -17,13 +17,11 @@ const services={
     GenerateOtp:new GenerateOtp(),
     JwtService:new JwtService()
 }
-const TokenService={
-    JwtService:new JwtService()
-}
+
 
 const UseCase = {
     UserUseCase: new UserUseCase({ Repositories ,services}), 
-    RefreshToken:new RefreshToken({TokenService}) 
+    Verification:new Verification({Repositories,services}) 
 };
 
 const UserDependancies = {

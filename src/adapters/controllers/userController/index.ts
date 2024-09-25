@@ -1,73 +1,121 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserUseCase } from "../../../application/usecases/user";
 import { Iuser } from "../../../domain/entities/user/user";
-import {RefreshToken} from "../../../application/usecases/refreshToken"
+import { Verification } from "../../../application/usecases/user/userVerification";
 
 interface Dependencies {
   UseCase: {
     UserUseCase: UserUseCase;
-    RefreshToken:RefreshToken
+    Verification: Verification;
   };
 }
 export class userController {
   private UserUseCase: UserUseCase;
-  private RefreshToken:RefreshToken;
+  private Verification: Verification;
   constructor(dependencies: Dependencies) {
     this.UserUseCase = dependencies.UseCase.UserUseCase;
-    this.RefreshToken=dependencies.UseCase.RefreshToken;
+    this.Verification = dependencies.UseCase.Verification;
   }
-  async createUser(req: Request, res: Response): Promise<void> {
+  async createUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { username, email, phone, password } = req.body as Iuser;
-      const { userDetails, accessToken, refreshToken } =
-        await this.UserUseCase.signupUser({ username, email, phone, password });
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+      const user = await this.UserUseCase.signupUser({
+        username,
+        email,
+        phone,
+        password,
       });
-
-      res.status(201).json({ userDetails, accessToken });
-      return;
+      return res
+        .status(201)
+        .json({ status: "success", message: "User registered ", user });
     } catch (error) {
-      const err = error as Error;
-      res.status(400).json({ error: err.message });
-      return;
+      return next(error);
     }
   }
-  async loginUser(req: Request, res: Response): Promise<void> {
+  async loginUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body as Iuser;
-      const {
-        userDetails,accessToken,refreshToken} = await this.UserUseCase.signinUser(email, password);
-      if (!userDetails) {
-        res.status(401).send("user not found");
-        return;
+      const { user, accessToken, refreshToken } =
+        await this.UserUseCase.signinUser(email, password);
+      if (!user.is_verified) {
+        return res.status(403).json({
+          status: "error",
+          message: "verify the OTP",
+          user,
+          redirect: "/verification",
+        });
       }
+      return res.status(200).json({
+        status: "success",
+        message: "Logged in successfully",
+        user,
+        accessToken,
+        refreshToken,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async OTPVerification(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { Otp, user } = req.body;
+      if(!user){
+        res.status(404).json({status:"error",message:"User Not Found"})
+      }
+      if (Otp.length != 4) {
+        res.status(400).json({ status: "error", message: "Incorrect OTP" });
+      }
+      const { userData, accessToken, refreshToken } =
+        await this.Verification.OTPVerification(Otp, user.email);        
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true,
         sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      res.status(200).json({userDetails,accessToken});
-      return;
+      return res.status(200).json({
+        status: "success",
+        message: "OTP  Verified",
+        user: userData,
+        accessToken,
+      });
     } catch (error) {
-      const err = error as Error;
-      res.status(500).json({ error: err.message });
-      return;
+      return next(error);
     }
   }
-  async RefreshAccessToken(req: Request, res: Response){
+  async sendOTP(req: Request, res: Response, next: NextFunction) {
     try {
-        const newAccessToken=await this.RefreshToken.refreshAccessToken(req.cookies.refreshToken)
-        res.json({accessToken:newAccessToken})
-        return
+      const { email } = req.body;
+      const OTPData = await this.Verification.sendOTP(email);
+      return res
+        .status(200)
+        .json({ status: "success", message: "Resend OTP", OTPData });
     } catch (error) {
-        const err=error as Error
-        res.status(400).json({error:err.message})
-        return
+      return next(error);
+    }
+  }
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, password } = req.body;
+      const user = await this.Verification.changePassword(email, password);
+      return res.status(200).json({status:"success",message:"Password changed",user});
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async RefreshAccessToken(req: Request, res: Response) {
+    try {
+      const accessToken = await this.Verification.refreshAccessToken(
+        req.cookies.refreshToken
+      );
+      if (!accessToken) {
+        return res.json("token expired");
+      }
+      return res.json({ accessToken: accessToken });
+    } catch (error) {
+      const err = error as Error;
+      return res.status(400).json({ error: err.message });
     }
   }
 }
