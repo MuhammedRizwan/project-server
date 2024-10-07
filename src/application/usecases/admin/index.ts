@@ -1,5 +1,4 @@
 import { ObjectId } from "mongoose";
-import { IOTP } from "../../../domain/entities/user/otp";
 import { Iadmin } from "../../../domain/entities/admin/admin";
 import { Iuser } from "../../../domain/entities/user/user";
 import { Iagent } from "../../../domain/entities/agent/agent";
@@ -8,9 +7,6 @@ import { CustomError } from "../../../domain/errors/customError";
 interface MongoAdminRepository {
   changePassword(email: string, password: string): unknown;
   findAdminByEmail(email: string): Promise<Iadmin | null>;
-}
-interface MongoOTPRepository {
-  createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
 }
 interface MongoUserRepository {
   getAllUsersData(): Promise<Iuser[] | null>;
@@ -27,9 +23,7 @@ interface EmailService {
   sendAcceptanceEmail(email: string): Promise<void>;
   sendRejectionEmail(email: string): Promise<void>;
 }
-interface GenerateOtp {
-  generate(): string;
-}
+
 interface JwtService {
   verifyRefreshToken(refreshToken: string): any;
   generateAccessToken(userId: ObjectId | undefined): string;
@@ -39,33 +33,31 @@ interface JwtService {
 interface Dependencies {
   Repositories: {
     MongoAdminRepository: MongoAdminRepository;
-    MongoOTPRepository: MongoOTPRepository;
     MongoUserRepository: MongoUserRepository;
     MongoAgentRepository: MongoAgentRepository;
   };
   Services: {
     EmailService: EmailService;
-    GenerateOtp: GenerateOtp;
     JwtService: JwtService;
   };
 }
 export class AdminUseCase {
   private adminRepository: MongoAdminRepository;
-  private OTPRepository: MongoOTPRepository;
+
   private userRepository: MongoUserRepository;
   private agentRepository: MongoAgentRepository;
   private emailService: EmailService;
   private JwtService: JwtService;
-  private generateOtp: GenerateOtp;
+
 
   constructor(Dependencies: Dependencies) {
     this.adminRepository = Dependencies.Repositories.MongoAdminRepository;
-    this.OTPRepository = Dependencies.Repositories.MongoOTPRepository;
+
     this.agentRepository = Dependencies.Repositories.MongoAgentRepository;
     this.userRepository = Dependencies.Repositories.MongoUserRepository;
     this.emailService = Dependencies.Services.EmailService;
     this.JwtService = Dependencies.Services.JwtService;
-    this.generateOtp = Dependencies.Services.GenerateOtp;
+
   }
   async loginAdmin(email: string, password: string) {
     try {
@@ -101,44 +93,6 @@ export class AdminUseCase {
       return accessToken;
     } catch (err) {
       throw new Error("Invalid refresh token");
-    }
-  }
-  async sendOTP(email: string) {
-    try {
-      const existAdmin = await this.adminRepository.findAdminByEmail(email);
-      if (!existAdmin) {
-        throw new CustomError("User not found", 404);
-      }
-      const verificationOtp = this.generateOtp.generate();
-      if (!verificationOtp) {
-        throw new CustomError("Error generating OTP", 500);
-      }
-      await this.emailService.sendVerificationEmail(email, verificationOtp);
-      const createOTP = await this.OTPRepository.createOTP({
-        email: email,
-        otp: verificationOtp,
-      });
-      if (!createOTP) {
-        throw new CustomError("OTP creation failed", 500);
-      }
-      return createOTP;
-    } catch (error) {
-      throw error
-    }
-  }
-  async changePassword(email: string, password: string) {
-    try {
-      const isAdmin = await this.adminRepository.findAdminByEmail(email);
-      if (!isAdmin) {
-        throw new CustomError("Admin not found", 404);
-      }
-      const updatePassword = await this.adminRepository.changePassword(email, password);
-      if (!updatePassword) {
-        throw new CustomError("Password not updated", 500);
-      }
-      return updatePassword;
-    } catch (error) {
-      throw error
     }
   }
   async getAllUsers() {

@@ -14,7 +14,7 @@ export class adminController {
     this.AdminUseCase = dependencies.useCase.AdminUseCase;
   }
 
-  async loginAdmin(req: Request, res: Response,next:NextFunction) {
+  async loginAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body as Iadmin;
       const { admin, accessToken, refreshToken } =
@@ -25,28 +25,16 @@ export class adminController {
         sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      return res.status(200).json({ admin, accessToken });
+      return res
+        .status(200)
+        .json({
+          status: "success",
+          message: "Admin Logged In",
+          admin,
+          accessToken,
+        });
     } catch (error) {
-      return next(error)
-    }
-  }
-
-  async sendOTP(req: Request, res: Response,next:NextFunction) {
-    try {
-      const { email } = req.body;
-      const OTPData = await this.AdminUseCase.sendOTP(email);
-      return res.status(200).json(OTPData);
-    } catch (error) {
-      return next(error)
-    }
-  }
-  async changePassword(req: Request, res: Response,next:NextFunction) {
-    try {
-      const { email, password } = req.body;
-      const admin = await this.AdminUseCase.changePassword(email, password);
-      return res.status(200).json(admin);
-    } catch (error) {
-      return next(error)
+      return next(error);
     }
   }
   async RefreshAccessToken(req: Request, res: Response) {
@@ -63,59 +51,87 @@ export class adminController {
       return res.status(400).json({ error: err.message });
     }
   }
-  async getAllUsers(req: Request, res: Response,next:NextFunction) {
+  async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const users = await this.AdminUseCase.getAllUsers();
-      return res.status(200).json(users);
+      return res
+        .status(200)
+        .json({ status: "success", message: "Fetched All Users", users });
     } catch (error) {
-      return next(error)
+      return next(error);
     }
   }
-  async BlockUser(req: Request, res: Response,next:NextFunction) {
+  async BlockUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id, is_block } = req.body;
       const user = await this.AdminUseCase.changeUserStatus(id, is_block);
-      return res.status(200).json(user);
+      return res
+        .status(200)
+        .json({
+          status: "success",
+          message: `${user.is_block ? "user Blocked" : "User Unblocked"}`,
+          user,
+        });
     } catch (error) {
-      return next(error)
+      return next(error);
     }
   }
-  async getAllAgencies(req: Request, res: Response,next:NextFunction) {
+  async getAllAgencies(req: Request, res: Response, next: NextFunction) {
     try {
       const agencies = await this.AdminUseCase.getAllAgencies();
-      return res.status(200).json(agencies);
+      return res
+        .status(200)
+        .json({ status: "success", message: "Fetch all agencies", agencies });
     } catch (error) {
-      return next(error)
+      return next(error);
     }
   }
-  async BlockAgent(req: Request, res: Response,next:NextFunction) {
+  async BlockAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const { id, is_block } = req.body;
-      const user = await this.AdminUseCase.changeAgentStatus(id, is_block);
-      return res.status(200).json(user);
+      const agent = await this.AdminUseCase.changeAgentStatus(id, is_block);
+      return res
+        .status(200)
+        .json({
+          status: "success",
+          message: `${agent.is_block ? "user Blocked" : "User Unblocked"}`,
+          agent,
+        });
     } catch (error) {
-      return next(error)
+      return next(error);
     }
   }
-  async getAgent(req: Request, res: Response,next:NextFunction) {
+  async getAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.agentid;
       const agent = await this.AdminUseCase.getAgent(id);
-      return res.status(200).json(agent);
+      return res
+        .status(200)
+        .json({ status: "success", message: "Fetched Agent Data", agent });
     } catch (error) {
-     return next(error)
+      return next(error);
     }
   }
-  async verifyAgentByAdmin(req: Request, res: Response,next:NextFunction) {
+  async verifyAgentByAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const { id, admin_verified } = req.body;
       const agent = await this.AdminUseCase.adminVerifyAgent(
         id,
         admin_verified
       );
-      return res.status(200).json(agent);
+      return res
+        .status(200)
+        .json({
+          status: "success",
+          message: `${
+            agent.admin_verified == "accept"
+              ? "Agency Aceepted"
+              : "Agency Rejected"
+          }`,
+          agent,
+        });
     } catch (error) {
-    return next(error)
+      return next(error);
     }
   }
 }

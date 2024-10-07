@@ -18,10 +18,8 @@ const Services={
     GenerateOtp:new GenerateOtp(),
     JwtService:new JwtService()
 }
-
 const useCase={
     AdminUseCase:new AdminUseCase({Repositories,Services}),
-
 }
 
 const AdminDepencies={

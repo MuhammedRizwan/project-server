@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { adminController } from "../../../../adapters/controllers/adminController";
 import AdminDepencies from "../../../dependancies/admindepencies";
-
+import categoryRouter from "../category/categoryRouter";
 const router = Router();
 
 const controller = {
@@ -13,14 +13,6 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) =>
 );
 router.post("/refreshToken", (req: Request, res: Response) =>
   controller.admin.RefreshAccessToken(req, res)
-);
-router.post("/sendotp", (req: Request, res: Response, next: NextFunction) =>
-  controller.admin.sendOTP(req, res, next)
-);
-router.post(
-  "/changepassword",
-  (req: Request, res: Response, next: NextFunction) =>
-    controller.admin.changePassword(req, res, next)
 );
 router.get("/users", (req: Request, res: Response, next: NextFunction) =>
   controller.admin.getAllUsers(req, res, next)
@@ -48,4 +40,5 @@ router.patch(
   (req: Request, res: Response, next: NextFunction) =>
     controller.admin.verifyAgentByAdmin(req, res, next)
 );
+router.use('/category', categoryRouter);
 export default router;

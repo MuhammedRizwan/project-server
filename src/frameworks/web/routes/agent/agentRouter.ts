@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { agentController } from "../../../../adapters/controllers/agentController";
 import AgentDepencies from "../../../dependancies/agentdepencies";
+import packageRouter from "../package/packageRouter";
+import categoryRouter from "../category/categoryRouter";
 
 import multer from "multer";
 
@@ -36,4 +38,6 @@ router.post(
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.changePassword(req, res, next)
 );
+router.use('/package', packageRouter);
+router.use('/category', categoryRouter);
 export default router;
