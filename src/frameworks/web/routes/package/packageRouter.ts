@@ -14,17 +14,20 @@ router.get("/", (req: Request, res: Response, next: NextFunction) =>
 );
 router.post(
   "/add",
-  upload.array("image"),
+  upload.array("images[]",10),
   (req: Request, res: Response, next: NextFunction) =>
     controller.package.createPackage(req, res, next)
 );
 router.put(
   "/update/:packageId",
-  upload.single("image"),
+  upload.array("images"),
   (req: Request, res: Response, next: NextFunction) =>
     controller.package.updatePackage(req, res, next)
 );
 router.patch("/block", (req: Request, res: Response, next: NextFunction) =>
   controller.package.blockNUnblockPackage(req, res, next)
+);
+router.get("/:packageId", (req: Request, res: Response, next: NextFunction) =>
+  controller.package.getPackageById(req, res, next)
 );
 export default router;

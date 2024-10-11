@@ -141,4 +141,31 @@ export class UserUseCase {
       throw error;
     }
   }
+  async googleLogin(googleUser: any) {
+    try {
+      const user = await this.userRepository.findUserByEmail(googleUser.email);
+      if (!user) {
+        const userData = {
+          name: googleUser.name,
+          email: googleUser.email,
+          password: googleUser.id,
+          profile_pic: googleUser.picture,
+          is_verified: true,
+        };
+        const newUser = await this.userRepository.createUser(userData);
+        if (!newUser) {
+          throw new CustomError("something went wrong cannot signup user", 500);
+        }
+        return newUser;
+      } else {
+        const accessToken = this.JwtService.generateAccessToken(user._id);
+        if (!accessToken) {
+          throw new CustomError("Couldn't generate token", 500);
+        }
+        return {user,accessToken,refreshToken:null}
+      } 
+    } catch (error) {
+      throw error;
+    }
+  }
 }

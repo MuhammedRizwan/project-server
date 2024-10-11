@@ -11,5 +11,5 @@ const categorySchema = new Schema(
     timestamps: true,
   }
 );
-const agentModel = model("Category", categorySchema);
-export default agentModel;
+const categoryModel = model("Category", categorySchema);
+export default categoryModel;

@@ -6,6 +6,7 @@ import userSignupSchema from "../../../../domain/validator/userSignup";
 import userLoginSchema from "../../../../domain/validator/userLogin";
 import { emailValidationSchema } from "../../../../domain/validator/emailvalidation";
 import { passwordValidationSchema } from "../../../../domain/validator/forget-password";
+import packageRouter from "../package/packageRouter";
 
 const router = Router();
 
@@ -49,4 +50,8 @@ router.post(
     controller.user.changePassword(req, res, next);
   }
 );
+router.post('/googleLogin',(req:Request,res:Response,next:NextFunction)=>{
+  controller.user.googleLogin(req,res,next)
+})
+router.use("/packages", packageRouter);
 export default router;

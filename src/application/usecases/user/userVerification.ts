@@ -77,11 +77,7 @@ export class Verification {
 
   async OTPVerification(Otp: string, email: string) {
     try {
-      console.log(email);
-      
-      const OTP = await this.OTPRepository.findOTPbyEmail(email);
-      console.log(OTP);
-      
+      const OTP = await this.OTPRepository.findOTPbyEmail(email);      
       if (!OTP) {
         throw new CustomError("OTP expired", 410);
       }

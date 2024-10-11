@@ -1,11 +1,12 @@
-import { Package, PackageData } from "../../../domain/entities/package/package";
+import { ObjectId } from "mongoose";
+import { Package } from "../../../domain/entities/package/package";
 import { CustomError } from "../../../domain/errors/customError";
 
 interface MongoPackageRepository {
-  createPackage(packages: Package): Promise<Package | null>;
+  createPackage( package_data: Package): Promise<Package | null>;
   getPackage(id: string): Promise<Package | null>;
   getAllPackages(): Promise<Package[] | null>;
-  editPackage(id: string, packageData: PackageData): Promise<Package | null>;
+  editPackage(id: string, packageData: Package): Promise<Package | null>;
   blockNUnblockPackage(packageId: string, isBlock: boolean): Promise<Package|null>;
 }
 interface CloudinaryService {
@@ -21,19 +22,30 @@ interface Dependencies {
 }
 export class packageUseCase {
   private packageRepository: MongoPackageRepository;
-  private clodinaryService: CloudinaryService;
+  private cloudinaryService: CloudinaryService;
   constructor(dependencies: Dependencies) {
     this.packageRepository = dependencies.Repositories.MongoPackageRepository;
-    this.clodinaryService = dependencies.services.CloudinaryService;
+    this.cloudinaryService = dependencies.services.CloudinaryService;
   }
-  async createPackage(packages: Package) {
-    const newPackage = await this.packageRepository.createPackage(packages);
-    if(!newPackage) {
-        throw new CustomError("Package creation failed", 500);
+  async createPackage(
+    package_data: Package,
+    files: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[] | undefined
+  ) {
+    if (Array.isArray(files)) {
+      package_data.images = await Promise.all(
+        files.map(async (image) => {
+          const imageUrl = await this.cloudinaryService.uploadImage(image);
+          return imageUrl;
+        })
+      );
+    }
+    const newPackage = await this.packageRepository.createPackage(package_data);    
+    if (!newPackage) {
+      throw new CustomError("Package creation failed", 500);
     }
     return newPackage;
   }
-  async getPackage(id: string) {
+  async getPackage(id: string) {    
     const packageData = await this.packageRepository.getPackage(id);
     if(!packageData) {
         throw new CustomError("Package not found", 404);
@@ -47,7 +59,7 @@ export class packageUseCase {
     }
     return packages;
   }
-  async editPackage(id: string, packageData: PackageData) {
+  async editPackage(id: string, packageData: Package) {
     const editedPackage = await this.packageRepository.editPackage(id, packageData);
     if(!editedPackage) {
         throw new CustomError("Package not found", 404);
@@ -61,4 +73,5 @@ export class packageUseCase {
     }
     return updatedPackage;
   }
+
 }

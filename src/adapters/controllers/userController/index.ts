@@ -118,4 +118,14 @@ export class userController {
       return res.status(400).json({ error: err.message });
     }
   }
+  async googleLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await this.UserUseCase.googleLogin(req.body);
+      console.log(req.body,"ippam");
+      
+      return res.status(200).json({ status: "success", user });
+    } catch (error) {
+      return next(error);
+    }
+  }
 }

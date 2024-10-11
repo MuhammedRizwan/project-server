@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { packageUseCase } from "../../../application/usecases/package";
+import { Package } from "../../../domain/entities/package/package";
 
 interface Dependencies {
   useCase: {
@@ -12,8 +13,25 @@ export class PackageController {
     this.packageUseCase = dependencies.useCase.packageUseCase;
   }
   async createPackage(req: Request, res: Response, next: NextFunction) {
-    try {
-      const result = await this.packageUseCase.createPackage(req.body);
+    try {      
+      const {travel_agent_id, package_name, destinations, original_price, max_person, no_of_days, no_of_nights, itineraries,category } = req.body;
+      
+      const package_data: Package = {
+        travel_agent_id,
+        package_name,
+        destinations,
+        category_id: category[0]._id,
+        original_price,
+        offer_price: original_price, 
+        max_person,
+        no_of_days,
+        no_of_nights,                                    
+        itineraries,
+        images: [],
+      };
+     console.log(package_data,"controller");
+     
+      const result = await this.packageUseCase.createPackage(package_data, req.files);
       return res
         .status(201)
         .json({ message: "package created successfully", data: result });
@@ -33,13 +51,12 @@ export class PackageController {
   }
   async updatePackage(req: Request, res: Response, next: NextFunction) {
     try {
-        const { package_name, destinations, original_price,offer_price,max_person,no_of_day,no_of_night,itineraries } = req.body;
+        const { package_name, destinations, original_price,offer_price,max_person,no_of_days,no_of_nights,itineraries } = req.body;
         const { id } = req.params;
         const result = await this.packageUseCase.editPackage(
             id,
             {
-                package_name, destinations, original_price, offer_price, max_person, no_of_day, no_of_night, itineraries
-                
+              package_name, destinations, original_price, offer_price, max_person, no_of_days, no_of_nights, itineraries,
             },
         );
         return res
@@ -59,6 +76,17 @@ export class PackageController {
         return res
           .status(200)
           .json({ message: "package updated successfully", data: result });
+    } catch (error) {
+        next(error);
+    }
+  }
+  async getPackageById(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { packageId } = req.params;
+        const packageData = await this.packageUseCase.getPackage(packageId);
+        return res
+          .status(200)
+          .json({ message: "package fetched successfully", packageData });
     } catch (error) {
         next(error);
     }

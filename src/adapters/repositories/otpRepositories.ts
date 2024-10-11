@@ -15,7 +15,7 @@ export class MongoOTPRepository {
     return createOTP
   }
   async findOTPbyEmail(email: string):Promise<IOTP|null>{
-    const otpData = await OTPModel.findOne({ email });
+    const otpData = await OTPModel.findOne({ email }).sort({ created_at: -1 });
     if(otpData){
       const Otp: IOTP = {
         ...otpData.toObject() as unknown as IOTP,  

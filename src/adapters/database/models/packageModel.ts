@@ -17,8 +17,13 @@ const ItinerarySchema = new Schema({
   ],
 });
 
-const PackageDataSchema = new Schema(
+const PackageSchema = new Schema(
   {
+    travel_agent_id: {
+      type: Schema.Types.ObjectId,
+      ref: "TravelAgent",
+      required: true,
+    },
     package_name: {
       type: String,
       required: true,
@@ -46,16 +51,16 @@ const PackageDataSchema = new Schema(
       type: Number,
       required: true,
     },
-    no_of_day: {
+    no_of_days: {
       type: Number,
       required: true,
     },
-    no_of_night: {
+    no_of_nights: {
       type: Number,
       required: true,
     },
     itineraries: [ItinerarySchema],
-    image: [
+    images: [
       {
         type: String,
       },
@@ -64,26 +69,6 @@ const PackageDataSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    created_at: {
-      type: Date,
-      default: Date.now,
-    },
-    updated_at: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  { timestamps: true }
-);
-
-const PackageSchema = new Schema(
-  {
-    travel_agent_id: {
-      type: Schema.Types.ObjectId,
-      ref: "TravelAgent",
-      required: true,
-    },
-    package_data: [PackageDataSchema],
   },
   { timestamps: true }
 );

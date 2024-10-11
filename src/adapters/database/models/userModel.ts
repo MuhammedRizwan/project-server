@@ -11,6 +11,7 @@ const userSchema = new Schema(
     friends: [{ type: Types.ObjectId }],
     is_verified: { type: Boolean, default: false },
     is_block: { type: Boolean, default: false },
+    refreshToken:{type:String,required:true},
   },
   {
     timestamps: true,
