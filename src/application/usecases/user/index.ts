@@ -162,7 +162,11 @@ export class UserUseCase {
         if (!accessToken) {
           throw new CustomError("Couldn't generate token", 500);
         }
-        return {user,accessToken,refreshToken:null}
+        const refreshToken = this.JwtService.generateRefreshToken(user._id);
+        if (!refreshToken) {
+          throw new CustomError("Couldn't generate token", 500);
+        }
+        return {user,accessToken,refreshToken}
       } 
     } catch (error) {
       throw error;

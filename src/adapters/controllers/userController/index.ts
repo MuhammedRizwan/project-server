@@ -37,14 +37,16 @@ export class userController {
       const { email, password } = req.body as Iuser;
       const { user, accessToken, refreshToken } =
         await this.UserUseCase.signinUser(email, password);
+
       if (!user.is_verified) {
         return res.status(403).json({
           status: "error",
-          message: "verify the OTP",
+          message: "Verify the OTP",
           user,
           redirect: "/verification",
         });
       }
+
       return res.status(200).json({
         status: "success",
         message: "Logged in successfully",
@@ -60,24 +62,21 @@ export class userController {
   async OTPVerification(req: Request, res: Response, next: NextFunction) {
     try {
       const { Otp, user } = req.body;
-      if(!user){
-        res.status(404).json({status:"error",message:"User Not Found"})
+      if (!user) {
+        res.status(404).json({ status: "error", message: "User Not Found" });
       }
       if (Otp.length != 4) {
         res.status(400).json({ status: "error", message: "Incorrect OTP" });
       }
       const { userData, accessToken, refreshToken } =
-        await this.Verification.OTPVerification(Otp, user.email);        
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        sameSite: "none",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+        await this.Verification.OTPVerification(Otp, user.email);
+
       return res.status(200).json({
         status: "success",
         message: "OTP  Verified",
         user: userData,
         accessToken,
+        refreshToken,
       });
     } catch (error) {
       return next(error);
@@ -98,7 +97,9 @@ export class userController {
     try {
       const { email, password } = req.body;
       const user = await this.Verification.changePassword(email, password);
-      return res.status(200).json({status:"success",message:"Password changed",user});
+      return res
+        .status(200)
+        .json({ status: "success", message: "Password changed", user });
     } catch (error) {
       return next(error);
     }
@@ -120,10 +121,15 @@ export class userController {
   }
   async googleLogin(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await this.UserUseCase.googleLogin(req.body);
-      console.log(req.body,"ippam");
-      
-      return res.status(200).json({ status: "success", user });
+      const { user, accessToken, refreshToken } =
+        (await this.UserUseCase.googleLogin(req.body)) as {
+          user: Iuser;
+          accessToken: string;
+          refreshToken: string;
+        };
+      return res
+        .status(200)
+        .json({ status: "success", user, accessToken, refreshToken });
     } catch (error) {
       return next(error);
     }
