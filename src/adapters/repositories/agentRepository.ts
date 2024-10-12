@@ -15,7 +15,7 @@ export class MongoAgentRepository {
     return agent;
   }
   async findAgentByEmail(email: string): Promise<Iagent | null> {
-    const agent = await agentModel.findOne({ email });
+    const agent = await agentModel.findOne({ email },{password:0,refreshToken:0,createdAt:0,updatedAt:0});
     if (!agent) {
       return agent;
     }
@@ -77,5 +77,8 @@ export class MongoAgentRepository {
   async adminVerifyAgent(id:string,admin_verified:string):Promise<Iagent|null>{
     const agent:Iagent|null=await agentModel.findOneAndUpdate({_id:id}, { $set: { admin_verified }},{new:true})    
     return agent
+  }
+  async addRefreshToken(id:ObjectId,refreshToken:string):Promise<void>{
+    const agent:Iagent|null=await agentModel.findOneAndUpdate({_id:id}, { $set: { refreshToken }},{new:true})    
   }
 }

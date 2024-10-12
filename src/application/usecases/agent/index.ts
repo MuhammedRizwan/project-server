@@ -6,6 +6,8 @@ import { CustomError } from "../../../domain/errors/customError";
 interface MongoAgentRepository {
   createAgent(agent: Iagent): Promise<Iagent>;
   findAgentByEmail(email: string): Promise<Iagent | null>;
+  addRefreshToken(id: ObjectId|undefined, refreshToken: string): Promise<void>;
+  verifyAgent(email: string): Promise<Iagent | null>;
 }
 interface MongoOTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
@@ -163,6 +165,10 @@ export class AgentUseCase {
     if(!refreshToken){
       throw new CustomError("couldn't genarate token",500)
     }
+    const addRefreshToken = await this.agentRepository.addRefreshToken(
+      agent._id,
+      refreshToken
+    )
     return {
       agent,
       accessToken,

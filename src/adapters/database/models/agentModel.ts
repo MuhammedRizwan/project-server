@@ -17,6 +17,7 @@ const agentSchema = new Schema(
       default: "pending",
     },
     is_block: { type: Boolean, default: false },
+    refreshToken:{type:String,required:true},
   },
   {
     timestamps: true,
