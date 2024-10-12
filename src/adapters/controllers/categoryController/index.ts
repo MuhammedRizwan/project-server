@@ -57,10 +57,6 @@ export class categoryController {
   async updateCategory(req: Request, res: Response, next: NextFunction) {
     try {
       const {categoryId } = req.params;
-      console.log(categoryId);
-      console.log(req.body);
-      console.log(req.file);
-
       const category = await this.categoryUseCase.updateCategory(categoryId, req.body, {
         Document: req.file,
       });

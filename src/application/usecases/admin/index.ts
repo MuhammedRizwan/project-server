@@ -125,7 +125,6 @@ export class AdminUseCase {
       }
       return agencies;
     } catch (error) {
-      console.log(error);
       throw error
     }
   }
@@ -137,7 +136,6 @@ export class AdminUseCase {
       }
       return agent;
     } catch (error) {
-      console.log(error);
       throw error
     }
   }
@@ -149,7 +147,6 @@ export class AdminUseCase {
       }
       return agent;
     } catch (error) {
-      console.log(error);
       throw error
     }
   }

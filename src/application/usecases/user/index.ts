@@ -58,9 +58,7 @@ export class UserUseCase {
     try {
       const existUser = await this.userRepository.findUserByEmail(
         userData.email
-      );
-      console.log(existUser);
-      
+      );      
       if (existUser) {
         throw new CustomError("user already exists", 409);
       }

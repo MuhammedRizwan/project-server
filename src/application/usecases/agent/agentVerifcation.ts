@@ -71,7 +71,6 @@ export class AgentVerification {
         throw new CustomError("Invalid refresh token", 401);
       }
       const decoded = this.jwtService.verifyRefreshToken(incommingRefreshToken);
-      console.log(decoded);
       if (!decoded) {
         throw new CustomError("Invalid refresh token", 401);
       }
@@ -85,9 +84,7 @@ export class AgentVerification {
       const accessToken = this.jwtService.generateAccessToken(agent?._id);
       if (!accessToken) {
         throw new CustomError("token Error", 500);
-      }
-      console.log(accessToken, "accessToken");
-      
+      }      
       return accessToken;
     } catch (err) {
       throw new Error("Invalid refresh token");

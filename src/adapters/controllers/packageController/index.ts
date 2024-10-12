@@ -29,7 +29,6 @@ export class PackageController {
         itineraries,
         images: [],
       };
-     console.log(package_data,"controller");
      
       const result = await this.packageUseCase.createPackage(package_data, req.files);
       return res

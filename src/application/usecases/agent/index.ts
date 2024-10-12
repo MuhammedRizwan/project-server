@@ -77,7 +77,6 @@ export class AgentUseCase {
       let uploadDocumentUrl: string | null = null;
       if (file.Document) {
         const fileType = file.Document?.mimetype;
-        console.log(fileType);
         if (fileType === "application/pdf") {
           const pdfUrl = await this.CloudinaryService.uploadPDF(file.Document);
           if (!pdfUrl) {
