@@ -26,6 +26,7 @@ interface MongoAgentRepository {
   findAgentByEmail(email: string): Promise<Iagent | null>;
   verifyAgent(email: string): Promise<Iagent | null>;
   changePassword(email: string, password: string): Promise<Iagent | null>;
+  getAgent(userId: string): Promise<Iagent | null>;
 }
 
 interface MongoOTPRepository {
@@ -63,10 +64,30 @@ export class AgentVerification {
     this.passwordService = dependencies.Services.PasswordService;
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<string> {
+  async refreshAccessToken(token: string): Promise<string> {
     try {
-      const decoded = this.jwtService.verifyRefreshToken(refreshToken);
-      const accessToken = this.jwtService.generateAccessToken(decoded.userId);
+      const incommingRefreshToken = token;
+      if (!incommingRefreshToken) {
+        throw new CustomError("Invalid refresh token", 401);
+      }
+      const decoded = this.jwtService.verifyRefreshToken(incommingRefreshToken);
+      console.log(decoded);
+      if (!decoded) {
+        throw new CustomError("Invalid refresh token", 401);
+      }
+      const agent = await this.agentRepository.getAgent(decoded.userId);
+      if (!agent) {
+        throw new CustomError("Invalid refresh token", 401);
+      }
+      if (incommingRefreshToken !== agent?.refreshToken) {
+        throw new CustomError("Invalid refresh token", 401);
+      }
+      const accessToken = this.jwtService.generateAccessToken(agent?._id);
+      if (!accessToken) {
+        throw new CustomError("token Error", 500);
+      }
+      console.log(accessToken, "accessToken");
+      
       return accessToken;
     } catch (err) {
       throw new Error("Invalid refresh token");
@@ -94,22 +115,19 @@ export class AgentVerification {
     try {
       const existUser = await this.agentRepository.findAgentByEmail(email);
       if (!existUser) {
-        throw new CustomError("Agency not exist",404);
+        throw new CustomError("Agency not exist", 404);
       }
       const verificationOtp = this.generateOtp.generate();
       if (!verificationOtp) {
-        throw new CustomError("something went wrong",500);
+        throw new CustomError("something went wrong", 500);
       }
-      await this.emailService.sendVerificationEmail(
-        email,
-        verificationOtp
-      );
+      await this.emailService.sendVerificationEmail(email, verificationOtp);
       const createOTP = await this.OTPRepository.createOTP({
         email: email,
         otp: verificationOtp,
       });
       if (!createOTP) {
-        throw new CustomError("OTP creation failed",500);
+        throw new CustomError("OTP creation failed", 500);
       }
       return createOTP;
     } catch (error) {
@@ -120,16 +138,19 @@ export class AgentVerification {
     try {
       const isAgent = await this.agentRepository.findAgentByEmail(email);
       if (!isAgent) {
-        throw new CustomError("Invalid user",404);
+        throw new CustomError("Invalid user", 404);
       }
       password = await this.passwordService.passwordHash(password);
-      const updatePassword = this.agentRepository.changePassword(email, password);
+      const updatePassword = this.agentRepository.changePassword(
+        email,
+        password
+      );
       if (!updatePassword) {
-        throw new CustomError("password not updated",500);
+        throw new CustomError("password not updated", 500);
       }
       return updatePassword;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 }

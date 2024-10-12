@@ -13,4 +13,5 @@ export interface Iagent {
   admin_verified?: string;
   is_block?: boolean;
   profile_picture?: string;
+  refreshToken?: string;
 }

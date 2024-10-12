@@ -1,21 +1,19 @@
-import { Request, Response, NextFunction } from 'express';
-import { JwtService } from '../../frameworks/services/jwtService'
-import { Iuser } from '../../domain/entities/user/user';
+import { Request, Response, NextFunction } from "express";
+import { JwtService } from "../../frameworks/services/jwtService";
 
-export const jwtAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
+const jwtService=new JwtService()
+const jwtAuth = (req: Request, res: Response, next: NextFunction) => {  
   const authHeader = req.headers.authorization;
-  
   if (!authHeader) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json({ message: "No token provided" });
   }
-
-  const token = authHeader.split(' ')[1]; // Assuming token comes as "Bearer <token>"
-
+  const token = authHeader.split(" ")[1]; 
   try {
-    const decoded = JwtService.verifyAccessToken(token);
-    //req.user = decoded; // Attach the user information to the request object
+    const decoded = jwtService.verifyAccessToken(token);
+    if(!decoded) throw new Error("Invalid token")
     next();
   } catch (err) {
-    return res.status(403).json({ message: 'Invalid or expired token' });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+export default jwtAuth;

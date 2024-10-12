@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import multer from "multer";
 import { PackageController } from "../../../../adapters/controllers/packageController";
 import PackageDepencies from "../../../dependancies/packagedepencies";
+import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -11,6 +12,9 @@ const controller = {
 
 router.get("/", (req: Request, res: Response, next: NextFunction) =>
   controller.package.getAllPackages(req, res, next)
+);
+router.get("/agent/:agentId", jwtAuth, (req: Request, res: Response, next: NextFunction) =>
+  controller.package.getAgentPackages(req, res, next)
 );
 router.post(
   "/add",

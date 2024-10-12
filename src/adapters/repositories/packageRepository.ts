@@ -38,6 +38,10 @@ export class MongoPackageRepository {
     );
     return updatedPackage;
   }
+  async getAgentPackages(agentId: string): Promise<Package[] | null> {
+    const packages: Package[] | null = await packageModel.find({travel_agent_id: agentId });
+    return packages;
+  }
 
 }
 

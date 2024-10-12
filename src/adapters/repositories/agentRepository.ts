@@ -15,45 +15,27 @@ export class MongoAgentRepository {
     return agent;
   }
   async findAgentByEmail(email: string): Promise<Iagent | null> {
-    const agent = await agentModel.findOne({ email },{password:0,refreshToken:0,createdAt:0,updatedAt:0});
-    if (!agent) {
-      return agent;
-    }
-    const agentData: Iagent = {
-      ...(agent.toObject() as unknown as Iagent),
-      _id: agent._id as ObjectId,
-    };
-    return agentData;
+    const agent: Iagent | null = await agentModel.findOne({ email });
+    return agent;
   }
   async verifyAgent(email: string): Promise<Iagent | null> {
-    const updatedAgent = await agentModel.findOneAndUpdate(
+    const agent: Iagent | null = await agentModel.findOneAndUpdate(
       { email },
       { $set: { is_verified: true } },
       { new: true }
     );
-    if (!updatedAgent) {
-      return null;
-    }
-    const agentData: Iagent = {
-      ...(updatedAgent.toObject() as unknown as Iagent),
-      _id: updatedAgent._id as ObjectId,
-    };
-    return agentData;
+    return agent;
   }
-  async changePassword(email: string, password: string) {
-    const updatedAgent = await agentModel.findOneAndUpdate(
+  async changePassword(
+    email: string,
+    password: string
+  ): Promise<Iagent | null> {
+    const agent: Iagent | null = await agentModel.findOneAndUpdate(
       { email },
       { $set: { password: password } },
       { new: true }
     );
-    if (!updatedAgent) {
-      return null;
-    }
-    const agentData: Iagent = {
-      ...(updatedAgent.toObject() as unknown as Iagent),
-      _id: updatedAgent._id as ObjectId,
-    };
-    return agentData;
+    return agent;
   }
   async getAllAgenciesData(): Promise<Iagent[] | null> {
     const agencies: Iagent[] = await agentModel.find();
@@ -70,15 +52,26 @@ export class MongoAgentRepository {
     );
     return updatedAgent;
   }
-  async getAgent(id:string):Promise<Iagent|null>{
-    const agent:Iagent|null=await agentModel.findById(id)
-    return agent
+  async getAgent(id: string): Promise<Iagent | null> {
+    const agent: Iagent | null = await agentModel.findById(id);
+    return agent;
   }
-  async adminVerifyAgent(id:string,admin_verified:string):Promise<Iagent|null>{
-    const agent:Iagent|null=await agentModel.findOneAndUpdate({_id:id}, { $set: { admin_verified }},{new:true})    
-    return agent
+  async adminVerifyAgent(
+    id: string,
+    admin_verified: string
+  ): Promise<Iagent | null> {
+    const agent: Iagent | null = await agentModel.findOneAndUpdate(
+      { _id: id },
+      { $set: { admin_verified } },
+      { new: true }
+    );
+    return agent;
   }
-  async addRefreshToken(id:ObjectId,refreshToken:string):Promise<void>{
-    const agent:Iagent|null=await agentModel.findOneAndUpdate({_id:id}, { $set: { refreshToken }},{new:true})    
+  async addRefreshToken(id: ObjectId, refreshToken: string): Promise<void> {
+    const agent: Iagent | null = await agentModel.findOneAndUpdate(
+      { _id: id },
+      { $set: { refreshToken } },
+      { new: true }
+    );
   }
 }

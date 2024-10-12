@@ -91,4 +91,15 @@ export class PackageController {
         next(error);
     }
   }
+  async getAgentPackages(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { agentId } = req.params;
+        const packageList = await this.packageUseCase.getAgentPackages(agentId);
+        return res
+          .status(200)
+          .json({ message: "packages fetched successfully", packageList });
+    } catch (error) {
+        next(error);
+    }
+  }
 }

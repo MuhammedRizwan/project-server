@@ -22,7 +22,7 @@ router.post(
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.createAgent(req, res, next)
 );
-router.post("/refreshToken", (req: Request, res: Response) =>
+router.post("/refresh-token", (req: Request, res: Response) =>
   controller.agent.RefreshAccessToken(req, res)
 );
 router.post(

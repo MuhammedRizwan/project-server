@@ -8,6 +8,7 @@ interface MongoPackageRepository {
   getAllPackages(): Promise<Package[] | null>;
   editPackage(id: string, packageData: Package): Promise<Package | null>;
   blockNUnblockPackage(packageId: string, isBlock: boolean): Promise<Package|null>;
+  getAgentPackages(agentId: string): Promise<Package[] | null>;
 }
 interface CloudinaryService {
   uploadImage(file: Express.Multer.File | undefined): Promise<string>;
@@ -72,6 +73,13 @@ export class packageUseCase {
         throw new CustomError("Package not found", 404);
     }
     return updatedPackage;
+  }
+  async getAgentPackages(agentId: string) {
+    const packages = await this.packageRepository.getAgentPackages(agentId);
+    if(!packages) {
+        throw new CustomError("Package not found", 404);
+    }
+    return packages;
   }
 
 }

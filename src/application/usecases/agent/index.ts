@@ -165,7 +165,7 @@ export class AgentUseCase {
     if(!refreshToken){
       throw new CustomError("couldn't genarate token",500)
     }
-    const addRefreshToken = await this.agentRepository.addRefreshToken(
+     await this.agentRepository.addRefreshToken(
       agent._id,
       refreshToken
     )
