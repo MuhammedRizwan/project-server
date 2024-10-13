@@ -48,15 +48,16 @@ export class PackageController {
       next(error);
     }
   }
-  async updatePackage(req: Request, res: Response, next: NextFunction) {
+  async editPackage(req: Request, res: Response, next: NextFunction) {
     try {
         const { package_name, destinations, original_price,offer_price,max_person,no_of_days,no_of_nights,itineraries } = req.body;
-        const { id } = req.params;
+        const { packageId } = req.params;
         const result = await this.packageUseCase.editPackage(
-            id,
+            packageId,
             {
               package_name, destinations, original_price, offer_price, max_person, no_of_days, no_of_nights, itineraries,
             },
+            req.files,
         );
         return res
           .status(200)
@@ -97,6 +98,17 @@ export class PackageController {
         return res
           .status(200)
           .json({ message: "packages fetched successfully", packageList });
+    } catch (error) {
+        next(error);
+    }
+  }
+  async getSimilarPackages(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { packageId } = req.params;
+        const packageList = await this.packageUseCase.getSimilarPackages(packageId);
+        return res
+          .status(200)
+          .json({status: "success", message: "packages fetched successfully", packageList });
     } catch (error) {
         next(error);
     }

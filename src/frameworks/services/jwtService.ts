@@ -5,8 +5,8 @@ import { ObjectId } from 'mongoose';
 
 const JWT_SECRET = configKeys.JWT_SECRET;
 const REFRESH_TOKEN_SECRET = configKeys.REFRESH_TOKEN_SECRET;
-const ACCESS_TOKEN_EXPIRES_IN = '2m'; 
-const REFRESH_TOKEN_EXPIRES_IN = '15m';
+const ACCESS_TOKEN_EXPIRES_IN = '15m'; 
+const REFRESH_TOKEN_EXPIRES_IN = '7d';
 
 export class JwtService {
 

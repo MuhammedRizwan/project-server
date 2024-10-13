@@ -7,6 +7,7 @@ import userLoginSchema from "../../../../domain/validator/userLogin";
 import { emailValidationSchema } from "../../../../domain/validator/emailvalidation";
 import { passwordValidationSchema } from "../../../../domain/validator/forget-password";
 import packageRouter from "../package/packageRouter";
+import categoryRouter from "../category/categoryRouter";
 
 const router = Router();
 
@@ -54,4 +55,5 @@ router.post('/googleLogin',(req:Request,res:Response,next:NextFunction)=>{
   controller.user.googleLogin(req,res,next)
 })
 router.use("/packages", packageRouter);
+router.use("/categories",categoryRouter)
 export default router;

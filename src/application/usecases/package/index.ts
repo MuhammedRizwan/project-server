@@ -9,6 +9,7 @@ interface MongoPackageRepository {
   editPackage(id: string, packageData: Package): Promise<Package | null>;
   blockNUnblockPackage(packageId: string, isBlock: boolean): Promise<Package|null>;
   getAgentPackages(agentId: string): Promise<Package[] | null>;
+  getsimilarPackages(offer_price: number): Promise<Package[] | null>;
 }
 interface CloudinaryService {
   uploadImage(file: Express.Multer.File | undefined): Promise<string>;
@@ -60,7 +61,7 @@ export class packageUseCase {
     }
     return packages;
   }
-  async editPackage(id: string, packageData: Package) {
+  async editPackage(id: string, packageData: Package, files: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[] | undefined) {
     const editedPackage = await this.packageRepository.editPackage(id, packageData);
     if(!editedPackage) {
         throw new CustomError("Package not found", 404);
@@ -81,5 +82,19 @@ export class packageUseCase {
     }
     return packages;
   }
-
+  async getSimilarPackages(packageId: string) {
+    try {
+      const packages = await this.packageRepository.getPackage(packageId);
+      if(!packages) {
+          throw new CustomError("Package not found", 404);
+      }
+      const similarPackages = await this.packageRepository.getsimilarPackages(packages.offer_price);
+      if(!similarPackages) {
+          throw new CustomError("Similar packages not found", 404);
+      }
+      return similarPackages
+    } catch (error) {
+      throw error
+    }
+  }
 }

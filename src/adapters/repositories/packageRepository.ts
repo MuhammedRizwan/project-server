@@ -10,11 +10,7 @@ export class MongoPackageRepository {
   }
 
   async getPackage(id: string): Promise<Package | null> {
-    const packageDoc = await packageModel.findById(id);
-    if (!packageDoc) {
-      return null;
-    }
-    const packageData: Package = packageDoc.toObject() as unknown as Package;
+  const packageData: Package | null = await packageModel.findById(id);
     return packageData;
   }
 
@@ -40,6 +36,16 @@ export class MongoPackageRepository {
   }
   async getAgentPackages(agentId: string): Promise<Package[] | null> {
     const packages: Package[] | null = await packageModel.find({travel_agent_id: agentId });
+    return packages;
+  }
+  async getsimilarPackages(offer_price: number): Promise<Package[] | null> {
+    const minPrice = offer_price - 10000;
+    const maxPrice = offer_price + 10000;
+  
+    const packages: Package[] | null = await packageModel.find({
+      offer_price: { $gte: minPrice, $lte: maxPrice }
+    });
+  
     return packages;
   }
 

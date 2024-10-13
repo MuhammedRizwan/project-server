@@ -5,6 +5,7 @@ import packageRouter from "../package/packageRouter";
 import categoryRouter from "../category/categoryRouter";
 
 import multer from "multer";
+import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -38,6 +39,6 @@ router.post(
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.changePassword(req, res, next)
 );
-router.use('/package', packageRouter);
-router.use('/category', categoryRouter);
+router.use('/package',jwtAuth, packageRouter);
+router.use('/category',jwtAuth, categoryRouter);
 export default router;
