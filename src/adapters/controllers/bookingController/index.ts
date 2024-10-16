@@ -23,4 +23,26 @@ export class BookingController {
       next(error);
     }
   }
+  async getBooking(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { bookingId } = req.params;
+      const booking = await this.bookingUseCase.getBooking(bookingId);
+      return res
+        .status(200)
+        .json({ status: "success", message: "Fetched Booking", booking });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getAgentBookings(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { agentId } = req.params;
+      const bookings = await this.bookingUseCase.getAgentBookings(agentId);
+      return res
+        .status(200)
+        .json({ status: "success", message: "Fetched All Bookings", bookings });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

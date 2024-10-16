@@ -6,6 +6,7 @@ export interface Itinerary {
   }
   
   export interface Package  {
+    _id?:string
     travel_agent_id?: ObjectId; 
     package_name: string;
     category_id?: ObjectId;  

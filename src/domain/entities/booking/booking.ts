@@ -1,12 +1,24 @@
-export interface Ibooking {
-    _id?: string;
-    user_id: string;
-    package_id: string;
-    members: { name: string; age: number }[];
-    date: Date;
-    bookingStatus: string;
-    payment_status: string;
-    travel_status: string;
-    payment_amount: number;
-    start_date: Date;
-  }
+import { ObjectId } from "mongoose";
+import { Iuser } from "../user/user";
+import {Iagent} from "../agent/agent";
+import {Package} from "../package/package";
+export interface Booking {
+  _id?: ObjectId;
+  user_id: string|Iuser;
+  travel_agent_id: string|Iagent;
+  package_id: string|Package;
+  bill_details: {
+      first_name: string;
+      last_name: string;
+      email: string;
+      phone: string;
+      address: string;
+    };
+  members: { name: string,age: number}[];
+  payment_amount: number;
+  payment_status: "pending" | "completed";
+  booking_status: "pending" | "confirmed" | "cancelled";
+  travel_status: "pending" | "in-progress" | "completed";
+  start_date: string; // Use ISO string for date handling
+  booking_date: string; // ISO string for booking timestamp
+}

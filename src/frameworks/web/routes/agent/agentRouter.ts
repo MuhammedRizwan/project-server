@@ -3,6 +3,7 @@ import { agentController } from "../../../../adapters/controllers/agentControlle
 import AgentDepencies from "../../../dependancies/agentdepencies";
 import packageRouter from "../package/packageRouter";
 import categoryRouter from "../category/categoryRouter";
+import bookingRouter from "../booking/bookingRouter"
 
 import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
@@ -41,4 +42,5 @@ router.post(
 );
 router.use('/package',jwtAuth, packageRouter);
 router.use('/category',jwtAuth, categoryRouter);
+router.use('/booking',bookingRouter)
 export default router;

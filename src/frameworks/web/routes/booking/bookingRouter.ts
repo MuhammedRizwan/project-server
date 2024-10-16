@@ -8,6 +8,10 @@ const controller = {
 router.post("/", (req: Request, res: Response, next: NextFunction) =>
     controller.booking.createBooking(req, res, next)
 );
+router.get("/:bookingId", (req: Request, res: Response, next: NextFunction) =>
+    controller.booking.getBooking(req, res, next)
+);
+router.get('/travel-agency/:agentId', (req: Request, res: Response, next: NextFunction) =>controller.booking.getAgentBookings(req, res, next))
 
 
 export default router;
