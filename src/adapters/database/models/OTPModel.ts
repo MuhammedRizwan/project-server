@@ -5,6 +5,6 @@ const OTPSchema: Schema = new Schema({
   otp: { type: String, required: true },
   created_at: { type: Date, default: Date.now, expires: "1m" },
 });
-const OTPModel = model('OTP', OTPSchema);
+const OTPModel = model("OTP", OTPSchema);
 
 export default OTPModel;

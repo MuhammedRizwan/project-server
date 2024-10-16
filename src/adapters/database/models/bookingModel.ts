@@ -2,22 +2,14 @@ import { model, Schema } from "mongoose";
 
 const bookingSchema = new Schema(
   {
-    user_id: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    user_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
     travel_agent_id: {
       type: Schema.Types.ObjectId,
-      ref: "TravelAgent",
+      ref: "Agent",
       required: true,
     },
-    package_id: {
-      type: Schema.Types.ObjectId,
-      ref: "Package",
-      required: true,
-    },
-    bill_details:{
+    package_id: { type: Schema.Types.ObjectId, ref: "Package", required: true },
+    bill_details: {
       first_name: { type: String, required: true },
       last_name: { type: String, required: true },
       email: { type: String, required: true },
@@ -27,20 +19,11 @@ const bookingSchema = new Schema(
     booking_date: { type: Date, default: Date.now },
     members: [
       {
-        name: {
-          type: String,
-          required: true,
-        },
-        age: {
-          type: Number,
-          required: true,
-        },
+        name: { type: String, required: true },
+        age: { type: Number, required: true },
       },
     ],
-    payment_amount: {
-      type: Number,
-      required: true,
-    },
+    payment_amount: { type: Number, required: true },
     payment_status: {
       type: String,
       enum: ["pending", "paid", "cancelled"],

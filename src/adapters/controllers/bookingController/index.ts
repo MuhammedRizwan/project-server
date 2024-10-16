@@ -45,4 +45,14 @@ export class BookingController {
       next(error);
     }
   }
+  async getAdminBookings(req: Request, res: Response, next: NextFunction) {
+    try {
+      const bookings = await this.bookingUseCase.getAdminBookings();
+      return res
+        .status(200)
+        .json({ status: "success", message: "Fetched All Bookings", bookings });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

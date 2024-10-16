@@ -1,13 +1,11 @@
+import { Iagent } from "../../domain/entities/agent/agent";
 import { Booking } from "../../domain/entities/booking/booking";
 import { Package } from "../../domain/entities/package/package";
 import { Iuser } from "../../domain/entities/user/user";
 import bookingModel from "../database/models/bookingModel";
 
-
-
 export class MongoBookingRepository {
-   async createBooking(booking: Booking): Promise<Booking | null> {
-    console.log("bookingRepository",booking);
+  async createBooking(booking: Booking): Promise<Booking | null> {
     const createdBooking = await bookingModel.create(booking);
     const bookingData = createdBooking.toObject() as unknown as Booking;
     return bookingData;
@@ -19,29 +17,42 @@ export class MongoBookingRepository {
         .populate<{ user_id: Iuser }>("user_id")
         .populate<{ package_id: Package }>("package_id")
         .exec(); // Ensure proper promise handling
-  
+
       return booking as Booking | null;
     } catch (error) {
-     console.error("Error fetching booking:", error);
-     return null; 
+      console.error("Error fetching booking:", error);
+      return null;
     }
   }
-  async getAgentBooking(agentId: string): Promise<Booking[] |null> {
+  async getAgentBooking(agentId: string): Promise<Booking[] | null> {
     try {
       const booking = await bookingModel
         .find({ travel_agent_id: agentId })
         .populate<{ user_id: Iuser }>("user_id")
         .populate<{ package_id: Package }>("package_id")
         .exec(); // Ensure proper promise handling
-  
-      return booking as Booking[] | []; ;
+
+      return booking as Booking[] | [];
     } catch (error) {
       console.error("Error fetching booking:", error);
       return null;
     }
   }
-  async getAllBookings(): Promise<Booking[] | null> {
-    const bookings: Booking[] | null = await bookingModel.find();
-    return bookings;
+  async getAdminBookings(): Promise<Booking[] | null> {
+    try {
+      const bookings = await bookingModel
+        .find()
+        .populate<{ user_id: Iuser }>("user_id")
+        .populate<{ package_id: Package }>("package_id")
+        .populate<{ travel_agent_id: Iagent }>("travel_agent_id")
+        .exec();
+      return bookings.map((booking) => {
+        const bookingData = booking.toObject() as unknown as Booking;
+        return bookingData;
+      }) as Booking[] | null;
+    } catch (error) {
+      console.error("Error fetching booking:", error);
+      return null;
+    }
   }
 }

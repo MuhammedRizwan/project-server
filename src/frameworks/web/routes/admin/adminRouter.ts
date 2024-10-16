@@ -2,6 +2,8 @@ import { NextFunction, Request, Response, Router } from "express";
 import { adminController } from "../../../../adapters/controllers/adminController";
 import AdminDepencies from "../../../dependancies/admindepencies";
 import categoryRouter from "../category/categoryRouter";
+import bookingRouter from "../booking/bookingRouter"
+import couponRouter from "../coupon/couponRouter"
 const router = Router();
 
 const controller = {
@@ -41,4 +43,6 @@ router.patch(
     controller.admin.verifyAgentByAdmin(req, res, next)
 );
 router.use('/category', categoryRouter);
+router.use('/booking',bookingRouter);
+router.use('/coupon',couponRouter)
 export default router;

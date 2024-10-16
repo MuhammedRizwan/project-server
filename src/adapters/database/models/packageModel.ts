@@ -24,51 +24,21 @@ const PackageSchema = new Schema(
       ref: "TravelAgent",
       required: true,
     },
-    package_name: {
-      type: String,
-      required: true,
-    },
+    package_name: { type: String, required: true },
     category_id: {
       type: Schema.Types.ObjectId,
       ref: "Category",
       required: true,
     },
-    destinations: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
-    original_price: {
-      type: Number,
-      required: true,
-    },
-    offer_price: {
-      type: Number,
-      required: true,
-    },
-    max_person: {
-      type: Number,
-      required: true,
-    },
-    no_of_days: {
-      type: Number,
-      required: true,
-    },
-    no_of_nights: {
-      type: Number,
-      required: true,
-    },
+    destinations: [{ type: String, required: true }],
+    original_price: { type: Number, required: true },
+    offer_price: { type: Number, required: true },
+    max_person: { type: Number, required: true },
+    no_of_days: { type: Number, required: true },
+    no_of_nights: { type: Number, required: true },
     itineraries: [ItinerarySchema],
-    images: [
-      {
-        type: String,
-      },
-    ],
-    is_block: {
-      type: Boolean,
-      default: false,
-    },
+    images: [{ type: String }],
+    is_block: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

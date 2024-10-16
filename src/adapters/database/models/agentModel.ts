@@ -1,4 +1,4 @@
-import  { model, Schema, Types } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 const agentSchema = new Schema(
   {
@@ -6,10 +6,10 @@ const agentSchema = new Schema(
     agency_name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     phone: { type: String, required: true },
-    location:{type:String,required:true},
+    location: { type: String, required: true },
     profile_picture: { type: String },
     password: { type: String, required: true },
-    DocumentURL:{type:String,required:true},
+    DocumentURL: { type: String, required: true },
     is_verified: { type: Boolean, default: false },
     admin_verified: {
       type: String,
@@ -17,7 +17,7 @@ const agentSchema = new Schema(
       default: "pending",
     },
     is_block: { type: Boolean, default: false },
-    refreshToken:{type:String,required:true},
+    refreshToken: { type: String, required: true },
   },
   {
     timestamps: true,

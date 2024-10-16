@@ -6,7 +6,7 @@ interface MongoBookingRepository {
   createBooking(booking: Booking): Promise<Booking | null>;
   getBooking(bookingId: string): Promise<Booking | null>;
   getAgentBooking(agentId: string): Promise<Booking[] | null>;
-  getAllBookings(): Promise<Booking[] | null>;
+  getAdminBookings(): Promise<Booking[] | null>;
 }
 
 interface MongoPackageRepository {
@@ -81,6 +81,18 @@ export class BookingUseCase {
   async getAgentBookings(agentId: string): Promise<Booking[] | null> {
     try {
       const bookingData = await this.bookingRepository.getAgentBooking(agentId);
+      if (!bookingData) {
+        throw new CustomError("booking not found", 404);
+      }
+      return bookingData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAdminBookings(): Promise<Booking[] | null> {
+    try {
+      const bookingData = await this.bookingRepository.getAdminBookings();
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
