@@ -10,4 +10,5 @@ export interface Iuser {
   is_verified?: boolean;
   is_block?: boolean;
   profile_picture?: string;
+  refreshToken?: string;
 }

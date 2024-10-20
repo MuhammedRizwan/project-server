@@ -55,4 +55,30 @@ export class BookingController {
       next(error);
     }
   }
+  async createOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { amount } = req.body;
+      const order = await this.bookingUseCase.createRazorpayOrder(amount);
+      return res
+        .status(200)
+        .json({ status: "success", message: "razorpay Created", order });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async verifyOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { orderId, razorpayPaymentId, razorpaySignature } = req.body;
+      const successpayment = await this.bookingUseCase.verifyRazorpayOrder(
+        orderId,
+        razorpayPaymentId,
+        razorpaySignature
+      );
+      return res
+        .status(200)
+        .json({ status: "success", message: "payment verified", successpayment });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

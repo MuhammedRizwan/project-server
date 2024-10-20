@@ -7,6 +7,8 @@ import { CustomError } from "../../../domain/errors/customError";
 interface MongoAdminRepository {
   changePassword(email: string, password: string): unknown;
   findAdminByEmail(email: string): Promise<Iadmin | null>;
+  getAdmin(id: string): Promise<Iadmin | null>;
+  addRefreshToken(id: ObjectId | undefined, refreshToken: string): Promise<void>;
 }
 interface MongoUserRepository {
   getAllUsersData(): Promise<Iuser[] | null>;
@@ -17,6 +19,7 @@ interface MongoAgentRepository {
   changeAgentStatus(id: ObjectId, is_block: boolean): Promise<Iagent | null>;
   getAgent(id:string):Promise<Iagent|null>
   adminVerifyAgent(id:string,admin_verified:string):Promise<Iagent|null>
+  
 }
 interface EmailService {
   sendVerificationEmail(email: string, otp: string): Promise<void>;
@@ -28,6 +31,7 @@ interface JwtService {
   verifyRefreshToken(refreshToken: string): any;
   generateAccessToken(userId: ObjectId | undefined): string;
   generateRefreshToken(userId: ObjectId | undefined): string;
+ 
 }
 
 interface Dependencies {
@@ -77,6 +81,7 @@ export class AdminUseCase {
       if(!refreshToken){
         throw new CustomError("couldn't genarate token",500)
       }
+      await this.adminRepository.addRefreshToken(admin._id, refreshToken);
       return {
         admin,
         accessToken,
@@ -86,11 +91,32 @@ export class AdminUseCase {
       throw error
     }
   }
-  async refreshAccessToken(refreshToken: string): Promise<string> {
+  async refreshAccessToken(token: string): Promise<string> {
     try {
-      const decoded = this.JwtService.verifyRefreshToken(refreshToken);
-      const accessToken = this.JwtService.generateAccessToken(decoded.userId);
-      return accessToken;
+      try {
+        const incommingRefreshToken = token;
+        if (!incommingRefreshToken) {
+          throw new CustomError("Invalid refresh token", 401);
+        }
+        const decoded = this.JwtService.verifyRefreshToken(incommingRefreshToken);
+        if (!decoded) {
+          throw new CustomError("Invalid refresh token", 401);
+        }
+        const admin = await this.adminRepository.getAdmin(decoded.userId);
+        if (!admin) {
+          throw new CustomError("Invalid refresh token", 401);
+        }
+        if (incommingRefreshToken !== admin?.refreshToken) {
+          throw new CustomError("Invalid refresh token", 401);
+        }
+        const accessToken = this.JwtService.generateAccessToken(admin?._id);
+        if (!accessToken) {
+          throw new CustomError("token Error", 500);
+        }      
+        return accessToken;
+      } catch (err) {
+        throw new Error("Invalid refresh token");
+      }
     } catch (err) {
       throw new Error("Invalid refresh token");
     }

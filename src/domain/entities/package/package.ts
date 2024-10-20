@@ -19,5 +19,7 @@ export interface Itinerary {
     itineraries: Itinerary[];  
     is_block?: boolean;
     images?: string[];
+    includedItems:string[],
+    excludedItems:string[]
   }
   

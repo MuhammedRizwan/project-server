@@ -32,6 +32,7 @@ export class adminController {
           message: "Admin Logged In",
           admin,
           accessToken,
+          refreshToken
         });
     } catch (error) {
       return next(error);
@@ -40,12 +41,13 @@ export class adminController {
   async RefreshAccessToken(req: Request, res: Response) {
     try {
       const accessToken = await this.AdminUseCase.refreshAccessToken(
-        req.cookies.refreshToken
+        req.body.refreshToken
       );
       if (!accessToken) {
         return res.json("token expired");
       }
-      return res.json({ accessToken: accessToken });
+      console.log(accessToken,"===================================================");
+      return res.json({ accessToken });
     } catch (error) {
       const err = error as Error;
       return res.status(400).json({ error: err.message });

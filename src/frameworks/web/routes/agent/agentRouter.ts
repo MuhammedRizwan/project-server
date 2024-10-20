@@ -42,5 +42,5 @@ router.post(
 );
 router.use('/package',jwtAuth, packageRouter);
 router.use('/category',jwtAuth, categoryRouter);
-router.use('/booking',bookingRouter)
+router.use('/booking',jwtAuth,bookingRouter)
 export default router;

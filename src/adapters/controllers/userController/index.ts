@@ -108,7 +108,7 @@ export class userController {
   async RefreshAccessToken(req: Request, res: Response) {
     try {
       const accessToken = await this.Verification.refreshAccessToken(
-        req.cookies.refreshToken
+        req.body.refreshToken
       );
       if (!accessToken) {
         return res.json("token expired");

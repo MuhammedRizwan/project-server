@@ -2,6 +2,7 @@ import { Booking } from "../../../domain/entities/booking/booking";
 import { Package } from "../../../domain/entities/package/package";
 import { CustomError } from "../../../domain/errors/customError";
 
+
 interface MongoBookingRepository {
   createBooking(booking: Booking): Promise<Booking | null>;
   getBooking(bookingId: string): Promise<Booking | null>;
@@ -12,19 +13,28 @@ interface MongoBookingRepository {
 interface MongoPackageRepository {
   getPackage(id: string): Promise<Package | null>;
 }
+interface RazorPay {
+  createRazorpayOrder(amount: number): Promise<any>;
+  verifyRazorpayOrder(orderId: string, razorpayPaymentId: string, razorpaySignature: string): Promise<string>;
+}
 interface Dependencies {
   Repositories: {
     MongoBookingRepository: MongoBookingRepository;
     MongoPackageRepository: MongoPackageRepository;
   };
+  Services: {
+    RazorPay: RazorPay;
+  };
 }
 export class BookingUseCase {
   private bookingRepository: MongoBookingRepository;
   private packageRepository: MongoPackageRepository;
+  private razorPayService: RazorPay;
 
   constructor(dependencies: Dependencies) {
     this.bookingRepository = dependencies.Repositories.MongoBookingRepository;
     this.packageRepository = dependencies.Repositories.MongoPackageRepository;
+    this.razorPayService = dependencies.Services.RazorPay;
   }
 
   async createBooking(booking: Booking): Promise<Booking | null> {
@@ -97,6 +107,21 @@ export class BookingUseCase {
         throw new CustomError("booking not found", 404);
       }
       return bookingData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async createRazorpayOrder(amount:number): Promise<any> {
+    try {
+      return await this.razorPayService.createRazorpayOrder(amount);
+    } catch (error) {
+      throw error;
+    }
+  }
+  async verifyRazorpayOrder(orderId: string, razorpayPaymentId: string, razorpaySignature: string): Promise<string> {
+    try {
+      return await this.razorPayService.verifyRazorpayOrder(orderId, razorpayPaymentId, razorpaySignature);
     } catch (error) {
       throw error;
     }

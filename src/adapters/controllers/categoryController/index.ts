@@ -25,6 +25,7 @@ export class categoryController {
     }
   }
   async getAllCategories(req: Request, res: Response, next: NextFunction) {
+    console.log(req.cookies)
     try {
       const categories = await this.categoryUseCase.findAllCategory();
       return res.status(200).json({

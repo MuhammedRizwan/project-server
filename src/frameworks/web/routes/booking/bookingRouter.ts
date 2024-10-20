@@ -19,5 +19,10 @@ router.get(
   (req: Request, res: Response, next: NextFunction) =>
     controller.booking.getAgentBookings(req, res, next)
 );
-
+router.post("/createOrder", (req: Request, res: Response, next: NextFunction) =>
+  controller.booking.createOrder(req, res, next)
+);
+router.post("/verifyOrder", (req: Request, res: Response, next: NextFunction) =>
+  controller.booking.verifyOrder(req, res, next)
+);
 export default router;

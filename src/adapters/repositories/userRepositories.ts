@@ -1,6 +1,7 @@
 import { ObjectId } from "mongoose";
 import { Iuser } from "../../domain/entities/user/user";
 import userModel from "../database/models/userModel";
+import { CustomError } from "../../domain/errors/customError";
 
 export class MongoUserRepository {
   async createUser(user: Iuser): Promise<Iuser> {
@@ -66,5 +67,27 @@ export class MongoUserRepository {
       { new: true }
     );
     return updatedUser;
+  }
+  async getUser(id:string):Promise<Iuser|null>{
+    try {
+      const user:Iuser|null = await userModel.findById(id);
+      if(!user){
+        throw new CustomError("user not found",404)
+      }
+      return user
+    } catch (error) {
+      throw error
+    }
+  }
+  async updateRefreshToken(id:ObjectId,refreshToken:string):Promise<void>{
+    try {
+      const updatedUser:Iuser|null = await userModel.findOneAndUpdate(
+        { _id:id },
+        { $set: { refreshToken} },
+        { new: true }
+      );
+    } catch (error) {
+      throw error
+    }
   }
 }

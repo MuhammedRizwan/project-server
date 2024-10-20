@@ -14,7 +14,7 @@ export class PackageController {
   }
   async createPackage(req: Request, res: Response, next: NextFunction) {
     try {      
-      const {travel_agent_id, package_name, destinations, original_price, max_person, no_of_days, no_of_nights, itineraries,category } = req.body;
+      const {travel_agent_id, package_name, destinations, original_price, max_person, no_of_days, no_of_nights, itineraries,category ,includedItems,excludedItems} = req.body;
       
       const package_data: Package = {
         travel_agent_id,
@@ -28,6 +28,8 @@ export class PackageController {
         no_of_nights,                                    
         itineraries,
         images: [],
+        includedItems,
+        excludedItems
       };
      
       const result = await this.packageUseCase.createPackage(package_data, req.files);
@@ -39,7 +41,8 @@ export class PackageController {
     }
   }
   async getAllPackages(req: Request, res: Response, next: NextFunction) {
-    try {        
+    try { 
+      console.log("+++++++++++++++++++++++++++")
       const packageList = await this.packageUseCase.getAllPackages();
       return res
         .status(200)
@@ -50,12 +53,12 @@ export class PackageController {
   }
   async editPackage(req: Request, res: Response, next: NextFunction) {
     try {
-        const { package_name, destinations, original_price,offer_price,max_person,no_of_days,no_of_nights,itineraries } = req.body;
+        const { package_name, destinations, original_price,offer_price,max_person,no_of_days,no_of_nights,itineraries,includedItems,excludedItems } = req.body;
         const { packageId } = req.params;
         const result = await this.packageUseCase.editPackage(
             packageId,
             {
-              package_name, destinations, original_price, offer_price, max_person, no_of_days, no_of_nights, itineraries,
+              package_name, destinations, original_price, offer_price, max_person, no_of_days, no_of_nights, itineraries,includedItems,excludedItems
             },
             req.files,
         );
@@ -92,7 +95,7 @@ export class PackageController {
     }
   }
   async getAgentPackages(req: Request, res: Response, next: NextFunction) {
-    try {
+    try {      
         const { agentId } = req.params;
         const packageList = await this.packageUseCase.getAgentPackages(agentId);
         return res

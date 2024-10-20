@@ -6,6 +6,7 @@ import { CustomError } from "../../../domain/errors/customError";
 interface UserRepository {
   createUser(user: Iuser): Promise<Iuser>;
   findUserByEmail(email: string): Promise<Iuser | null>;
+  updateRefreshToken(id: ObjectId|undefined, refreshToken: string): Promise<void>;
 }
 interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
@@ -130,6 +131,7 @@ export class UserUseCase {
       if(!refreshToken){
         throw new CustomError("Couldn't generate token",500)
       }
+      await this.userRepository.updateRefreshToken(user._id, refreshToken);
       return {
         user,
         accessToken,

@@ -38,6 +38,9 @@ const PackageSchema = new Schema(
     no_of_nights: { type: Number, required: true },
     itineraries: [ItinerarySchema],
     images: [{ type: String }],
+    description: { type: String, required: true },
+    includedItems: [{ type: String }],
+    excludedItems: [{ type: String }],
     is_block: { type: Boolean, default: false },
   },
   { timestamps: true }

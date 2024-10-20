@@ -26,6 +26,7 @@ interface UserRepository {
   findUserByEmail(email: string): Promise<Iuser | null>;
   verifyuser(email: string): Promise<Iuser | null>;
   changePassword(email: string, password: string): Promise<Iuser | null>;
+  getUser(id: string): Promise<Iuser | null>;
 }
 interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
@@ -62,13 +63,27 @@ export class Verification {
     this.passwordService = dependencies.services.PasswordService;
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<string> {
+  async refreshAccessToken(token: string): Promise<string> {
     try {
-      const decoded = this.jwtService.verifyRefreshToken(refreshToken);
-      if(!decoded){
-
+      const incommingRefreshToken = token;
+      if (!incommingRefreshToken) {
+        throw new CustomError("Invalid refresh token", 401);
       }
-      const accessToken = this.jwtService.generateAccessToken(decoded.userId);
+      const decoded = this.jwtService.verifyRefreshToken(incommingRefreshToken);
+      if (!decoded) {
+        throw new CustomError("Invalid refresh token", 401);
+      }
+      const user = await this.userRepository.getUser(decoded.userId);
+      if (!user) {
+        throw new CustomError("Invalid refresh token", 401);
+      }
+      if (incommingRefreshToken !== user?.refreshToken) {
+        throw new CustomError("Invalid refresh token", 401);
+      }
+      const accessToken = this.jwtService.generateAccessToken(user?._id);
+      if (!accessToken) {
+        throw new CustomError("token Error", 500);
+      }      
       return accessToken;
     } catch (err) {
       throw new Error("Invalid refresh token");
