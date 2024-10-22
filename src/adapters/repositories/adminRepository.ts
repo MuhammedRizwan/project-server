@@ -1,4 +1,3 @@
-import { ObjectId } from "mongoose";
 import { Iadmin } from "../../domain/entities/admin/admin";
 import adminModel from "../database/models/adminModel";
 import { CustomError } from "../../domain/errors/customError";
@@ -11,7 +10,7 @@ export class MongoAdminRepository {
     }
     const adminData: Iadmin = {
       ...(admin.toObject() as unknown as Iadmin),
-      _id: admin._id as ObjectId,
+      _id: admin._id as string,
     };
     return adminData;
   }
@@ -26,7 +25,7 @@ export class MongoAdminRepository {
     }
     const adminData: Iadmin = {
       ...(updatedAdmin.toObject() as unknown as Iadmin),
-      _id: updatedAdmin._id as ObjectId,
+      _id: updatedAdmin._id as string,
     };
     return adminData;
   }
@@ -41,7 +40,7 @@ export class MongoAdminRepository {
       throw error;
     }
   }
-  async addRefreshToken(id: ObjectId, refreshToken: string): Promise<void> {
+  async addRefreshToken(id: string, refreshToken: string): Promise<void> {
     try {
       const updatedAdmin = await adminModel.findOneAndUpdate(
         { _id: id },

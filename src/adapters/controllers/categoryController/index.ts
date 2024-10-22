@@ -6,6 +6,7 @@ interface Dependencies {
     CategoryUseCase: CategoryUseCase;
   };
 }
+const isString = (value: unknown): value is string => typeof value === 'string';
 
 export class categoryController {
   private categoryUseCase: CategoryUseCase;
@@ -25,13 +26,24 @@ export class categoryController {
     }
   }
   async getAllCategories(req: Request, res: Response, next: NextFunction) {
-    console.log(req.cookies)
     try {
-      const categories = await this.categoryUseCase.findAllCategory();
+      
+      const search = isString(req.query.search) ? req.query.search : "";
+      const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
+      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
+  
+      const { categories ,totalItems,totalPages,currentPage} = await this.categoryUseCase.findAllCategory(
+        search,
+        page,
+        limit
+      );
       return res.status(200).json({
         status: "success",
         message: "Fetched All Categories",
-        categories,
+        filterData:categories,
+        totalPages,
+        totalItems,
+        currentPage
       });
     } catch (error) {
       next(error);
@@ -57,10 +69,14 @@ export class categoryController {
   }
   async updateCategory(req: Request, res: Response, next: NextFunction) {
     try {
-      const {categoryId } = req.params;
-      const category = await this.categoryUseCase.updateCategory(categoryId, req.body, {
-        Document: req.file,
-      });
+      const { categoryId } = req.params;
+      const category = await this.categoryUseCase.updateCategory(
+        categoryId,
+        req.body,
+        {
+          Document: req.file,
+        }
+      );
       return res
         .status(200)
         .json({ status: "success", message: "Category Updated", category });

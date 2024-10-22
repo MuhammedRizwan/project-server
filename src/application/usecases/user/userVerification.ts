@@ -1,17 +1,11 @@
-import { JwtPayload } from "jsonwebtoken";
-import { ObjectId } from "mongoose";
 import { IOTP } from "../../../domain/entities/user/otp";
 import { Iuser } from "../../../domain/entities/user/user";
 import { CustomError } from "../../../domain/errors/customError";
 
-// interface DecodedToken extends JwtPayload {
-//   userId: ObjectId;
-// }
-
 interface JwtService {
   verifyRefreshToken(refreshToken: string): any;
-  generateAccessToken(userId: ObjectId | undefined): string;
-  generateRefreshToken(userId: ObjectId | undefined): string;
+  generateAccessToken(userId: string | undefined): string;
+  generateRefreshToken(userId: string | undefined): string;
 }
 interface GenerateOtp {
   generate(): string;

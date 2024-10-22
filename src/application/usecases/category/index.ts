@@ -5,14 +5,16 @@ interface MongoCategoryRepository {
   createCategory(category: Icategory): Promise<Icategory | null>;
   findByCategoryName(category_name: string): Promise<Icategory | null>;
   blockNUnblockCategory(
-    category_name: string,
+    id: string,
     is_block: boolean
   ): Promise<Icategory | null>;
-  findAllCategory(): Promise<Icategory[]>;
+  findAllCategory(query:object,page:number,limit:number): Promise<Icategory[]>;
   editCategory(id: string, catagory: Icategory): Promise<Icategory | null>;
+  countDocument(query:object): Promise<number>;
+  findCategoryById(id: string): Promise<Icategory | null>;
 }
-interface CloudinaryService{
-  uploadImage(file: Express.Multer.File|undefined): Promise<string>;
+interface CloudinaryService {
+  uploadImage(file: Express.Multer.File | undefined): Promise<string>;
 }
 
 interface Dependencies {
@@ -20,17 +22,20 @@ interface Dependencies {
     MongoCategoryRepository: MongoCategoryRepository;
   };
   Services: {
-    CloudinaryService:CloudinaryService
+    CloudinaryService: CloudinaryService;
   };
 }
 export class CategoryUseCase {
   private categoryRepository: MongoCategoryRepository;
-  private cloudinaryService:CloudinaryService
+  private cloudinaryService: CloudinaryService;
   constructor(dependencies: Dependencies) {
     this.categoryRepository = dependencies.Repositories.MongoCategoryRepository;
-    this.cloudinaryService=dependencies.Services.CloudinaryService
+    this.cloudinaryService = dependencies.Services.CloudinaryService;
   }
-  async createCategory(category: Icategory,file: { Document: Express.Multer.File|undefined }) {
+  async createCategory(
+    category: Icategory,
+    file: { Document: Express.Multer.File | undefined }
+  ) {
     try {
       const isExist = await this.categoryRepository.findByCategoryName(
         category.category_name
@@ -38,7 +43,7 @@ export class CategoryUseCase {
       if (isExist) {
         throw new CustomError("catagory Already Exist", 409);
       }
-      category.image=await this.cloudinaryService.uploadImage(file.Document)
+      category.image = await this.cloudinaryService.uploadImage(file.Document);
       const createdCategory = await this.categoryRepository.createCategory(
         category
       );
@@ -50,19 +55,10 @@ export class CategoryUseCase {
       throw error;
     }
   }
-  async blocknUnblockCategory(category_name: string, is_block: boolean) {
+  async blocknUnblockCategory(id: string, is_block: boolean) {
     try {
-      const isExist = await this.categoryRepository.findByCategoryName(
-        category_name
-      );
-      if (!isExist) {
-        throw new CustomError("catagory Not Found", 404);
-      }
       const updatedCategory =
-        await this.categoryRepository.blockNUnblockCategory(
-          category_name,
-          is_block
-        );
+        await this.categoryRepository.blockNUnblockCategory(id, is_block);
       if (!updatedCategory) {
         throw new CustomError("catagory Updation Failed", 500);
       }
@@ -71,26 +67,41 @@ export class CategoryUseCase {
       throw error;
     }
   }
-  async findAllCategory() {
+  async findAllCategory(search:string,page:number,limit:number) {
     try {
-      const categories = await this.categoryRepository.findAllCategory();
+    const query = search
+      ? { category_name: { $regex: search, $options: 'i' } } 
+      : {};
+      const categories = await this.categoryRepository.findAllCategory(query,page,limit);
       if (!categories) {
         throw new CustomError("catagory Not Found", 404);
       }
-      return categories;
+      const totalItems=await this.categoryRepository.countDocument(query);
+      if(totalItems===0){
+        throw new CustomError("catagory Not Found", 404);
+      }
+      return {
+        categories,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,};
     } catch (error) {
       throw error;
     }
   }
-  async updateCategory(id: string, catagory: Icategory,file: { Document: Express.Multer.File|undefined }) {
+  async updateCategory(
+    id: string,
+    catagory: Icategory,
+    file: { Document: Express.Multer.File | undefined }
+  ) {
     try {
-      const isExist = await this.categoryRepository.findByCategoryName(
-        catagory.category_name
-      );
+      const isExist = await this.categoryRepository.findCategoryById(id);
       if (!isExist) {
         throw new CustomError("catagory Not Found", 404);
       }
-      catagory.image=await this.cloudinaryService.uploadImage(file.Document)
+      if(file.Document){
+        catagory.image = await this.cloudinaryService.uploadImage(file.Document);
+      }
       const updatedCategory = await this.categoryRepository.editCategory(
         id,
         catagory

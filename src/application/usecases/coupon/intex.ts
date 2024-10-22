@@ -5,9 +5,14 @@ interface MongoCouponRepository {
   createCoupon(coupon: Coupon): Promise<Coupon>;
   getCouponByCode(coupon_code: string): Promise<Coupon | null>;
   getCouponById(coupon_id: string): Promise<Coupon | null>;
-  getAllCoupons(): Promise<Coupon[] | null>;
+  getAllCoupons(
+    query: object,
+    page: number,
+    limit: number
+  ): Promise<Coupon[] | null>;
   editCoupon(coupon_id: string, coupon: Coupon): Promise<Coupon | null>;
   blockCoupon(coupon_id: string, is_active: boolean): Promise<Coupon | null>;
+  couponCount(query: object): Promise<number>;
 }
 interface Dependencies {
   Repositories: {
@@ -22,7 +27,7 @@ export class CouponUseCase {
   async createCoupon(coupon: Coupon): Promise<Coupon> {
     try {
       const createdCoupon = await this.couponRepository.createCoupon(coupon);
-      if(!createdCoupon){
+      if (!createdCoupon) {
         throw new CustomError("coupon not created", 500);
       }
       return createdCoupon;
@@ -42,13 +47,30 @@ export class CouponUseCase {
       throw error;
     }
   }
-  async getAllCoupons(): Promise<Coupon[] | null> {
+  async getAllCoupons(search: string, page: number, limit: number) {
     try {
-      const coupons = await this.couponRepository.getAllCoupons();
+      const query = search
+        ? { category_name: { $regex: search, $options: "i" } }
+        : {};
+      const coupons = await this.couponRepository.getAllCoupons(
+        query,
+        page,
+        limit
+      );
       if (!coupons) {
         throw new CustomError("coupons not found", 404);
       }
-      return coupons;
+      const totalItems = await this.couponRepository.couponCount(query);
+      if (totalItems === 0) {
+        throw new CustomError("coupons not found", 404);
+      }
+
+      return {
+        coupons,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw error;
     }
@@ -67,7 +89,10 @@ export class CouponUseCase {
   }
   async editCoupon(coupon_id: string, coupon: Coupon): Promise<Coupon | null> {
     try {
-      const couponData = await this.couponRepository.editCoupon(coupon_id,coupon);
+      const couponData = await this.couponRepository.editCoupon(
+        coupon_id,
+        coupon
+      );
       if (!couponData) {
         throw new CustomError("coupon not found", 404);
       }
@@ -76,9 +101,15 @@ export class CouponUseCase {
       throw error;
     }
   }
-  async blockCoupon(coupon_id: string,is_active: boolean): Promise<Coupon | null> {
+  async blockCoupon(
+    coupon_id: string,
+    is_active: boolean
+  ): Promise<Coupon | null> {
     try {
-      const couponData = await this.couponRepository.blockCoupon(coupon_id,is_active);
+      const couponData = await this.couponRepository.blockCoupon(
+        coupon_id,
+        is_active
+      );
       if (!couponData) {
         throw new CustomError("coupon not found", 404);
       }
@@ -87,5 +118,4 @@ export class CouponUseCase {
       throw error;
     }
   }
-  
 }

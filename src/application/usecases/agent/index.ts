@@ -6,7 +6,7 @@ import { CustomError } from "../../../domain/errors/customError";
 interface MongoAgentRepository {
   createAgent(agent: Iagent): Promise<Iagent>;
   findAgentByEmail(email: string): Promise<Iagent | null>;
-  addRefreshToken(id: ObjectId|undefined, refreshToken: string): Promise<void>;
+  addRefreshToken(id: string|undefined, refreshToken: string): Promise<void>;
   verifyAgent(email: string): Promise<Iagent | null>;
 }
 interface MongoOTPRepository {
@@ -24,8 +24,8 @@ interface GenerateOtp {
   generate(): string;
 }
 interface JwtService {
-  generateAccessToken(userId: ObjectId | undefined): string;
-  generateRefreshToken(userId: ObjectId | undefined): string;
+  generateAccessToken(userId: string | undefined): string;
+  generateRefreshToken(userId: string | undefined): string;
 }
 interface CloudinaryService {
   uploadImage(file: Express.Multer.File): Promise<string>;

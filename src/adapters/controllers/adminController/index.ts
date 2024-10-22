@@ -7,7 +7,7 @@ interface Dependencies {
     AdminUseCase: AdminUseCase;
   };
 }
-
+const isString = (value: unknown): value is string => typeof value === 'string';
 export class adminController {
   private AdminUseCase: AdminUseCase;
   constructor(dependencies: Dependencies) {
@@ -46,7 +46,6 @@ export class adminController {
       if (!accessToken) {
         return res.json("token expired");
       }
-      console.log(accessToken,"===================================================");
       return res.json({ accessToken });
     } catch (error) {
       const err = error as Error;
@@ -55,10 +54,13 @@ export class adminController {
   }
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
-      const users = await this.AdminUseCase.getAllUsers();
+      const search = isString(req.query.search) ? req.query.search : "";
+      const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
+      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
+      const { users ,totalItems,totalPages,currentPage} = await this.AdminUseCase.getAllUsers(search, page, limit);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched All Users", users });
+        .json({ status: "success", message: "Fetched All Users",filterData:users,totalItems,totalPages,currentPage });
     } catch (error) {
       return next(error);
     }
@@ -80,10 +82,14 @@ export class adminController {
   }
   async getAllAgencies(req: Request, res: Response, next: NextFunction) {
     try {
-      const agencies = await this.AdminUseCase.getAllAgencies();
+      const search = isString(req.query.search) ? req.query.search : "";
+      const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
+      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
+
+      const { agencies,totalItems,totalPages,currentPage} = await this.AdminUseCase.getAllAgencies(search, page, limit);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetch all agencies", agencies });
+        .json({ status: "success", message: "Fetch all agencies",filterData:agencies,totalItems,totalPages,currentPage });
     } catch (error) {
       return next(error);
     }

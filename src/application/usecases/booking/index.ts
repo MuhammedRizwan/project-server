@@ -7,7 +7,8 @@ interface MongoBookingRepository {
   createBooking(booking: Booking): Promise<Booking | null>;
   getBooking(bookingId: string): Promise<Booking | null>;
   getAgentBooking(agentId: string): Promise<Booking[] | null>;
-  getAdminBookings(): Promise<Booking[] | null>;
+  getAdminBookings(query:object,page:number,limit:number): Promise<Booking[] | null>;
+  countDocument(query:object): Promise<number>;
 }
 
 interface MongoPackageRepository {
@@ -100,13 +101,25 @@ export class BookingUseCase {
     }
   }
 
-  async getAdminBookings(): Promise<Booking[] | null> {
+  async getAdminBookings(search:string,page:number,limit:number){
     try {
-      const bookingData = await this.bookingRepository.getAdminBookings();
+      const query = search
+      ? { category_name: { $regex: search, $options: 'i' } } 
+      : {};
+      const bookingData = await this.bookingRepository.getAdminBookings(query,page,limit);
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
-      return bookingData;
+      const totalItems=await this.bookingRepository.countDocument(query);
+      if(totalItems===0){
+        throw new CustomError("booking not found", 404);
+      }
+      return {
+         bookingData,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw error;
     }

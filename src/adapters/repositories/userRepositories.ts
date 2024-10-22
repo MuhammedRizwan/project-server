@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { FilterQuery, ObjectId } from "mongoose";
 import { Iuser } from "../../domain/entities/user/user";
 import userModel from "../database/models/userModel";
 import { CustomError } from "../../domain/errors/customError";
@@ -11,7 +11,7 @@ export class MongoUserRepository {
     }
     const userData: Iuser = {
       ...(userCreate.toObject() as unknown as Iuser),
-      _id: userCreate._id as ObjectId,
+      _id: userCreate._id as string,
     };
     return userData
   }
@@ -22,7 +22,7 @@ export class MongoUserRepository {
     }
     const userData: Iuser = {
       ...(user.toObject() as unknown as Iuser),
-      _id: user._id as ObjectId,
+      _id: user._id as string,
     };    
     return userData;
   }
@@ -37,7 +37,7 @@ export class MongoUserRepository {
     }
     const userData: Iuser = {
       ...(updatedUser.toObject() as unknown as Iuser),
-      _id: updatedUser._id as ObjectId,
+      _id: updatedUser._id as string,
     };
     return userData;
   }
@@ -52,13 +52,20 @@ export class MongoUserRepository {
     }
     const userData: Iuser = {
       ...(updatedUser.toObject() as unknown as Iuser),
-      _id: updatedUser._id as ObjectId,
+      _id: updatedUser._id as string,
     };
+
     return userData;
   }
- async getAllUsersData():Promise<Iuser[]|null>{
-  const users:Iuser[]=await userModel.find();
-  return users
+ async getAllUsersData(query:FilterQuery<Iuser>,page:number,limit:number):Promise<Iuser[]|null>{
+  const users = await userModel.find(query).skip((page - 1) * limit).limit(limit);
+  return users.map((user) => {
+    const userData: Iuser = {
+      ...(user.toObject() as unknown as Iuser),
+      _id: user._id as string,
+    };
+    return userData;
+  })
   }
   async changeUserStatus(id:ObjectId,is_block:boolean):Promise<Iuser|null>{
     const updatedUser:Iuser|null = await userModel.findOneAndUpdate(
@@ -79,7 +86,7 @@ export class MongoUserRepository {
       throw error
     }
   }
-  async updateRefreshToken(id:ObjectId,refreshToken:string):Promise<void>{
+  async updateRefreshToken(id:string,refreshToken:string):Promise<void>{
     try {
       const updatedUser:Iuser|null = await userModel.findOneAndUpdate(
         { _id:id },
@@ -90,4 +97,7 @@ export class MongoUserRepository {
       throw error
     }
   }
+  async countUsers(query:FilterQuery<Iuser>):Promise<number>{
+    return await userModel.countDocuments(query)
+  } 
 }

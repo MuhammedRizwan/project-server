@@ -1,4 +1,3 @@
-import { ObjectId } from "mongoose";
 import { Iuser } from "../../../domain/entities/user/user";
 import { IOTP } from "../../../domain/entities/user/otp";
 import { CustomError } from "../../../domain/errors/customError";
@@ -6,7 +5,7 @@ import { CustomError } from "../../../domain/errors/customError";
 interface UserRepository {
   createUser(user: Iuser): Promise<Iuser>;
   findUserByEmail(email: string): Promise<Iuser | null>;
-  updateRefreshToken(id: ObjectId|undefined, refreshToken: string): Promise<void>;
+  updateRefreshToken(id: string|undefined, refreshToken: string): Promise<void>;
 }
 interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
@@ -23,8 +22,8 @@ interface GenerateOtp {
   generate(): string;
 }
 interface JwtService {
-  generateAccessToken(userId: ObjectId | undefined): string;
-  generateRefreshToken(userId: ObjectId | undefined): string;
+  generateAccessToken(userId: string | undefined): string;
+  generateRefreshToken(userId: string | undefined): string;
 }
 
 interface Dependencies {
@@ -146,7 +145,7 @@ export class UserUseCase {
       const user = await this.userRepository.findUserByEmail(googleUser.email);
       if (!user) {
         const userData = {
-          name: googleUser.name,
+          username: googleUser.name,
           email: googleUser.email,
           password: googleUser.id,
           profile_pic: googleUser.picture,

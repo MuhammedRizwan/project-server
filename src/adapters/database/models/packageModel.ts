@@ -42,6 +42,7 @@ const PackageSchema = new Schema(
     includedItems: [{ type: String }],
     excludedItems: [{ type: String }],
     is_block: { type: Boolean, default: false },
+    departure_place:{type:String,required:true},
   },
   { timestamps: true }
 );

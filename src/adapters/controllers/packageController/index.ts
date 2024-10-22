@@ -42,7 +42,6 @@ export class PackageController {
   }
   async getAllPackages(req: Request, res: Response, next: NextFunction) {
     try { 
-      console.log("+++++++++++++++++++++++++++")
       const packageList = await this.packageUseCase.getAllPackages();
       return res
         .status(200)

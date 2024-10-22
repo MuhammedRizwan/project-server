@@ -8,18 +8,27 @@ interface MongoAdminRepository {
   changePassword(email: string, password: string): unknown;
   findAdminByEmail(email: string): Promise<Iadmin | null>;
   getAdmin(id: string): Promise<Iadmin | null>;
-  addRefreshToken(id: ObjectId | undefined, refreshToken: string): Promise<void>;
+  addRefreshToken(id: string | undefined, refreshToken: string): Promise<void>;
 }
 interface MongoUserRepository {
-  getAllUsersData(): Promise<Iuser[] | null>;
+  getAllUsersData(
+    query: object,
+    page: number,
+    limit: number
+  ): Promise<Iuser[] | null>;
   changeUserStatus(id: ObjectId, is_block: boolean): Promise<Iuser | null>;
+  countUsers(query: object): Promise<number>;
 }
 interface MongoAgentRepository {
-  getAllAgenciesData(): Promise<Iagent[] | null>;
+  getAllAgenciesData(
+    query: object,
+    page: number,
+    limit: number
+  ): Promise<Iagent[] | null>;
   changeAgentStatus(id: ObjectId, is_block: boolean): Promise<Iagent | null>;
-  getAgent(id:string):Promise<Iagent|null>
-  adminVerifyAgent(id:string,admin_verified:string):Promise<Iagent|null>
-  
+  getAgent(id: string): Promise<Iagent | null>;
+  adminVerifyAgent(id: string, admin_verified: string): Promise<Iagent | null>;
+  countAgencies(query: object): Promise<number>;
 }
 interface EmailService {
   sendVerificationEmail(email: string, otp: string): Promise<void>;
@@ -29,9 +38,8 @@ interface EmailService {
 
 interface JwtService {
   verifyRefreshToken(refreshToken: string): any;
-  generateAccessToken(userId: ObjectId | undefined): string;
-  generateRefreshToken(userId: ObjectId | undefined): string;
- 
+  generateAccessToken(userId: string | undefined): string;
+  generateRefreshToken(userId: string | undefined): string;
 }
 
 interface Dependencies {
@@ -53,7 +61,6 @@ export class AdminUseCase {
   private emailService: EmailService;
   private JwtService: JwtService;
 
-
   constructor(Dependencies: Dependencies) {
     this.adminRepository = Dependencies.Repositories.MongoAdminRepository;
 
@@ -61,7 +68,6 @@ export class AdminUseCase {
     this.userRepository = Dependencies.Repositories.MongoUserRepository;
     this.emailService = Dependencies.Services.EmailService;
     this.JwtService = Dependencies.Services.JwtService;
-
   }
   async loginAdmin(email: string, password: string) {
     try {
@@ -74,12 +80,12 @@ export class AdminUseCase {
         throw new CustomError("Invalid password", 401);
       }
       const accessToken = this.JwtService.generateAccessToken(admin._id);
-      if(!accessToken){
-        throw new CustomError("couldn't genarate token",500)
+      if (!accessToken) {
+        throw new CustomError("couldn't genarate token", 500);
       }
       const refreshToken = this.JwtService.generateRefreshToken(admin._id);
-      if(!refreshToken){
-        throw new CustomError("couldn't genarate token",500)
+      if (!refreshToken) {
+        throw new CustomError("couldn't genarate token", 500);
       }
       await this.adminRepository.addRefreshToken(admin._id, refreshToken);
       return {
@@ -88,7 +94,7 @@ export class AdminUseCase {
         refreshToken,
       };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
   async refreshAccessToken(token: string): Promise<string> {
@@ -98,7 +104,9 @@ export class AdminUseCase {
         if (!incommingRefreshToken) {
           throw new CustomError("Invalid refresh token", 401);
         }
-        const decoded = this.JwtService.verifyRefreshToken(incommingRefreshToken);
+        const decoded = this.JwtService.verifyRefreshToken(
+          incommingRefreshToken
+        );
         if (!decoded) {
           throw new CustomError("Invalid refresh token", 401);
         }
@@ -112,7 +120,7 @@ export class AdminUseCase {
         const accessToken = this.JwtService.generateAccessToken(admin?._id);
         if (!accessToken) {
           throw new CustomError("token Error", 500);
-        }      
+        }
         return accessToken;
       } catch (err) {
         throw new Error("Invalid refresh token");
@@ -121,15 +129,32 @@ export class AdminUseCase {
       throw new Error("Invalid refresh token");
     }
   }
-  async getAllUsers() {
+  async getAllUsers(search: string, page: number, limit: number) {
     try {
-      const users = await this.userRepository.getAllUsersData();
+      
+      const query = search
+        ? { category_name: { $regex: search, $options: "i" } }
+        : {};
+      const users = await this.userRepository.getAllUsersData(
+        query,
+        page,
+        limit
+      );
       if (!users || users.length === 0) {
         throw new CustomError("No users found", 404);
       }
-      return users;
+      const totalItems = await this.userRepository.countUsers(query);
+      if (totalItems === 0) {
+        throw new CustomError("No users found", 404);
+      }
+      return {
+        users,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+      };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
   async changeUserStatus(id: ObjectId, is_block: boolean) {
@@ -140,18 +165,34 @@ export class AdminUseCase {
       }
       return user;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
-  async getAllAgencies() {
+  async getAllAgencies(search: string, page: number, limit: number) {
     try {
-      const agencies = await this.agentRepository.getAllAgenciesData();
+      const query = search
+        ? { category_name: { $regex: search, $options: "i" } }
+        : {};
+      const agencies = await this.agentRepository.getAllAgenciesData(
+        query,
+        page,
+        limit
+      );
       if (!agencies || agencies.length === 0) {
         throw new CustomError("No agencies found", 404);
       }
-      return agencies;
+      const totalItems = await this.agentRepository.countAgencies(query);
+      if (totalItems === 0) {
+        throw new CustomError("No agencies found", 404);
+      }
+      return {
+        agencies,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+      };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
   async changeAgentStatus(id: ObjectId, is_block: boolean) {
@@ -162,7 +203,7 @@ export class AdminUseCase {
       }
       return agent;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
   async getAgent(id: string) {
@@ -173,12 +214,15 @@ export class AdminUseCase {
       }
       return agent;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
   async adminVerifyAgent(id: string, admin_verified: string) {
     try {
-      const agent = await this.agentRepository.adminVerifyAgent(id, admin_verified);
+      const agent = await this.agentRepository.adminVerifyAgent(
+        id,
+        admin_verified
+      );
       if (!agent) {
         throw new CustomError("Agent verification failed", 500);
       }
@@ -189,7 +233,7 @@ export class AdminUseCase {
       }
       return agent;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 }

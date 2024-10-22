@@ -1,3 +1,4 @@
+import { FilterQuery } from "mongoose";
 import { Iagent } from "../../domain/entities/agent/agent";
 import { Booking } from "../../domain/entities/booking/booking";
 import { Package } from "../../domain/entities/package/package";
@@ -38,14 +39,14 @@ export class MongoBookingRepository {
       return null;
     }
   }
-  async getAdminBookings(): Promise<Booking[] | null> {
+  async getAdminBookings(query:FilterQuery<Booking>,page:number,limit:number): Promise<Booking[] | null> {
     try {
       const bookings = await bookingModel
-        .find()
+        .find(query)
         .populate<{ user_id: Iuser }>("user_id")
         .populate<{ package_id: Package }>("package_id")
         .populate<{ travel_agent_id: Iagent }>("travel_agent_id")
-        .exec();
+        .skip((page-1)*limit).limit(limit).exec();
       return bookings.map((booking) => {
         const bookingData = booking.toObject() as unknown as Booking;
         return bookingData;
@@ -54,5 +55,8 @@ export class MongoBookingRepository {
       console.error("Error fetching booking:", error);
       return null;
     }
+  }
+  async countDocument(query:FilterQuery<Booking>): Promise<number> {
+    return bookingModel.countDocuments(query);
   }
 }

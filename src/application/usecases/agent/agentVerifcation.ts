@@ -10,8 +10,8 @@ import { CustomError } from "../../../domain/errors/customError";
 
 interface JwtService {
   verifyRefreshToken(refreshToken: string): any;
-  generateAccessToken(userId: ObjectId | undefined): string;
-  generateRefreshToken(userId: ObjectId | undefined): string;
+  generateAccessToken(userId: string | undefined): string;
+  generateRefreshToken(userId: string | undefined): string;
 }
 interface GenerateOtp {
   generate(): string;

@@ -1,7 +1,5 @@
-import { ObjectId } from "mongoose";
-
 export interface Iagent {
-  _id?: ObjectId;
+  _id?: string;
   agency_name?: string;
   email: string;
   phone?: string;
@@ -12,6 +10,6 @@ export interface Iagent {
   is_verified?: boolean;
   admin_verified?: string;
   is_block?: boolean;
-  profile_picture?: string;
+  profile_picture?: string|null;
   refreshToken?: string;
 }

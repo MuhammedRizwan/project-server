@@ -10,10 +10,10 @@ const REFRESH_TOKEN_EXPIRES_IN = '14day';
 
 export class JwtService {
 
-  generateAccessToken(userId: ObjectId) {
+  generateAccessToken(userId: string) {
     return jwt.sign({ userId }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN });
   }
-  generateRefreshToken(userId: ObjectId) {
+  generateRefreshToken(userId: string) {
     return jwt.sign({ userId }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
   }
   verifyAccessToken(token: string) {

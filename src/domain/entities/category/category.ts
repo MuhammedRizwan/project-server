@@ -1,9 +1,9 @@
-import { ObjectId } from "mongoose";
+
 
 export interface Icategory{
     _id?:string,
     category_name:string,
-    discription:string,
+    description:string,
     image:string,
     is_block?:boolean
 }

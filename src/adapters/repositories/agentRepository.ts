@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { FilterQuery, ObjectId, Types } from "mongoose";
 import { Iagent } from "../../domain/entities/agent/agent";
 import agentModel from "../database/models/agentModel";
 
@@ -10,7 +10,7 @@ export class MongoAgentRepository {
     }
     const agent: Iagent = {
       ...(agentCreate.toObject() as unknown as Iagent),
-      _id: agentCreate._id as ObjectId,
+      _id: agentCreate._id as string,
     };
     return agent;
   }
@@ -37,9 +37,23 @@ export class MongoAgentRepository {
     );
     return agent;
   }
-  async getAllAgenciesData(): Promise<Iagent[] | null> {
-    const agencies: Iagent[] = await agentModel.find();
-    return agencies;
+  async getAllAgenciesData(
+    query: FilterQuery<Iagent>,
+    page: number,
+    limit: number
+  ): Promise<Iagent[] | null> {
+    const agencies = await agentModel
+      .find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+    if (agencies) {
+      return agencies.map((agency) => ({
+        ...agency,
+        _id: agency._id as string,
+      }));
+    }
+    return null;
   }
   async changeAgentStatus(
     id: ObjectId,
@@ -67,11 +81,14 @@ export class MongoAgentRepository {
     );
     return agent;
   }
-  async addRefreshToken(id: ObjectId, refreshToken: string): Promise<void> {
+  async addRefreshToken(id: string, refreshToken: string): Promise<void> {
     const agent: Iagent | null = await agentModel.findOneAndUpdate(
       { _id: id },
       { $set: { refreshToken } },
       { new: true }
     );
+  }
+  async countAgencies(query: FilterQuery<Iagent>): Promise<number> {
+    return await agentModel.countDocuments(query);
   }
 }

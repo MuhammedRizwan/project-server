@@ -6,7 +6,7 @@ interface Dependencies {
     BookingUseCase: BookingUseCase;
   };
 }
-
+const isString = (value: unknown): value is string => typeof value === 'string';
 export class BookingController {
   private bookingUseCase: BookingUseCase;
   constructor(dependencies: Dependencies) {
@@ -14,7 +14,6 @@ export class BookingController {
   }
   async createBooking(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log("req.body", req.body);
       const booking = await this.bookingUseCase.createBooking(req.body);
       return res
         .status(201)
@@ -47,10 +46,16 @@ export class BookingController {
   }
   async getAdminBookings(req: Request, res: Response, next: NextFunction) {
     try {
-      const bookings = await this.bookingUseCase.getAdminBookings();
+      const search = isString(req.query.search) ? req.query.search : "";
+      const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
+      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
+
+      const {bookingData,totalItems,totalPages,currentPage}= await this.bookingUseCase.getAdminBookings(search,
+        page,
+        limit);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched All Bookings", bookings });
+        .json({ status: "success", message: "Fetched All Bookings", filterData:bookingData,totalItems,totalPages,currentPage });
     } catch (error) {
       next(error);
     }
