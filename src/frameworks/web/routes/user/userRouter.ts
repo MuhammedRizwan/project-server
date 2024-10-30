@@ -10,6 +10,7 @@ import packageRouter from "../package/packageRouter";
 import categoryRouter from "../category/categoryRouter";
 import bookingRouter from "../booking/bookingRouter";
 import couponRouter from "../coupon/couponRouter";
+import walletRouter from "../wallet/walletRouter";
 import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
 
 const router = Router();
@@ -73,5 +74,6 @@ router.use("/packages", packageRouter);
 router.use("/categories",categoryRouter);
 router.use("/booking",jwtAuth,bookingRouter);
 router.use("/coupon",jwtAuth,couponRouter);
+router.use("/wallet",jwtAuth,walletRouter);
 
 export default router;

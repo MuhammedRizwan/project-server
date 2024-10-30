@@ -70,4 +70,20 @@ export class MongoCouponRepository {
       throw error;
     }
   }
+
+  async adduserCoupon(coupon_id: string, user_id: string): Promise<Coupon | null> {
+    try {
+      const updatedCoupon: Coupon | null = await couponModel.findByIdAndUpdate(
+        coupon_id,
+        { $push: { used_by: new Types.ObjectId(user_id) } },
+        { new: true }
+      );
+      if (!updatedCoupon) {
+        throw new CustomError(`Coupon with ID ${coupon_id} not found.`, 404);
+      }
+      return updatedCoupon;
+    } catch (error) {
+      throw error
+    }
+  }
 }

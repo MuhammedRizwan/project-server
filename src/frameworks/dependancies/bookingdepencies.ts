@@ -4,11 +4,13 @@ import { MongoPackageRepository } from "../../adapters/repositories/packageRepos
 import { BookingUseCase } from "../../application/usecases/booking";
 import { RazorPay } from "../services/razorpayService";
 import { MongoCouponRepository } from "../../adapters/repositories/couponRepository";
+import { MongoWalletRepository } from "../../adapters/repositories/walletRepository";
 
 const Repositories={
     MongoBookingRepository:new MongoBookingRepository(),
     MongoPackageRepository:new MongoPackageRepository(),
-    MongoCouponRepository:new MongoCouponRepository()
+    MongoCouponRepository:new MongoCouponRepository(),
+    MongoWalletRepository:new MongoWalletRepository()
 }
 const Services={
     RazorPay:new RazorPay()

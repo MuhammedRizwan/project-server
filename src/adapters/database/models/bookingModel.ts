@@ -26,13 +26,13 @@ const bookingSchema = new Schema(
     payment_amount: { type: Number, required: true },
     payment_status: {
       type: String,
-      enum: ["pending", "paid", "cancelled"],
+      enum: ["pending", "paid", "refunded"],
       required: true,
     },
     payment_id: { type: String },
     booking_status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled"],
+      enum: ["pending", "confirmed", "cancelled", "completed"],
       required: true,
     },
     travel_status: {

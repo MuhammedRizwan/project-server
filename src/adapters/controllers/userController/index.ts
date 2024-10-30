@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { UserUseCase } from "../../../application/usecases/user";
 import { Iuser } from "../../../domain/entities/user/user";
 import { Verification } from "../../../application/usecases/user/userVerification";
-import { CustomRequest } from "../../middleware/jwtAuthMiddleware";
 
 interface Dependencies {
   UseCase: {
@@ -135,7 +134,7 @@ export class userController {
       return next(error);
     }
   }
-  async getProfile(req: CustomRequest, res: Response, next: NextFunction) {
+  async getProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const {userId}=req.params
       const user=await this.UserUseCase.getProfile(userId)
@@ -144,7 +143,7 @@ export class userController {
       
     }
   }
-  async updateProfile(req: CustomRequest, res: Response, next: NextFunction) {
+  async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const {userId}=req.params
       const user=await this.UserUseCase.updateProfile(userId,req.body)

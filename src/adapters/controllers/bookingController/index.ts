@@ -36,10 +36,13 @@ export class BookingController {
   async getAgentBookings(req: Request, res: Response, next: NextFunction) {
     try {
       const { agentId } = req.params;
-      const bookings = await this.bookingUseCase.getAgentBookings(agentId);
+      const search = isString(req.query.search) ? req.query.search : "";
+      const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
+      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 10;
+      const {bookingData,totalItems,totalPages,currentPage} = await this.bookingUseCase.getAgentBookings(agentId,search, page, limit);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched All Bookings", bookings });
+        .json({ status: "success", message: "Fetched All Bookings",filterData:bookingData,totalItems,totalPages,currentPage });
     } catch (error) {
       next(error);
     }
@@ -48,7 +51,7 @@ export class BookingController {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
-      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
+      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 10;
 
       const {bookingData,totalItems,totalPages,currentPage}= await this.bookingUseCase.getAdminBookings(search,
         page,
@@ -84,6 +87,25 @@ export class BookingController {
         .json({ status: "success", message: "payment verified", successpayment });
     } catch (error) {
       next(error);
+    }
+  }
+  async getTravelHistory(req:Request,res:Response,next:NextFunction){
+    try {
+      const {userId}=req.params
+      const travelHistory=await this.bookingUseCase.getTravelHistory(userId)
+      return res.status(200).json({status:true,message:"user travel history",travelHistory})
+    } catch (error) {
+      next(error)
+    }
+  }
+  async cancelBooking(req:Request,res:Response,next:NextFunction){
+    try {
+      console.log(req.params)
+      const {bookingId}=req.params
+      const cancelBooking=await this.bookingUseCase.cancelBooking(bookingId)
+      return res.status(200).json({status:true,message:"booking cancelled",cancelBooking})
+    } catch (error) {
+      next(error)
     }
   }
 }

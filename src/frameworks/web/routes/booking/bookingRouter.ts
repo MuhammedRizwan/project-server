@@ -25,4 +25,14 @@ router.post("/createOrder", (req: Request, res: Response, next: NextFunction) =>
 router.post("/verifyOrder", (req: Request, res: Response, next: NextFunction) =>
   controller.booking.verifyOrder(req, res, next)
 );
+router.get(
+  "/travel-history/:userId",
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.booking.getTravelHistory(req, res, next)
+);
+router.patch(
+  "/cancel/:bookingId",
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.booking.cancelBooking(req, res, next)
+);
 export default router;

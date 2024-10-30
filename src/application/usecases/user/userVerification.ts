@@ -26,6 +26,9 @@ interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
   findOTPbyEmail(email: string): Promise<IOTP | null>;
 }
+interface walletRepository{
+  createWallet(user_id:string|undefined): Promise<void>;
+}
 
 interface Dependencies {
   services: {
@@ -37,6 +40,7 @@ interface Dependencies {
   Repositories: {
     MongoOTPRepository: OTPRepository;
     MongoUserRepository: UserRepository;
+    MongoWalletRepository:walletRepository
   };
 }
 
@@ -44,6 +48,7 @@ export class Verification {
   private jwtService: JwtService;
   private OTPRepository: OTPRepository;
   private userRepository: UserRepository;
+  private walletRepository:walletRepository
   private generateOtp: GenerateOtp;
   private emailService: EmailService;
   private passwordService: PasswordService;
@@ -52,6 +57,7 @@ export class Verification {
     this.jwtService = dependencies.services.JwtService;
     this.OTPRepository = dependencies.Repositories.MongoOTPRepository;
     this.userRepository = dependencies.Repositories.MongoUserRepository;
+    this.walletRepository=dependencies.Repositories.MongoWalletRepository
     this.generateOtp = dependencies.services.GenerateOtp;
     this.emailService = dependencies.services.EmailService;
     this.passwordService = dependencies.services.PasswordService;
@@ -105,6 +111,7 @@ export class Verification {
       if (!refreshToken) {
         throw new CustomError("Couldn't generate token", 500);
       }
+      await this.walletRepository.createWallet(userData._id)
       return { userData, accessToken, refreshToken };
     } catch (error) {
       throw error;
