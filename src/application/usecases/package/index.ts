@@ -1,15 +1,14 @@
-import { ObjectId } from "mongoose";
-import { Package } from "../../../domain/entities/package/package";
+import { Packages } from "../../../domain/entities/package/package";
 import { CustomError } from "../../../domain/errors/customError";
 
 interface MongoPackageRepository {
-  createPackage( package_data: Package): Promise<Package | null>;
-  getPackage(id: string): Promise<Package | null>;
-  getAllPackages(): Promise<Package[] | null>;
-  editPackage(id: string, packageData: Package): Promise<Package | null>;
-  blockNUnblockPackage(packageId: string, isBlock: boolean): Promise<Package|null>;
-  getAgentPackages(agentId: string): Promise<Package[] | null>;
-  getsimilarPackages(offer_price: number): Promise<Package[] | null>;
+  createPackage( package_data: Packages): Promise<Packages | null>;
+  getPackage(id: string): Promise<Packages | null>;
+  getAllPackages(): Promise<Packages[] | null>;
+  editPackage(id: string, packageData: Packages): Promise<Packages | null>;
+  blockNUnblockPackage(packageId: string, isBlock: boolean): Promise<Packages|null>;
+  getAgentPackages(agentId: string): Promise<Packages[] | null>;
+  getsimilarPackages(offer_price: number): Promise<Packages[] | null>;
 }
 interface CloudinaryService {
   uploadImage(file: Express.Multer.File | undefined): Promise<string>;
@@ -30,7 +29,7 @@ export class packageUseCase {
     this.cloudinaryService = dependencies.services.CloudinaryService;
   }
   async createPackage(
-    package_data: Package,
+    package_data: Packages,
     files: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[] | undefined
   ) {
     if (Array.isArray(files)) {
@@ -61,8 +60,9 @@ export class packageUseCase {
     }
     return packages;
   }
-  async editPackage(id: string, packageData: Package, files: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[] | undefined) {
+  async editPackage(id: string, packageData: Packages, files: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[] | undefined) {
     const editedPackage = await this.packageRepository.editPackage(id, packageData);
+
     if(!editedPackage) {
         throw new CustomError("Package not found", 404);
     }

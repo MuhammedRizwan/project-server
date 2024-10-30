@@ -5,15 +5,12 @@ import { CustomError } from "../../domain/errors/customError";
 
 export class MongoUserRepository {
   async createUser(user: Iuser): Promise<Iuser> {
-    const userCreate = await userModel.create(user);
-    if (!userCreate) {
-      return userCreate;
-    }
+    const userCreate = await userModel.create(user);   
     const userData: Iuser = {
       ...(userCreate.toObject() as unknown as Iuser),
-      _id: userCreate._id as string,
+      _id: userCreate._id.toString(),
     };
-    return userData
+    return userData;
   }
   async findUserByEmail(email: string): Promise<Iuser | null> {
     const user = await userModel.findOne({ email });
@@ -22,7 +19,7 @@ export class MongoUserRepository {
     }
     const userData: Iuser = {
       ...(user.toObject() as unknown as Iuser),
-      _id: user._id as string,
+      _id: user._id.toString(),
     };    
     return userData;
   }
@@ -37,7 +34,7 @@ export class MongoUserRepository {
     }
     const userData: Iuser = {
       ...(updatedUser.toObject() as unknown as Iuser),
-      _id: updatedUser._id as string,
+      _id: updatedUser._id.toString(),
     };
     return userData;
   }
@@ -52,7 +49,7 @@ export class MongoUserRepository {
     }
     const userData: Iuser = {
       ...(updatedUser.toObject() as unknown as Iuser),
-      _id: updatedUser._id as string,
+      _id: updatedUser._id.toString(),
     };
 
     return userData;
@@ -62,7 +59,7 @@ export class MongoUserRepository {
   return users.map((user) => {
     const userData: Iuser = {
       ...(user.toObject() as unknown as Iuser),
-      _id: user._id as string,
+      _id: user._id.toString(),
     };
     return userData;
   })

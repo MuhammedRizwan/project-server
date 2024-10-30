@@ -12,6 +12,9 @@ const controller = {
 router.get("/", (req: Request, res: Response, next: NextFunction) =>
   controller.category.getAllCategories(req, res, next)
 );
+router.get('/unblocked', (req: Request, res: Response, next: NextFunction) =>
+  controller.category.getUnblockedCategories(req, res, next)
+);
 router.post("/add",upload.single("image"),(req: Request, res: Response, next: NextFunction) =>
   controller.category.createCategory(req, res, next)
 );

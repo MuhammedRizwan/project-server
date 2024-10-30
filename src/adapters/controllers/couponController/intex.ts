@@ -33,16 +33,14 @@ export class CouponController {
         : 3;
       const { coupons, totalItems, totalPages, currentPage } =
         await this.couponuseCase.getAllCoupons(search, page, limit);
-      return res
-        .status(200)
-        .json({
-          status: "success",
-          message: "All coupons",
-          filterData: coupons,
-          totalItems,
-          totalPages,
-          currentPage,
-        });
+      return res.status(200).json({
+        status: "success",
+        message: "All coupons",
+        filterData: coupons,
+        totalItems,
+        totalPages,
+        currentPage,
+      });
     } catch (error) {
       next(error);
     }
@@ -70,6 +68,33 @@ export class CouponController {
       return res
         .status(200)
         .json({ status: "success", message: "Coupon Blocked", coupons });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getUnblockedCoupons(req: Request, res: Response, next: NextFunction) {
+    try {
+      const coupons = await this.couponuseCase.getUnblockedCoupons();
+      console.log(coupons);
+      return res
+        .status(200)
+        .json({ status: "success", message: "Unblocked coupons", coupons });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getUsedCoupons(req: Request, res: Response, next: NextFunction) {
+    try {
+      const couponId = req.params.couponId;
+      const {userId,totalPrice} = req.body;
+      const discountAmount = await this.couponuseCase.getUsedCoupons(
+        couponId,
+        userId,
+        totalPrice
+      );
+      return res
+        .status(200)
+        .json({ status: "success", message: "coupon validated", discountAmount });
     } catch (error) {
       next(error);
     }

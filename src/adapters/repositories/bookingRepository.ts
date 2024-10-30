@@ -1,7 +1,7 @@
 import { FilterQuery } from "mongoose";
 import { Iagent } from "../../domain/entities/agent/agent";
 import { Booking } from "../../domain/entities/booking/booking";
-import { Package } from "../../domain/entities/package/package";
+import { Packages } from "../../domain/entities/package/package";
 import { Iuser } from "../../domain/entities/user/user";
 import bookingModel from "../database/models/bookingModel";
 
@@ -16,7 +16,7 @@ export class MongoBookingRepository {
       const booking = await bookingModel
         .findOne({ _id: bookingId })
         .populate<{ user_id: Iuser }>("user_id")
-        .populate<{ package_id: Package }>("package_id")
+        .populate<{ package_id: Packages }>("package_id")
         .exec(); // Ensure proper promise handling
 
       return booking as Booking | null;
@@ -30,7 +30,7 @@ export class MongoBookingRepository {
       const booking = await bookingModel
         .find({ travel_agent_id: agentId })
         .populate<{ user_id: Iuser }>("user_id")
-        .populate<{ package_id: Package }>("package_id")
+        .populate<{ package_id: Packages }>("package_id")
         .exec(); // Ensure proper promise handling
 
       return booking as Booking[] | [];
@@ -44,7 +44,7 @@ export class MongoBookingRepository {
       const bookings = await bookingModel
         .find(query)
         .populate<{ user_id: Iuser }>("user_id")
-        .populate<{ package_id: Package }>("package_id")
+        .populate<{ package_id: Packages }>("package_id")
         .populate<{ travel_agent_id: Iagent }>("travel_agent_id")
         .skip((page-1)*limit).limit(limit).exec();
       return bookings.map((booking) => {

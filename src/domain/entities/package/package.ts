@@ -1,15 +1,16 @@
-import { Document, ObjectId } from "mongoose";
+import { ObjectId } from "mongoose";
+import { Icategory } from "../category/category";
 
 export interface Itinerary {
     day: number;
     activity: string;
   }
   
-  export interface Package  {
+  export interface Packages  {
     _id?:string
     travel_agent_id?: ObjectId; 
     package_name: string;
-    category_id?: ObjectId;  
+    category_id?: string|Icategory;  
     destinations: string[];
     original_price: number;
     offer_price: number;
@@ -20,6 +21,8 @@ export interface Itinerary {
     is_block?: boolean;
     images?: string[];
     includedItems:string[],
-    excludedItems:string[]
+    excludedItems:string[],
+    description?: string;
+    departure_place:string
   }
   

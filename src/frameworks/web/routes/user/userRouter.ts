@@ -9,6 +9,7 @@ import { passwordValidationSchema } from "../../../../domain/validator/forget-pa
 import packageRouter from "../package/packageRouter";
 import categoryRouter from "../category/categoryRouter";
 import bookingRouter from "../booking/bookingRouter";
+import couponRouter from "../coupon/couponRouter";
 import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
 
 const router = Router();
@@ -56,8 +57,12 @@ router.post(
 router.post('/googleLogin',(req:Request,res:Response,next:NextFunction)=>{
   controller.user.googleLogin(req,res,next)
 })
+router.get('/profile/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+  controller.user.getProfile(req,res,next)
+})
 router.use("/packages", packageRouter);
 router.use("/categories",categoryRouter);
 router.use("/booking",jwtAuth,bookingRouter);
+router.use("/coupon",jwtAuth,couponRouter);
 
 export default router;

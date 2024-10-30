@@ -1,5 +1,6 @@
 import { Booking } from "../../../domain/entities/booking/booking";
-import { Package } from "../../../domain/entities/package/package";
+import { Coupon } from "../../../domain/entities/coupon/coupon";
+import { Packages } from "../../../domain/entities/package/package";
 import { CustomError } from "../../../domain/errors/customError";
 
 
@@ -12,7 +13,10 @@ interface MongoBookingRepository {
 }
 
 interface MongoPackageRepository {
-  getPackage(id: string): Promise<Package | null>;
+  getPackage(id: string): Promise<Packages | null>;
+}
+interface MongoCouponRepository {
+  getCouponById(coupon_id: string|undefined): Promise<Coupon | null>;
 }
 interface RazorPay {
   createRazorpayOrder(amount: number): Promise<any>;
@@ -22,6 +26,7 @@ interface Dependencies {
   Repositories: {
     MongoBookingRepository: MongoBookingRepository;
     MongoPackageRepository: MongoPackageRepository;
+    MongoCouponRepository: MongoCouponRepository;
   };
   Services: {
     RazorPay: RazorPay;
@@ -31,10 +36,12 @@ export class BookingUseCase {
   private bookingRepository: MongoBookingRepository;
   private packageRepository: MongoPackageRepository;
   private razorPayService: RazorPay;
+  private couponRepository: MongoCouponRepository;
 
   constructor(dependencies: Dependencies) {
     this.bookingRepository = dependencies.Repositories.MongoBookingRepository;
     this.packageRepository = dependencies.Repositories.MongoPackageRepository;
+    this.couponRepository = dependencies.Repositories.MongoCouponRepository;
     this.razorPayService = dependencies.Services.RazorPay;
   }
 
@@ -57,10 +64,23 @@ export class BookingUseCase {
       if (!packageData.travel_agent_id) {
         throw new CustomError("Travel agent ID is missing", 400);
       }
-  
+      const couponData = await this.couponRepository.getCouponById(booking.coupon_id);
+      if(!couponData){
+        throw new CustomError("coupon not found", 404);
+      }
+      let totalPrice=(packageData.offer_price*booking.members.length);
+      if (couponData) {
+        booking.coupon_id = couponData?._id; 
+        let discount=totalPrice*Number(couponData?.percentage)/100;
+        if(discount>Number(couponData?.max_amount)){
+          discount=Number(couponData?.max_amount);
+        }
+        totalPrice=totalPrice-discount;  
+      }
+
       const bookingData: Booking = {
         ...booking,
-        payment_amount: packageData.offer_price,
+        payment_amount: totalPrice,
         travel_agent_id: packageData.travel_agent_id.toString(), // Convert ObjectId to string
         payment_status: "pending",
         booking_status: "confirmed",

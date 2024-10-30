@@ -19,7 +19,7 @@ export class MongoCategoryRepository {
     });
     return category;
   }
-  blockNUnblockCategory(id: string,is_block: boolean): Promise<Icategory | null> {
+  async blockNUnblockCategory(id: string,is_block: boolean): Promise<Icategory | null> {
     return categoryModel.findOneAndUpdate(
       { _id: id },
       { $set: { is_block } },
@@ -44,5 +44,9 @@ export class MongoCategoryRepository {
       { new: true }
     );
     return updatedCategory;
+  }
+  async getUnblockedCategories(): Promise<Icategory[] | null> {
+    const categories = await categoryModel.find({is_block: false}).lean();
+    return categories.map((category) => ({ ...category, _id: category._id?.toString() }));
   }
 }

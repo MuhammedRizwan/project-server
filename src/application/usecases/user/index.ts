@@ -6,6 +6,7 @@ interface UserRepository {
   createUser(user: Iuser): Promise<Iuser>;
   findUserByEmail(email: string): Promise<Iuser | null>;
   updateRefreshToken(id: string|undefined, refreshToken: string): Promise<void>;
+  getUser(id: string): Promise<Iuser | null>;
 }
 interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
@@ -142,6 +143,7 @@ export class UserUseCase {
   }
   async googleLogin(googleUser: any) {
     try {
+      console.log(googleUser)
       const user = await this.userRepository.findUserByEmail(googleUser.email);
       if (!user) {
         const userData = {
@@ -171,4 +173,11 @@ export class UserUseCase {
       throw error;
     }
   }
+  async getProfile(userId: string) {
+const user=await this.userRepository.getUser(userId)
+if(!user){
+  throw new CustomError("user not found",404)
+}
+return user
+}
 }

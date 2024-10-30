@@ -12,6 +12,7 @@ interface MongoCategoryRepository {
   editCategory(id: string, catagory: Icategory): Promise<Icategory | null>;
   countDocument(query:object): Promise<number>;
   findCategoryById(id: string): Promise<Icategory | null>;
+  getUnblockedCategories(): Promise<Icategory[] | null>;
 }
 interface CloudinaryService {
   uploadImage(file: Express.Multer.File | undefined): Promise<string>;
@@ -112,6 +113,21 @@ export class CategoryUseCase {
       return updatedCategory;
     } catch (error) {
       throw error;
+    }
+  }
+  async getUnblockedCategories() {
+    try {
+      
+      const categories = await this.categoryRepository.getUnblockedCategories();
+      if(!categories){
+        throw new CustomError("catagory Not Found", 404);
+      }
+      if(categories.length===0){
+        throw new CustomError("catagory Not Found", 404);
+      }
+      return categories;
+    } catch (error) {
+      throw error
     }
   }
 }

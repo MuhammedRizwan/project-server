@@ -84,4 +84,12 @@ export class categoryController {
       next(error);
     }
   }
+  async getUnblockedCategories(req:Request,res:Response,next:NextFunction){
+    try {
+      const categories=await this.categoryUseCase.getUnblockedCategories();
+      return res.status(200).json({status:"success",message:"Fetched All Categories",categories})
+    } catch (error) {
+      next(error)
+    }
+  }
 }

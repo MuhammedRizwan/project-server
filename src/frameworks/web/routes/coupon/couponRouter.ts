@@ -17,5 +17,8 @@ router.put("/edit/:couponId",(req:Request,res:Response,next:NextFunction)=>
     controller.coupon.editCoupon(req,res,next))
 router.patch("/block/:couponId",(req:Request,res:Response,next:NextFunction)=>
     controller.coupon.blockCoupon(req,res,next))
-
+router.get("/unblocked",(req:Request,res:Response,next:NextFunction)=>
+    controller.coupon.getUnblockedCoupons(req,res,next))
+router.post("/used/:couponId",(req:Request,res:Response,next:NextFunction)=>
+    controller.coupon.getUsedCoupons(req,res,next))
 export default router

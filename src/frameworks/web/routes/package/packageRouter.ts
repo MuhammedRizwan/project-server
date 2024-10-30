@@ -19,7 +19,7 @@ router.get(
 );
 router.post(
   "/add",
-  upload.array("images[]", 10),
+  upload.array("images[]", 6),
   (req: Request, res: Response, next: NextFunction) =>
     controller.package.createPackage(req, res, next)
 );
@@ -32,7 +32,7 @@ router.get("/:packageId", (req: Request, res: Response, next: NextFunction) =>
 );
 router.put(
   "/edit/:packageId",
-  upload.array("images[]", 10),
+  upload.array("images[]", 6),
   (req: Request, res: Response, next: NextFunction) =>
     controller.package.editPackage(req, res, next)
 );

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { UserUseCase } from "../../../application/usecases/user";
 import { Iuser } from "../../../domain/entities/user/user";
 import { Verification } from "../../../application/usecases/user/userVerification";
+import { CustomRequest } from "../../middleware/jwtAuthMiddleware";
 
 interface Dependencies {
   UseCase: {
@@ -132,6 +133,15 @@ export class userController {
         .json({ status: "success", user, accessToken, refreshToken });
     } catch (error) {
       return next(error);
+    }
+  }
+  async getProfile(req: CustomRequest, res: Response, next: NextFunction) {
+    try {
+      const {userId}=req.params
+      const user=await this.UserUseCase.getProfile(userId)
+      return res.status(200).json({ status: "success",message:"user profile", user });
+    } catch (error) {
+      
     }
   }
 }

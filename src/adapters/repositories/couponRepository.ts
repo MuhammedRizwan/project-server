@@ -62,4 +62,12 @@ export class MongoCouponRepository {
       throw new CustomError("Failed to update coupon", 500);
     }
   }
+  async getUnblockedCoupons(): Promise<Coupon[] | null> {
+    try {
+      const coupons: Coupon[] = await couponModel.find({ is_active: true });  
+      return coupons;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
