@@ -60,6 +60,15 @@ router.post('/googleLogin',(req:Request,res:Response,next:NextFunction)=>{
 router.get('/profile/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
   controller.user.getProfile(req,res,next)
 })
+router.put('/update-profile/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+  controller.user.updateProfile(req,res,next)
+})
+router.post('/validate-password/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+  controller.user.validatePassword(req,res,next)
+})
+router.put('/change-password/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+  controller.user.updatePassword(req,res,next)
+})
 router.use("/packages", packageRouter);
 router.use("/categories",categoryRouter);
 router.use("/booking",jwtAuth,bookingRouter);

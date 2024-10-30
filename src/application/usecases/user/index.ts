@@ -2,11 +2,17 @@ import { Iuser } from "../../../domain/entities/user/user";
 import { IOTP } from "../../../domain/entities/user/otp";
 import { CustomError } from "../../../domain/errors/customError";
 
+
 interface UserRepository {
   createUser(user: Iuser): Promise<Iuser>;
   findUserByEmail(email: string): Promise<Iuser | null>;
-  updateRefreshToken(id: string|undefined, refreshToken: string): Promise<void>;
+  updateRefreshToken(
+    id: string | undefined,
+    refreshToken: string
+  ): Promise<void>;
   getUser(id: string): Promise<Iuser | null>;
+  updateProfile(userId: string, userData: Iuser): Promise<Iuser | null>;
+  updatePassword(userId: string, HashedPssword: string): Promise<Iuser | null>;
 }
 interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
@@ -59,7 +65,7 @@ export class UserUseCase {
     try {
       const existUser = await this.userRepository.findUserByEmail(
         userData.email
-      );      
+      );
       if (existUser) {
         throw new CustomError("user already exists", 409);
       }
@@ -124,12 +130,12 @@ export class UserUseCase {
         );
       }
       const accessToken = this.JwtService.generateAccessToken(user._id);
-      if(!accessToken){
-        throw new CustomError("Couldn't generate token",500)
+      if (!accessToken) {
+        throw new CustomError("Couldn't generate token", 500);
       }
       const refreshToken = this.JwtService.generateRefreshToken(user._id);
-      if(!refreshToken){
-        throw new CustomError("Couldn't generate token",500)
+      if (!refreshToken) {
+        throw new CustomError("Couldn't generate token", 500);
       }
       await this.userRepository.updateRefreshToken(user._id, refreshToken);
       return {
@@ -143,7 +149,7 @@ export class UserUseCase {
   }
   async googleLogin(googleUser: any) {
     try {
-      console.log(googleUser)
+      console.log(googleUser);
       const user = await this.userRepository.findUserByEmail(googleUser.email);
       if (!user) {
         const userData = {
@@ -167,17 +173,67 @@ export class UserUseCase {
         if (!refreshToken) {
           throw new CustomError("Couldn't generate token", 500);
         }
-        return {user,accessToken,refreshToken}
-      } 
+        return { user, accessToken, refreshToken };
+      }
     } catch (error) {
       throw error;
     }
   }
   async getProfile(userId: string) {
-const user=await this.userRepository.getUser(userId)
-if(!user){
-  throw new CustomError("user not found",404)
-}
-return user
-}
+    try {
+      const user = await this.userRepository.getUser(userId);
+      if (!user) {
+        throw new CustomError("user not found", 404);
+      }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async updateProfile(userId: string, userData: Iuser) {
+    try {
+      const user = await this.userRepository.updateProfile(userId, userData);
+      if (!user) {
+        throw new CustomError("user not found", 404);
+      }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async validatePassword(userId: string, password: string) {
+    try {
+      const user = await this.userRepository.getUser(userId);
+      if (!user) {
+        throw new CustomError("user not found", 404);
+      }
+      const verifiedPassword = await this.passwordService.verifyPassword(
+        password,
+        user.password
+      );
+      console.log(verifiedPassword,"+++++++++++++++++++++")
+      if (!verifiedPassword) {
+        throw new CustomError("Invalid password", 404);
+      }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async updatePassword(userId: string, password: string) {
+    try {
+      console.log(password,userId)
+      const HashedPssword=await this.passwordService.passwordHash(password)
+      if (!HashedPssword) {
+        throw new CustomError("something went wrong", 500);
+      }
+      const user = await this.userRepository.updatePassword(userId, HashedPssword);
+      if (!user) {
+        throw new CustomError("user not found", 404);
+      }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

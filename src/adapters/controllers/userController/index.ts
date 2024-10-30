@@ -144,4 +144,33 @@ export class userController {
       
     }
   }
+  async updateProfile(req: CustomRequest, res: Response, next: NextFunction) {
+    try {
+      const {userId}=req.params
+      const user=await this.UserUseCase.updateProfile(userId,req.body)
+      return res.status(200).json({ status: "success",message:"user profile updated", user });
+      
+    } catch (error) {
+      next(error)
+    }
+  }
+  async validatePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {userId} = req.params
+      const user=await this.UserUseCase.validatePassword(userId,req.body.oldPassword)
+      console.log(user)
+      return res.status(200).json({ status: "success",message:"password validated", user });
+    }catch(error){
+      next(error)
+    }
+  }
+  async updatePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {userId} = req.params
+      const user = await this.UserUseCase.updatePassword(userId,req.body.newPassword)
+      return res.status(200).json({ status: "success",message:"password updated", user });
+    } catch (error) {
+      next(error)
+    }
+  }
 }

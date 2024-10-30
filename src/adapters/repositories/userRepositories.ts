@@ -97,4 +97,34 @@ export class MongoUserRepository {
   async countUsers(query:FilterQuery<Iuser>):Promise<number>{
     return await userModel.countDocuments(query)
   } 
+  async updateProfile(id:string,userData:Iuser):Promise<Iuser|null>{
+    try {
+      const user:Iuser|null = await userModel.findOneAndUpdate(
+        { _id:id },
+        { $set: userData },
+        { new: true }
+      )
+      if(!user){
+        throw new CustomError("user not found",404)
+      }
+      return user
+    } catch (error) {
+      throw error
+    }
+  }
+  async updatePassword(id:string,password:string):Promise<Iuser|null>{
+    try {
+      const user:Iuser|null = await userModel.findOneAndUpdate(
+        { _id:id },
+        { $set: { password} },
+        { new: true }
+      )
+      if(!user){
+        throw new CustomError("user not found",404)
+      }
+      return user
+    } catch (error) {
+      throw error
+    }
+  }
 }
