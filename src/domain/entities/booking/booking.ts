@@ -17,8 +17,8 @@ export interface Booking {
   members: { name: string,age: number}[];
   payment_amount: number;
   payment_status: "pending" | "paid" | "refunded";
-  booking_status: "pending" | "confirmed" | "cancelled"|"completed";
-  travel_status: "pending" | "on-going" | "completed"|"cancelled";
+  booking_status: "pending" | "confirmed" | "canceled";
+  travel_status: "pending" | "on-going" | "completed"|"canceled";
   coupon_id?:string
   start_date: string; // Use ISO string for date handling
   booking_date: string; // ISO string for booking timestamp

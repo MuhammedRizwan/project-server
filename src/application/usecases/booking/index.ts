@@ -1,13 +1,18 @@
+
 import { Booking } from "../../../domain/entities/booking/booking";
 import { Coupon } from "../../../domain/entities/coupon/coupon";
 import { Packages } from "../../../domain/entities/package/package";
 import Wallet from "../../../domain/entities/wallet/wallet";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface MongoBookingRepository {
+interface BookingRepository {
   createBooking(booking: Booking): Promise<Booking | null>;
   getBooking(bookingId: string): Promise<Booking | null>;
-  getAgentBooking(agentId: string, query: object, page: number, limit: number): Promise<Booking[] | null>;
+  getAgentBooking(
+    query: object,
+    page: number,
+    limit: number
+  ): Promise<Booking[] | null>;
   getAdminBookings(
     query: object,
     page: number,
@@ -16,17 +21,28 @@ interface MongoBookingRepository {
   countDocument(query: object): Promise<number>;
   countDocumentAgent(agentId: string): Promise<number>;
   getTravelHistory(userId: string): Promise<Booking[] | null>;
-  cancelBooking(bookingId: string): Promise<Booking | null>;
+  cancelBooking(bookingId: string, cancellation_reason: string): Promise<Booking | null>;
+  changeBookingStatus(
+    bookingId: string,
+    status: string,
+    cancellation_reason: string
+  ): Promise<Booking | null>;
+  changeTravelStatus(
+    bookingId: string,
+    travel_status: string): Promise<Booking | null>;
 }
 
-interface MongoPackageRepository {
+interface PackageRepository {
   getPackage(id: string): Promise<Packages | null>;
 }
-interface MongoCouponRepository {
+interface CouponRepository {
   getCouponById(coupon_id: string | undefined): Promise<Coupon | null>;
-  adduserCoupon(coupon_id: string | undefined, user_id: string): Promise<Coupon | null>;
+  adduserCoupon(
+    coupon_id: string | undefined,
+    user_id: string
+  ): Promise<Coupon | null>;
 }
-interface MongoWalletRepository {
+interface WalletRepository {
   refundWallet(
     userId: string | undefined,
     amount: number,
@@ -43,71 +59,71 @@ interface RazorPay {
 }
 interface Dependencies {
   Repositories: {
-    MongoBookingRepository: MongoBookingRepository;
-    MongoPackageRepository: MongoPackageRepository;
-    MongoCouponRepository: MongoCouponRepository;
-    MongoWalletRepository: MongoWalletRepository;
+    BookingRepository: BookingRepository;
+    PackageRepository: PackageRepository;
+    CouponRepository: CouponRepository;
+    WalletRepository: WalletRepository;
   };
   Services: {
     RazorPay: RazorPay;
   };
 }
 export class BookingUseCase {
-  private bookingRepository: MongoBookingRepository;
-  private packageRepository: MongoPackageRepository;
+  private bookingRepository: BookingRepository;
+  private packageRepository: PackageRepository;
   private razorPayService: RazorPay;
-  private couponRepository: MongoCouponRepository;
-  private walletRepository: MongoWalletRepository;
+  private couponRepository: CouponRepository;
+  private walletRepository: WalletRepository;
 
   constructor(dependencies: Dependencies) {
-    this.bookingRepository = dependencies.Repositories.MongoBookingRepository;
-    this.packageRepository = dependencies.Repositories.MongoPackageRepository;
-    this.couponRepository = dependencies.Repositories.MongoCouponRepository;
-    this.walletRepository = dependencies.Repositories.MongoWalletRepository;
+    this.bookingRepository = dependencies.Repositories.BookingRepository;
+    this.packageRepository = dependencies.Repositories.PackageRepository;
+    this.couponRepository = dependencies.Repositories.CouponRepository;
+    this.walletRepository = dependencies.Repositories.WalletRepository;
     this.razorPayService = dependencies.Services.RazorPay;
   }
 
   async createBooking(booking: Booking): Promise<Booking | null> {
     try {
       const packageId =
-        typeof booking.package_id === 'string'
+        typeof booking.package_id === "string"
           ? booking.package_id
           : booking.package_id._id;
-  
+
       if (!packageId) {
-        throw new CustomError('Invalid package ID', 400);
+        throw new CustomError("Invalid package ID", 400);
       }
-  
+
       const packageData = await this.packageRepository.getPackage(packageId);
       if (!packageData) {
-        throw new CustomError('Package not found', 404);
+        throw new CustomError("Package not found", 404);
       }
-  
+
       if (!packageData.travel_agent_id) {
-        throw new CustomError('Travel agent ID is missing', 400);
+        throw new CustomError("Travel agent ID is missing", 400);
       }
-  
+
       const userId =
-        typeof booking.user_id === 'string'
+        typeof booking.user_id === "string"
           ? booking.user_id
           : booking.user_id._id;
-  
+
       if (!userId) {
-        throw new CustomError('User ID is missing', 400);
+        throw new CustomError("User ID is missing", 400);
       }
-  
+
       let totalPrice = packageData.offer_price * booking.members.length;
-  
+
       if (booking.coupon_id) {
         const couponData = await this.couponRepository.adduserCoupon(
           booking.coupon_id,
           userId
         );
-  
+
         if (!couponData) {
-          throw new CustomError('Coupon not found', 404);
+          throw new CustomError("Coupon not found", 404);
         }
-  
+
         booking.coupon_id = couponData._id;
         let discount = (totalPrice * Number(couponData.percentage)) / 100;
         if (discount > Number(couponData.max_amount)) {
@@ -115,26 +131,28 @@ export class BookingUseCase {
         }
         totalPrice -= discount;
       }
-      if(!booking.coupon_id){
+      if (!booking.coupon_id) {
         delete booking.coupon_id;
       }
-  
+
       const bookingData: Booking = {
         ...booking,
         payment_amount: totalPrice,
-        travel_agent_id: packageData.travel_agent_id.toString(), 
-        payment_status: 'paid',
-        booking_status: 'pending',
-        travel_status: 'pending',
+        travel_agent_id: packageData.travel_agent_id.toString(),
+        payment_status: "paid",
+        booking_status: "pending",
+        travel_status: "pending",
         booking_date: new Date().toISOString(),
       };
-  
-      const createdBooking = await this.bookingRepository.createBooking(bookingData);
-  
+
+      const createdBooking = await this.bookingRepository.createBooking(
+        bookingData
+      );
+
       if (!createdBooking) {
-        throw new CustomError('Booking creation failed', 500);
+        throw new CustomError("Booking creation failed", 500);
       }
-  
+
       return createdBooking;
     } catch (error) {
       throw error;
@@ -151,16 +169,20 @@ export class BookingUseCase {
       throw error;
     }
   }
-  async getAgentBookings(agentId: string,search: string, page: number, limit: number) {
+  async getAgentBookings(agentId: string, packageId: string,search:string,page:number,limit:number) {
     try {
       const query = search
-        ? { category_name: { $regex: search, $options: "i" } }
-        : {};
-      const bookingData = await this.bookingRepository.getAgentBooking(agentId,query, page, limit);
+        ? { category_name: { $regex: search, $options: "i" },travel_agent_id:agentId,package_id:packageId }
+        : {travel_agent_id:agentId,package_id:packageId };
+      const bookingData = await this.bookingRepository.getAgentBooking(
+        query,
+        page,
+        limit
+      );
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
-      const totalItems = await this.bookingRepository.countDocumentAgent(agentId);
+      const totalItems = await this.bookingRepository.countDocument(query);
       if (totalItems === 0) {
         throw new CustomError("booking not found", 404);
       }
@@ -180,6 +202,7 @@ export class BookingUseCase {
       const query = search
         ? { category_name: { $regex: search, $options: "i" } }
         : {};
+       
       const bookingData = await this.bookingRepository.getAdminBookings(
         query,
         page,
@@ -237,14 +260,14 @@ export class BookingUseCase {
       throw error;
     }
   }
-  async cancelBooking(bookingId: string): Promise<Booking | null> {
+  async cancelBooking(bookingId: string,cancellation_reason:string): Promise<Booking | null> {
     try {
       const bookingData = await this.bookingRepository.getBooking(bookingId);
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
-      if (bookingData.booking_status === "cancelled") {
-        throw new CustomError("booking already cancelled", 400);
+      if (bookingData.booking_status === "canceled") {
+        throw new CustomError("booking already canceled", 400);
       }
       if (new Date(bookingData.start_date) < new Date()) {
         throw new CustomError("user already travelled", 400);
@@ -271,7 +294,7 @@ export class BookingUseCase {
         }
       }
       if (typeof bookingData?.user_id === "object") {
-        const reason = "booking cancelled";
+        const reason = "booking canceled";
         await this.walletRepository.refundWallet(
           bookingData.user_id._id,
           refundAmount,
@@ -281,12 +304,64 @@ export class BookingUseCase {
         throw new CustomError("Invalid user ID", 400);
       }
       const cancelBooking = await this.bookingRepository.cancelBooking(
-        bookingId
+        bookingId,cancellation_reason
       );
       if (!cancelBooking) {
         throw new CustomError("booking not found", 404);
       }
       return cancelBooking;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async changeBookingStatus(
+    bookingId: string,
+    status: string,
+    cancellation_reason:string
+  ): Promise<Booking | null> {
+    try {
+      const booking = await this.bookingRepository.getBooking(bookingId);
+      if (!booking) {
+        throw new CustomError("Booking not found", 404);
+      }
+      if (booking.booking_status == 'canceled') {
+        throw new CustomError("Booking already canceled", 404);
+      }
+      if (booking.travel_status == 'completed') {
+        throw new CustomError("Booking already completed", 404);
+      }
+      const bookingData = await this.bookingRepository.changeBookingStatus(
+        bookingId,
+        status,
+        cancellation_reason);
+      if (!bookingData) {
+        throw new CustomError("Failed to update booking details", 404);
+      }
+      return bookingData;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async changeTravelStatus(
+    bookingId: string,travel_status:string
+  ): Promise<Booking | null> {
+    try {
+      console.log(bookingId,travel_status,"travel status  ");
+      const booking = await this.bookingRepository.getBooking(bookingId);
+      if (!booking) {
+        throw new CustomError("Booking not found", 404);
+      }
+      if (booking.travel_status == 'completed') {
+        throw new CustomError("Booking already completed", 404);
+      }
+      const bookingData = await this.bookingRepository.changeTravelStatus(
+        bookingId,
+        travel_status
+      );
+      if (!bookingData) {
+        throw new CustomError("Failed to update booking details", 404);
+      }
+      return bookingData;
     } catch (error) {
       throw error;
     }

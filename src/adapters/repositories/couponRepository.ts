@@ -3,16 +3,18 @@ import { Coupon } from "../../domain/entities/coupon/coupon";
 import { CustomError } from "../../domain/errors/customError";
 import couponModel from "../database/models/couponModel";
 
-export class MongoCouponRepository {
+export class CouponRepository {
   async createCoupon(coupon: Coupon): Promise<Coupon> {
     const couponData: Coupon = (
       await couponModel.create(coupon)
     ).toObject() as unknown as Coupon;
     return couponData;
   }
-  async getAllCoupons(query: FilterQuery<Coupon>,page: number,limit: number): Promise<Coupon[] | null> {
+  async getAllCoupons(query: FilterQuery<Coupon>,page: number,limit: number,filterData:object): Promise<Coupon[] | null> {
     try {
-      const coupons = await couponModel.find(query).skip((page - 1) * limit).limit(limit);
+      const completedQuery={...query,...filterData}
+      console.log(filterData)
+      const coupons = await couponModel.find(completedQuery).skip((page - 1) * limit).limit(limit);
       if (!coupons) {
         throw new CustomError("Coupons not found", 404);
       }
@@ -21,8 +23,9 @@ export class MongoCouponRepository {
       throw new CustomError("Failed to get coupons", 500);
     }
   }
-  async couponCount(query: FilterQuery<Coupon>): Promise<number> {
-    return couponModel.countDocuments(query);
+  async couponCount(query: FilterQuery<Coupon>,filterData:object): Promise<number> {
+    const completedQuery={...query,...filterData}
+    return couponModel.countDocuments(completedQuery);
   }
   async getCouponByCode(coupon_code: string): Promise<Coupon | null> {
     const coupon: Coupon | null = await couponModel.findOne({ coupon_code });

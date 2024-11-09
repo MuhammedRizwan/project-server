@@ -1,15 +1,14 @@
-import { ObjectId } from "mongoose";
 import { Iagent } from "../../../domain/entities/agent/agent";
 import { IOTP } from "../../../domain/entities/user/otp";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface MongoAgentRepository {
+interface AgentRepository {
   createAgent(agent: Iagent): Promise<Iagent>;
   findAgentByEmail(email: string): Promise<Iagent | null>;
   addRefreshToken(id: string|undefined, refreshToken: string): Promise<void>;
   verifyAgent(email: string): Promise<Iagent | null>;
 }
-interface MongoOTPRepository {
+interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
   findOTPbyEmail(email: string): Promise<IOTP | null>;
 }
@@ -34,8 +33,8 @@ interface CloudinaryService {
 
 interface Dependencies {
   Repositories: {
-    MongoAgentRepository: MongoAgentRepository;
-    MongoOTPRepository: MongoOTPRepository;
+    AgentRepository: AgentRepository;
+    OTPRepository: OTPRepository;
   };
   Services: {
     EmailService: EmailService;
@@ -46,8 +45,8 @@ interface Dependencies {
   };
 }
 export class AgentUseCase {
-  private agentRepository: MongoAgentRepository;
-  private OTPRepository: MongoOTPRepository;
+  private agentRepository: AgentRepository;
+  private OTPRepository: OTPRepository;
   private emailService: EmailService;
   private passwordService: PasswordService;
   private JwtService: JwtService;
@@ -55,8 +54,8 @@ export class AgentUseCase {
   private CloudinaryService: CloudinaryService;
 
   constructor(Dependencies: Dependencies) {
-    this.agentRepository = Dependencies.Repositories.MongoAgentRepository;
-    this.OTPRepository = Dependencies.Repositories.MongoOTPRepository;
+    this.agentRepository = Dependencies.Repositories.AgentRepository;
+    this.OTPRepository = Dependencies.Repositories.OTPRepository;
     this.emailService = Dependencies.Services.EmailService;
     this.passwordService = Dependencies.Services.PasswordService;
     this.JwtService = Dependencies.Services.JwtService;

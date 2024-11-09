@@ -38,9 +38,9 @@ interface Dependencies {
     PasswordService: PasswordService;
   };
   Repositories: {
-    MongoOTPRepository: OTPRepository;
-    MongoUserRepository: UserRepository;
-    MongoWalletRepository:walletRepository
+    OTPRepository: OTPRepository;
+    UserRepository: UserRepository;
+    WalletRepository:walletRepository
   };
 }
 
@@ -55,9 +55,9 @@ export class Verification {
 
   constructor(dependencies: Dependencies) {
     this.jwtService = dependencies.services.JwtService;
-    this.OTPRepository = dependencies.Repositories.MongoOTPRepository;
-    this.userRepository = dependencies.Repositories.MongoUserRepository;
-    this.walletRepository=dependencies.Repositories.MongoWalletRepository
+    this.OTPRepository = dependencies.Repositories.OTPRepository;
+    this.userRepository = dependencies.Repositories.UserRepository;
+    this.walletRepository=dependencies.Repositories.WalletRepository
     this.generateOtp = dependencies.services.GenerateOtp;
     this.emailService = dependencies.services.EmailService;
     this.passwordService = dependencies.services.PasswordService;

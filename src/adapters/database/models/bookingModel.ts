@@ -32,16 +32,17 @@ const bookingSchema = new Schema(
     payment_id: { type: String },
     booking_status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled", "completed"],
+      enum: ["pending", "confirmed", "canceled", "completed"],
       required: true,
     },
     travel_status: {
       type: String,
-      enum: ["pending", "ongoing", "completed", "cancelled"],
+      enum: ["pending", "ongoing", "completed", "canceled"],
       required: true,
     },
     start_date: { type: Date, required: true },
     coupon_id: { type: Schema.Types.ObjectId, ref: "Coupon" },
+    cancellation_reason: { type: String },
   },
   {
     timestamps: true,

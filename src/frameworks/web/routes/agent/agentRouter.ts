@@ -7,6 +7,7 @@ import bookingRouter from "../booking/bookingRouter"
 
 import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
+import { agentBlocked } from "../../../../adapters/middleware/blockMiddleware";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -40,7 +41,7 @@ router.post(
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.changePassword(req, res, next)
 );
-router.use('/package',jwtAuth, packageRouter);
-router.use('/category',jwtAuth, categoryRouter);
-router.use('/booking',jwtAuth,bookingRouter)
+router.use('/package',jwtAuth,agentBlocked,packageRouter);
+router.use('/category',jwtAuth,agentBlocked,categoryRouter);
+router.use('/booking',jwtAuth,agentBlocked,bookingRouter)
 export default router;

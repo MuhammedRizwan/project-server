@@ -1,29 +1,30 @@
 import { Coupon } from "../../../domain/entities/coupon/coupon";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface MongoCouponRepository {
+interface CouponRepository {
   createCoupon(coupon: Coupon): Promise<Coupon>;
   getCouponByCode(coupon_code: string): Promise<Coupon | null>;
   getCouponById(coupon_id: string): Promise<Coupon | null>;
   getAllCoupons(
     query: object,
     page: number,
-    limit: number
+    limit: number,
+    filterData:object
   ): Promise<Coupon[] | null>;
   editCoupon(coupon_id: string, coupon: Coupon): Promise<Coupon | null>;
   blockCoupon(coupon_id: string, is_active: boolean): Promise<Coupon | null>;
-  couponCount(query: object): Promise<number>;
+  couponCount(query: object,filterData:object): Promise<number>;
   getUnblockedCoupons(): Promise<Coupon[] | null>;
 }
 interface Dependencies {
   Repositories: {
-    MongoCouponRepository: MongoCouponRepository;
+    CouponRepository: CouponRepository;
   };
 }
 export class CouponUseCase {
-  private couponRepository: MongoCouponRepository;
+  private couponRepository: CouponRepository;
   constructor(dependencies: Dependencies) {
-    this.couponRepository = dependencies.Repositories.MongoCouponRepository;
+    this.couponRepository = dependencies.Repositories.CouponRepository;
   }
   async createCoupon(coupon: Coupon): Promise<Coupon> {
     try {
@@ -54,20 +55,22 @@ export class CouponUseCase {
       throw error;
     }
   }
-  async getAllCoupons(search: string, page: number, limit: number) {
+  async getAllCoupons(search: string, page: number, limit: number,filter:string) {
     try {
       const query = search
-        ? { category_name: { $regex: search, $options: "i" } }
+        ? { coupon_code: { $regex: search, $options: "i" } }
         : {};
+        const filterData =filter === "all"? {}: {  is_active: filter === "blocked" ? false : true };
       const coupons = await this.couponRepository.getAllCoupons(
         query,
         page,
-        limit
+        limit,
+        filterData
       );
       if (!coupons) {
         throw new CustomError("coupons not found", 404);
       }
-      const totalItems = await this.couponRepository.couponCount(query);
+      const totalItems = await this.couponRepository.couponCount(query,filterData);
       if (totalItems === 0) {
         throw new CustomError("coupons not found", 404);
       }

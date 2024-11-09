@@ -2,7 +2,7 @@ import { FilterQuery } from "mongoose";
 import { Icategory } from "../../domain/entities/category/category";
 import categoryModel from "../database/models/categoryModel";
 
-export class MongoCategoryRepository {
+export class CategoryRepository {
   async createCategory(category: Icategory): Promise<Icategory | null> {
     const createdCategory = await categoryModel.create(category);
     return createdCategory
@@ -27,13 +27,15 @@ export class MongoCategoryRepository {
     );
   }
 
-  async findAllCategory(query: FilterQuery<Icategory>, page: number, limit: number): Promise<Icategory[]> {
-    const categories = await categoryModel.find(query).lean().skip((page - 1) * limit).limit(limit);
+  async findAllCategory(query: FilterQuery<Icategory>, page: number, limit: number,filterData:object): Promise<Icategory[]> {
+    const completedQuery = { ...query, ...filterData };
+    const categories = await categoryModel.find(completedQuery).lean().skip((page - 1) * limit).limit(limit);
     return categories.map((category) => ({ ...category, _id: category._id.toString() }));
   }
 
-  async countDocument(query: FilterQuery<Icategory>): Promise<number> {
-    return categoryModel.countDocuments(query);
+  async countDocument(query: FilterQuery<Icategory>,filterData:object): Promise<number> {
+    const completedQuery = { ...query, ...filterData };
+    return categoryModel.countDocuments(completedQuery);
   }
   async editCategory(
     id: string,catagory: Icategory

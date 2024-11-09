@@ -24,7 +24,7 @@ router.post(
     controller.package.createPackage(req, res, next)
 );
 
-router.patch("/block", (req: Request, res: Response, next: NextFunction) =>
+router.patch("/block/:packageId", (req: Request, res: Response, next: NextFunction) =>
   controller.package.blockNUnblockPackage(req, res, next)
 );
 router.get("/:packageId", (req: Request, res: Response, next: NextFunction) =>

@@ -2,7 +2,7 @@ import { Iadmin } from "../../domain/entities/admin/admin";
 import adminModel from "../database/models/adminModel";
 import { CustomError } from "../../domain/errors/customError";
 
-export class MongoAdminRepository {
+export class AdminRepository {
   async findAdminByEmail(email: string): Promise<Iadmin | null> {
     const admin = await adminModel.findOne({ email });
     if (!admin) {

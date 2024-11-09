@@ -1,8 +1,8 @@
-import { MongoCouponRepository } from "../../adapters/repositories/couponRepository";
+import { CouponRepository } from "../../adapters/repositories/couponRepository";
 import { CouponUseCase } from "../../application/usecases/coupon/intex";
 
 const Repositories = {
-  MongoCouponRepository: new MongoCouponRepository(),
+  CouponRepository: new CouponRepository(),
 };
 
 const useCase = {

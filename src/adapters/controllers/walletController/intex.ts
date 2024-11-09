@@ -16,7 +16,7 @@ export class walletController {
             const {userId}=req.params;
             const wallet = await this.walletUseCase.getAllWallet(userId);
             return res.status(200).json({
-                status: "success",
+                success:true,
                 message: "Fetched All Wallet",
                  wallet
             });

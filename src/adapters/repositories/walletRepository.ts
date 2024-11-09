@@ -8,7 +8,7 @@ interface Transaction {
   transactionType: "credit" | "debit";
   reason: string;
 }
-export class MongoWalletRepository {
+export class WalletRepository {
   async createWallet(userId: string): Promise<void> {
     const newWallet = await walletModel.create({ user_id: userId });
   }

@@ -7,7 +7,7 @@ interface Dependencies {
     AdminUseCase: AdminUseCase;
   };
 }
-const isString = (value: unknown): value is string => typeof value === 'string';
+export const isString = (value: unknown): value is string => typeof value === "string";
 export class adminController {
   private AdminUseCase: AdminUseCase;
   constructor(dependencies: Dependencies) {
@@ -19,21 +19,13 @@ export class adminController {
       const { email, password } = req.body as Iadmin;
       const { admin, accessToken, refreshToken } =
         await this.AdminUseCase.loginAdmin(email, password);
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+      return res.status(200).json({
+        success: true,
+        message: "Admin Logged In",
+        admin,
+        accessToken,
+        refreshToken,
       });
-      return res
-        .status(200)
-        .json({
-          status: "success",
-          message: "Admin Logged In",
-          admin,
-          accessToken,
-          refreshToken
-        });
     } catch (error) {
       return next(error);
     }
@@ -56,11 +48,22 @@ export class adminController {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
-      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
-      const { users ,totalItems,totalPages,currentPage} = await this.AdminUseCase.getAllUsers(search, page, limit);
+      const limit = isString(req.query.limit)
+        ? parseInt(req.query.limit, 10)
+        : 8;
+        const filter=isString(req.query.filter) ? req.query.filter : "";
+      const { users, totalItems, totalPages, currentPage } =
+        await this.AdminUseCase.getAllUsers(search, page, limit,filter);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched All Users",filterData:users,totalItems,totalPages,currentPage });
+        .json({
+          success:true,
+          message: "Fetched All Users",
+          filterData: users,
+          totalItems,
+          totalPages,
+          currentPage,
+        });
     } catch (error) {
       return next(error);
     }
@@ -69,13 +72,11 @@ export class adminController {
     try {
       const { id, is_block } = req.body;
       const user = await this.AdminUseCase.changeUserStatus(id, is_block);
-      return res
-        .status(200)
-        .json({
-          status: "success",
-          message: `${user.is_block ? "user Blocked" : "User Unblocked"}`,
-          user,
-        });
+      return res.status(200).json({
+        success: true,
+        message: `${user.is_block ? "user Blocked" : "User Unblocked"}`,
+        user,
+      });
     } catch (error) {
       return next(error);
     }
@@ -84,12 +85,22 @@ export class adminController {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
-      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
-
-      const { agencies,totalItems,totalPages,currentPage} = await this.AdminUseCase.getAllAgencies(search, page, limit);
+      const limit = isString(req.query.limit)
+        ? parseInt(req.query.limit, 10)
+        : 8;
+        const filter=isString(req.query.filter) ? req.query.filter : "";
+      const { agencies, totalItems, totalPages, currentPage } =
+        await this.AdminUseCase.getAllAgencies(search, page, limit,filter);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetch all agencies",filterData:agencies,totalItems,totalPages,currentPage });
+        .json({
+          success:true,
+          message: "Fetch all agencies",
+          filterData: agencies,
+          totalItems,
+          totalPages,
+          currentPage,
+        });
     } catch (error) {
       return next(error);
     }
@@ -98,13 +109,11 @@ export class adminController {
     try {
       const { id, is_block } = req.body;
       const agent = await this.AdminUseCase.changeAgentStatus(id, is_block);
-      return res
-        .status(200)
-        .json({
-          status: "success",
-          message: `${agent.is_block ? "user Blocked" : "User Unblocked"}`,
-          agent,
-        });
+      return res.status(200).json({
+        success: true,
+        message: `${agent.is_block ? "user Blocked" : "User Unblocked"}`,
+        agent,
+      });
     } catch (error) {
       return next(error);
     }
@@ -115,7 +124,7 @@ export class adminController {
       const agent = await this.AdminUseCase.getAgent(id);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched Agent Data", agent });
+        .json({ success:true, message: "Fetched Agent Data", agent });
     } catch (error) {
       return next(error);
     }
@@ -127,17 +136,15 @@ export class adminController {
         id,
         admin_verified
       );
-      return res
-        .status(200)
-        .json({
-          status: "success",
-          message: `${
-            agent.admin_verified == "accept"
-              ? "Agency Aceepted"
-              : "Agency Rejected"
-          }`,
-          agent,
-        });
+      return res.status(200).json({
+        success:true,
+        message: `${
+          agent.admin_verified == "accept"
+            ? "Agency Aceepted"
+            : "Agency Rejected"
+        }`,
+        agent,
+      });
     } catch (error) {
       return next(error);
     }

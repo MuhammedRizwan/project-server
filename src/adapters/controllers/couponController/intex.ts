@@ -16,10 +16,10 @@ export class CouponController {
   async createCoupon(req: Request, res: Response, next: NextFunction) {
     try {
       const coupon = req.body;
-      const couponCreated = await this.couponuseCase.createCoupon(coupon);
+      const couponData = await this.couponuseCase.createCoupon(coupon);
       return res
         .status(201)
-        .json({ status: "success", message: "Coupon Created", couponCreated });
+        .json({ success:true, message: "Coupon Created", couponData });
     } catch (error) {
       next(error);
     }
@@ -27,14 +27,15 @@ export class CouponController {
   async getAllCoupons(req: Request, res: Response, next: NextFunction) {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
-      const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
+      const page = isString(req.query.page) ? parseInt(req.query.page, 8) : 1;
       const limit = isString(req.query.limit)
-        ? parseInt(req.query.limit, 10)
+        ? parseInt(req.query.limit, 8)
         : 3;
+        const filter=isString(req.query.filter) ? req.query.filter : "";
       const { coupons, totalItems, totalPages, currentPage } =
-        await this.couponuseCase.getAllCoupons(search, page, limit);
+        await this.couponuseCase.getAllCoupons(search, page, limit,filter);
       return res.status(200).json({
-        status: "success",
+        success:true,
         message: "All coupons",
         filterData: coupons,
         totalItems,
@@ -49,13 +50,13 @@ export class CouponController {
     try {
       const coupon = req.body;
       const couponId = req.params.couponId;
-      const couponEdited = await this.couponuseCase.editCoupon(
+      const couponData = await this.couponuseCase.editCoupon(
         couponId,
         coupon
       );
       return res
         .status(200)
-        .json({ status: "success", message: "Coupon Edited", couponEdited });
+        .json({ success:true, message: "Coupon Edited", couponData });
     } catch (error) {
       next(error);
     }
@@ -67,7 +68,7 @@ export class CouponController {
       const coupons = await this.couponuseCase.blockCoupon(couponId, is_active);
       return res
         .status(200)
-        .json({ status: "success", message: "Coupon Blocked", coupons });
+        .json({ success:true, message: "Coupon Blocked", coupons });
     } catch (error) {
       next(error);
     }
@@ -78,7 +79,7 @@ export class CouponController {
       console.log(coupons);
       return res
         .status(200)
-        .json({ status: "success", message: "Unblocked coupons", coupons });
+        .json({ success:true, message: "Unblocked coupons", coupons });
     } catch (error) {
       next(error);
     }
@@ -94,7 +95,7 @@ export class CouponController {
       );
       return res
         .status(200)
-        .json({ status: "success", message: "coupon validated", discountAmount });
+        .json({ success:true, message: "coupon validated", discountAmount });
     } catch (error) {
       next(error);
     }

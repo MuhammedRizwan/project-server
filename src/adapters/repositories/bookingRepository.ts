@@ -4,8 +4,9 @@ import { Booking } from "../../domain/entities/booking/booking";
 import { Packages } from "../../domain/entities/package/package";
 import { Iuser } from "../../domain/entities/user/user";
 import bookingModel from "../database/models/bookingModel";
+import { CustomError } from "../../domain/errors/customError";
 
-export class MongoBookingRepository {
+export class BookingRepository {
   async createBooking(booking: Booking): Promise<Booking | null> {
     const createdBooking = await bookingModel.create(booking);
     const bookingData = createdBooking.toObject() as unknown as Booking;
@@ -25,22 +26,25 @@ export class MongoBookingRepository {
       return null;
     }
   }
-  async getAgentBooking(agentId: string,query: FilterQuery<Booking>,
+  async getAgentBooking(
+    query:FilterQuery<Booking>,
     page: number,
-    limit: number): Promise<Booking[] | null> {
+    limit: number
+  ): Promise<Booking[] | null> {
     try {
       const booking = await bookingModel
-        .find({ travel_agent_id: agentId })
+        .find(query)
         .populate<{ user_id: Iuser }>("user_id")
         .populate<{ package_id: Packages }>("package_id")
         .skip((page - 1) * limit)
         .limit(limit)
-        .exec(); // Ensure proper promise handling
 
-        return booking.map((booking) => {
-          const bookingData = booking.toObject() as unknown as Booking;
-          return bookingData;
-        }) as Booking[] | null;
+       
+
+      return booking.map((booking) => {
+        const bookingData = booking.toObject() as unknown as Booking;
+        return bookingData;
+      }) as Booking[] | null;
     } catch (error) {
       console.error("Error fetching booking:", error);
       return null;
@@ -84,20 +88,58 @@ export class MongoBookingRepository {
       .exec();
     return booking as Booking[] | [];
   }
-  async cancelBooking(bookingId: string): Promise<Booking | null> {
+  async cancelBooking(bookingId: string,cancellation_reason:string): Promise<Booking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
         {
           $set: {
             payment_status: "refunded",
-            booking_status: "cancelled",
-            travel_status: "cancelled",
+            booking_status: "canceled",
+            travel_status: "canceled",
+            cancellation_reason
           },
         },
         { new: true }
       );
       return booking as Booking | null;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async changeBookingStatus(
+    bookingId: string,
+    status: string,
+    cancellation_reason:string
+  ): Promise<Booking | null> {
+    try {
+      const booking = await bookingModel.findOneAndUpdate(
+        { _id: bookingId },
+        {$set: {booking_status: status,cancellation_reason}},
+        { new: true }
+      );
+      if(!booking){
+        throw new CustomError("booking not found",404)
+      }
+      return booking as unknown as Booking | null;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async changeTravelStatus(
+    bookingId: string,
+    travel_status: string
+  ): Promise<Booking | null> {
+    try {
+      const booking = await bookingModel.findOneAndUpdate(
+        { _id: bookingId },
+        {$set: {travel_status}},
+        { new: true }
+      );
+      if(!booking){
+        throw new CustomError("booking not found",404)
+      }
+      return booking as unknown as Booking | null;
     } catch (error) {
       throw error;
     }

@@ -1,9 +1,9 @@
-import { MongoWalletRepository } from "../../adapters/repositories/walletRepository";
+import { WalletRepository } from "../../adapters/repositories/walletRepository";
 import { WalletUseCase } from "../../application/usecases/wallet";
 
 
 const Repositories={
-    MongoWalletRepository:new MongoWalletRepository()
+    WalletRepository:new WalletRepository()
 }
 
 const useCase={

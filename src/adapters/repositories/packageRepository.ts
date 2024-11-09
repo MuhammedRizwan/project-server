@@ -1,28 +1,34 @@
+import { FilterQuery } from "mongoose";
 import { Icategory } from "../../domain/entities/category/category";
 import { Packages } from "../../domain/entities/package/package";
 import packageModel from "../database/models/packageModel";
 
-export class MongoPackageRepository {
-  async createPackage(package_data: Packages): Promise<Packages | null> {        
-    const packageDoc = await packageModel.create( package_data );
+export class PackageRepository {
+  async createPackage(package_data: Packages): Promise<Packages | null> {
+    const packageDoc = await packageModel.create(package_data);
     const packageData = packageDoc.toObject() as unknown as Packages;
     return packageData;
   }
 
   async getPackage(id: string): Promise<Packages | null> {
-      const packageData = await packageModel
-        .findOne({_id:id})
-        .populate<{category_id:Icategory }>("category_id")
-    
-      if (!packageData) return null;
-      return packageData as unknown as Packages;
+    const packageData = await packageModel
+      .findOne({ _id: id })
+      .populate<{ category_id: Icategory }>("category_id");
+
+    if (!packageData) return null;
+    return packageData as unknown as Packages;
   }
 
-  async getAllPackages(): Promise<Packages[] | null> {
-    const packages: Packages[] | null = await packageModel.find();
+  async getAllPackages(query: FilterQuery<Packages>, page: number, limit: number){
+    console.log(query,"query")
+    const completedQuery = { ...query, is_block: false };
+    const packages= await packageModel.find(completedQuery).lean().skip((page - 1) * limit).limit(limit); 
     return packages;
   }
-  async editPackage(id: string, packageData: Packages): Promise<Packages | null> {
+  async editPackage(
+    id: string,
+    packageData: Packages
+  ): Promise<Packages | null> {
     const updatedPackage: Packages | null = await packageModel.findOneAndUpdate(
       { _id: id },
       { $set: packageData },
@@ -30,29 +36,48 @@ export class MongoPackageRepository {
     );
     return updatedPackage;
   }
-  async blockNUnblockPackage(packageId: string, isBlock: boolean):Promise<Packages|null> {
-    const updatedPackage:Packages|null = await packageModel.findOneAndUpdate(
+  async blockNUnblockPackage(
+    packageId: string,
+    isBlock: boolean
+  ): Promise<Packages | null> {
+    console.log(isBlock);
+    const updatedPackage: Packages | null = await packageModel.findOneAndUpdate(
       { _id: packageId },
-      { $set: { isBlock } },
+      { $set: { is_block: isBlock } },
       { new: true }
     );
+    console.log(updatedPackage);
     return updatedPackage;
   }
-  async getAgentPackages(agentId: string): Promise<Packages[] | null> {
-    const packages: Packages[] | null = await packageModel.find({travel_agent_id: agentId });
-    return packages;
+  async getAgentPackages(
+    agentId: string,
+    query: FilterQuery<Packages>,
+    page: number,
+    limit: number
+  ) {
+    const completedQuery = { travel_agent_id: agentId, ...query };
+    const Packages = await packageModel
+      .find(completedQuery)
+      .lean() 
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate<{ category_id: Icategory }>("category_id");
+    return Packages;
   }
   async getsimilarPackages(offer_price: number): Promise<Packages[] | null> {
-    const minPrice = offer_price - 10000;
-    const maxPrice = offer_price + 10000;
-  
-    const packages: Packages[] | null = await packageModel.find({
-      offer_price: { $gte: minPrice, $lte: maxPrice }
-    });
-  
-    return packages;
+    const minPrice = offer_price - 5000;
+    const maxPrice = offer_price + 5000;
+
+    const packages = await packageModel
+      .find({
+        offer_price: { $gte: minPrice, $lte: maxPrice },
+      })
+      .limit(4);
+
+    return packages as unknown as Packages[];
   }
-
+  async packageCount(query: FilterQuery<Packages>): Promise<number> {
+    const totalItems = await packageModel.countDocuments(query);
+    return totalItems;
+  }
 }
-
-

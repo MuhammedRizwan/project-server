@@ -20,7 +20,7 @@ export class categoryController {
       });
       return res
         .status(201)
-        .json({ status: "success", message: "Category Created", category });
+        .json({ success:true, message: "Category Created", category });
     } catch (error) {
       next(error);
     }
@@ -31,11 +31,12 @@ export class categoryController {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
       const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
-  
+      const filter=isString(req.query.filter) ? req.query.filter : "";
       const { categories ,totalItems,totalPages,currentPage} = await this.categoryUseCase.findAllCategory(
         search,
         page,
-        limit
+        limit,
+        filter
       );
       return res.status(200).json({
         status: "success",
@@ -57,7 +58,7 @@ export class categoryController {
         is_block
       );
       return res.status(200).json({
-        status: "success",
+        success:true,
         message: `${
           category.is_block ? "Category Blocked" : "Category Unblocked"
         }`,
@@ -79,15 +80,16 @@ export class categoryController {
       );
       return res
         .status(200)
-        .json({ status: "success", message: "Category Updated", category });
+        .json({ success:true, message: "Category Updated", category });
     } catch (error) {
       next(error);
     }
   }
   async getUnblockedCategories(req:Request,res:Response,next:NextFunction){
     try {
+      console.log("hi")
       const categories=await this.categoryUseCase.getUnblockedCategories();
-      return res.status(200).json({status:"success",message:"Fetched All Categories",categories})
+      return res.status(200).json({success:true,message:"Fetched All Categories",categories})
     } catch (error) {
       next(error)
     }

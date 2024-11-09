@@ -1,4 +1,5 @@
-import { ObjectId } from "mongoose";
+
+import mongoose from "mongoose";
 import { Icategory } from "../category/category";
 
 export interface Itinerary {
@@ -8,7 +9,7 @@ export interface Itinerary {
   
   export interface Packages  {
     _id?:string
-    travel_agent_id?: ObjectId; 
+    travel_agent_id?:mongoose.Types.ObjectId
     package_name: string;
     category_id?: string|Icategory;  
     destinations: string[];

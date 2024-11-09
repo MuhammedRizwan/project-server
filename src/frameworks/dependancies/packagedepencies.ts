@@ -1,10 +1,10 @@
-import { MongoPackageRepository } from "../../adapters/repositories/packageRepository";
+import { PackageRepository } from "../../adapters/repositories/packageRepository";
 import { packageUseCase } from "../../application/usecases/package";
 import { CloudinaryService } from "../services/cloudinaryService";
 
 
 const Repositories={
-    MongoPackageRepository:new MongoPackageRepository()
+    PackageRepository:new PackageRepository()
 }
 const services={
     CloudinaryService:new CloudinaryService()

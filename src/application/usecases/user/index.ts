@@ -35,8 +35,8 @@ interface JwtService {
 
 interface Dependencies {
   Repositories: {
-    MongoUserRepository: UserRepository;
-    MongoOTPRepository: OTPRepository;
+    UserRepository: UserRepository;
+    OTPRepository: OTPRepository;
   };
   services: {
     EmailService: EmailService;
@@ -54,8 +54,8 @@ export class UserUseCase {
   private JwtService: JwtService;
 
   constructor(dependencies: Dependencies) {
-    this.userRepository = dependencies.Repositories.MongoUserRepository;
-    this.OTPRepository = dependencies.Repositories.MongoOTPRepository;
+    this.userRepository = dependencies.Repositories.UserRepository;
+    this.OTPRepository = dependencies.Repositories.OTPRepository;
     this.emailService = dependencies.services.EmailService;
     this.passwordService = dependencies.services.PasswordService;
     this.generateOtp = dependencies.services.GenerateOtp;
@@ -107,7 +107,7 @@ export class UserUseCase {
         user.password
       );
       if (!verifiedPassword) {
-        throw new CustomError("Invalid password", 401);
+        throw new CustomError("Invalid password", 403);
       }
       if (user.is_block) {
         throw new CustomError("user has been Blocked", 403);

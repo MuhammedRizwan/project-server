@@ -2,7 +2,7 @@ import { ObjectId } from "mongoose";
 import { IOTP } from "../../domain/entities/user/otp";
 import OTPModel from "../database/models/otpModel";
 
-export class MongoOTPRepository {
+export class OTPRepository {
   async createOTP(otpData: IOTP):Promise<IOTP>{
     const createOTP=await OTPModel.create(otpData)
     if(createOTP){

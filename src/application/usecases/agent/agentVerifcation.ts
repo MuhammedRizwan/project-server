@@ -1,5 +1,4 @@
-import { JwtPayload } from "jsonwebtoken";
-import { ObjectId } from "mongoose";
+
 import { IOTP } from "../../../domain/entities/user/otp";
 import { Iagent } from "../../../domain/entities/agent/agent";
 import { CustomError } from "../../../domain/errors/customError";
@@ -22,14 +21,14 @@ interface PasswordService {
 interface EmailService {
   sendVerificationEmail(email: string, otp: string): Promise<void>;
 }
-interface MongoAgentRepository {
+interface AgentRepository {
   findAgentByEmail(email: string): Promise<Iagent | null>;
   verifyAgent(email: string): Promise<Iagent | null>;
   changePassword(email: string, password: string): Promise<Iagent | null>;
   getAgent(userId: string): Promise<Iagent | null>;
 }
 
-interface MongoOTPRepository {
+interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
   findOTPbyEmail(email: string): Promise<IOTP | null>;
 }
@@ -42,23 +41,23 @@ interface Dependencies {
     PasswordService: PasswordService;
   };
   Repositories: {
-    MongoOTPRepository: MongoOTPRepository;
-    MongoAgentRepository: MongoAgentRepository;
+    OTPRepository: OTPRepository;
+    AgentRepository: AgentRepository;
   };
 }
 
 export class AgentVerification {
   private jwtService: JwtService;
-  private OTPRepository: MongoOTPRepository;
-  private agentRepository: MongoAgentRepository;
+  private OTPRepository: OTPRepository;
+  private agentRepository: AgentRepository;
   private generateOtp: GenerateOtp;
   private emailService: EmailService;
   private passwordService: PasswordService;
 
   constructor(dependencies: Dependencies) {
     this.jwtService = dependencies.Services.JwtService;
-    this.OTPRepository = dependencies.Repositories.MongoOTPRepository;
-    this.agentRepository = dependencies.Repositories.MongoAgentRepository;
+    this.OTPRepository = dependencies.Repositories.OTPRepository;
+    this.agentRepository = dependencies.Repositories.AgentRepository;
     this.generateOtp = dependencies.Services.GenerateOtp;
     this.emailService = dependencies.Services.EmailService;
     this.passwordService = dependencies.Services.PasswordService;

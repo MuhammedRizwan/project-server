@@ -12,6 +12,7 @@ import bookingRouter from "../booking/bookingRouter";
 import couponRouter from "../coupon/couponRouter";
 import walletRouter from "../wallet/walletRouter";
 import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
+import { userBlocked } from "../../../../adapters/middleware/blockMiddleware";
 
 const router = Router();
 
@@ -58,22 +59,22 @@ router.post(
 router.post('/googleLogin',(req:Request,res:Response,next:NextFunction)=>{
   controller.user.googleLogin(req,res,next)
 })
-router.get('/profile/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+router.get('/profile/:userId',jwtAuth,userBlocked,(req:Request,res:Response,next:NextFunction)=>{
   controller.user.getProfile(req,res,next)
 })
-router.put('/update-profile/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+router.put('/update-profile/:userId',jwtAuth,userBlocked,(req:Request,res:Response,next:NextFunction)=>{
   controller.user.updateProfile(req,res,next)
 })
-router.post('/validate-password/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+router.post('/validate-password/:userId',jwtAuth,userBlocked,(req:Request,res:Response,next:NextFunction)=>{
   controller.user.validatePassword(req,res,next)
 })
-router.put('/change-password/:userId',jwtAuth,(req:Request,res:Response,next:NextFunction)=>{
+router.put('/change-password/:userId',jwtAuth,userBlocked,(req:Request,res:Response,next:NextFunction)=>{
   controller.user.updatePassword(req,res,next)
 })
-router.use("/packages", packageRouter);
-router.use("/categories",categoryRouter);
-router.use("/booking",jwtAuth,bookingRouter);
-router.use("/coupon",jwtAuth,couponRouter);
-router.use("/wallet",jwtAuth,walletRouter);
+router.use("/packages",jwtAuth,userBlocked,packageRouter);
+router.use("/category",jwtAuth,userBlocked,categoryRouter);
+router.use("/booking",jwtAuth,userBlocked,bookingRouter);
+router.use("/coupon",jwtAuth,userBlocked,couponRouter);
+router.use("/wallet",jwtAuth,userBlocked,walletRouter);
 
 export default router;

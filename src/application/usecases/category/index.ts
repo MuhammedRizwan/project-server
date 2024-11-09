@@ -1,16 +1,16 @@
 import { Icategory } from "../../../domain/entities/category/category";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface MongoCategoryRepository {
+interface CategoryRepository {
   createCategory(category: Icategory): Promise<Icategory | null>;
   findByCategoryName(category_name: string): Promise<Icategory | null>;
   blockNUnblockCategory(
     id: string,
     is_block: boolean
   ): Promise<Icategory | null>;
-  findAllCategory(query:object,page:number,limit:number): Promise<Icategory[]>;
+  findAllCategory(query:object,page:number,limit:number,filterData:object): Promise<Icategory[]>;
   editCategory(id: string, catagory: Icategory): Promise<Icategory | null>;
-  countDocument(query:object): Promise<number>;
+  countDocument(query:object,filterData:object): Promise<number>;
   findCategoryById(id: string): Promise<Icategory | null>;
   getUnblockedCategories(): Promise<Icategory[] | null>;
 }
@@ -20,17 +20,17 @@ interface CloudinaryService {
 
 interface Dependencies {
   Repositories: {
-    MongoCategoryRepository: MongoCategoryRepository;
+    CategoryRepository: CategoryRepository;
   };
   Services: {
     CloudinaryService: CloudinaryService;
   };
 }
 export class CategoryUseCase {
-  private categoryRepository: MongoCategoryRepository;
+  private categoryRepository: CategoryRepository;
   private cloudinaryService: CloudinaryService;
   constructor(dependencies: Dependencies) {
-    this.categoryRepository = dependencies.Repositories.MongoCategoryRepository;
+    this.categoryRepository = dependencies.Repositories.CategoryRepository;
     this.cloudinaryService = dependencies.Services.CloudinaryService;
   }
   async createCategory(
@@ -68,16 +68,17 @@ export class CategoryUseCase {
       throw error;
     }
   }
-  async findAllCategory(search:string,page:number,limit:number) {
+  async findAllCategory(search:string,page:number,limit:number,filter:string) {
     try {
     const query = search
       ? { category_name: { $regex: search, $options: 'i' } } 
       : {};
-      const categories = await this.categoryRepository.findAllCategory(query,page,limit);
+      const filterData =filter === "all"? {}: { is_block: filter === "blocked" ? true : false };
+      const categories = await this.categoryRepository.findAllCategory(query,page,limit,filterData);
       if (!categories) {
         throw new CustomError("catagory Not Found", 404);
       }
-      const totalItems=await this.categoryRepository.countDocument(query);
+      const totalItems=await this.categoryRepository.countDocument(query,filterData);
       if(totalItems===0){
         throw new CustomError("catagory Not Found", 404);
       }
@@ -99,6 +100,10 @@ export class CategoryUseCase {
       const isExist = await this.categoryRepository.findCategoryById(id);
       if (!isExist) {
         throw new CustomError("catagory Not Found", 404);
+      }
+      const nameExit=await this.categoryRepository.findByCategoryName(catagory.category_name);
+      if(nameExit && nameExit?._id !=undefined && nameExit._id.toString()!==id){
+        throw new CustomError("catagory Already Exist", 409);
       }
       if(file.Document){
         catagory.image = await this.cloudinaryService.uploadImage(file.Document);

@@ -17,7 +17,7 @@ export class BookingController {
       const booking = await this.bookingUseCase.createBooking(req.body);
       return res
         .status(201)
-        .json({ status: "success", message: "Booking Created", booking });
+        .json({ success:true, message: "Booking Created", booking });
     } catch (error) {
       next(error);
     }
@@ -28,21 +28,23 @@ export class BookingController {
       const booking = await this.bookingUseCase.getBooking(bookingId);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched Booking", booking });
+        .json({ success:true, message: "Fetched Booking", booking });
     } catch (error) {
       next(error);
     }
   }
   async getAgentBookings(req: Request, res: Response, next: NextFunction) {
     try {
-      const { agentId } = req.params;
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
-      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 10;
-      const {bookingData,totalItems,totalPages,currentPage} = await this.bookingUseCase.getAgentBookings(agentId,search, page, limit);
+      const limit = isString(req.query.limit)
+        ? parseInt(req.query.limit, 10)
+        : 3;
+      const { agentId,packageId } = req.params;
+      const {bookingData,totalItems,totalPages,currentPage}= await this.bookingUseCase.getAgentBookings(agentId,packageId,search,page,limit);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched All Bookings",filterData:bookingData,totalItems,totalPages,currentPage });
+        .json({ success:true, message: "Fetched All Bookings",bookingData,totalItems,totalPages,currentPage });
     } catch (error) {
       next(error);
     }
@@ -51,7 +53,7 @@ export class BookingController {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
-      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 10;
+      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 8;
 
       const {bookingData,totalItems,totalPages,currentPage}= await this.bookingUseCase.getAdminBookings(search,
         page,
@@ -69,7 +71,7 @@ export class BookingController {
       const order = await this.bookingUseCase.createRazorpayOrder(amount);
       return res
         .status(200)
-        .json({ status: "success", message: "razorpay Created", order });
+        .json({ success:true, message: "razorpay Created", order });
     } catch (error) {
       next(error);
     }
@@ -84,7 +86,7 @@ export class BookingController {
       );
       return res
         .status(200)
-        .json({ status: "success", message: "payment verified", successpayment });
+        .json({ success:true, message: "payment verified", successpayment });
     } catch (error) {
       next(error);
     }
@@ -93,17 +95,40 @@ export class BookingController {
     try {
       const {userId}=req.params
       const travelHistory=await this.bookingUseCase.getTravelHistory(userId)
-      return res.status(200).json({status:true,message:"user travel history",travelHistory})
+      return res.status(200).json({success:true,message:"user travel history",travelHistory})
     } catch (error) {
       next(error)
     }
   }
   async cancelBooking(req:Request,res:Response,next:NextFunction){
     try {
-      console.log(req.params)
       const {bookingId}=req.params
-      const cancelBooking=await this.bookingUseCase.cancelBooking(bookingId)
-      return res.status(200).json({status:true,message:"booking cancelled",cancelBooking})
+      const {cancellation_reason}=req.body
+      const cancelBooking=await this.bookingUseCase.cancelBooking(bookingId,cancellation_reason)
+      return res.status(200).json({success:true,message:"booking canceled",cancelBooking})
+    } catch (error) {
+      next(error)
+    }
+  }
+  async changeStatus(req:Request,res:Response,next:NextFunction){
+    try {
+      console.log(req.body)
+      const {bookingId}=req.params
+      const {status,cancellation_reason}=req.body
+      const changeBookingstatus=await this.bookingUseCase.changeBookingStatus(bookingId,status,cancellation_reason)
+      console.log(changeBookingstatus)
+      return res.status(200).json({success:true,message:"booking status updated",changeBookingstatus})
+    } catch (error) {
+      next(error)
+    }
+  }
+  async changeTravelStatus(req:Request,res:Response,next:NextFunction){
+    try {
+      const {bookingId}=req.params
+      const {travel_status}=req.body
+      const changeTravelstatus=await this.bookingUseCase.changeTravelStatus(bookingId,travel_status)
+      console.log(changeTravelstatus)
+      return res.status(200).json({success:true,message:"booking status updated",changeTravelstatus})
     } catch (error) {
       next(error)
     }

@@ -15,7 +15,7 @@ router.get("/:bookingId", (req: Request, res: Response, next: NextFunction) =>
   controller.booking.getBooking(req, res, next)
 );
 router.get(
-  "/travel-agency/:agentId",
+  "/travel-agency/:agentId/:packageId",
   (req: Request, res: Response, next: NextFunction) =>
     controller.booking.getAgentBookings(req, res, next)
 );
@@ -34,5 +34,15 @@ router.patch(
   "/cancel/:bookingId",
   (req: Request, res: Response, next: NextFunction) =>
     controller.booking.cancelBooking(req, res, next)
+);
+router.patch(
+  "/travel-status/:bookingId",
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.booking.changeTravelStatus(req, res, next)
+);
+router.patch(
+  "/booking-status/:bookingId",
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.booking.changeStatus(req, res, next)
 );
 export default router;

@@ -34,7 +34,7 @@ export class agentController {
       );
       return res
         .status(201)
-        .json({ status: "success", message: "Agency Registered", agent });
+        .json({ success:true, message: "Agency Registered", agent });
     } catch (error) {
       return next(error);
     }
@@ -52,7 +52,7 @@ export class agentController {
             redirect: "/agent/verification",
           });
         }
-        return res.status(200).json({status:"success",message:"Agency Logged In", agent, accessToken,refreshToken });
+        return res.status(200).json({success:true,message:"Agency Logged In", agent, accessToken,refreshToken });
     } catch (error) {
       return next(error)
     }
@@ -72,7 +72,7 @@ export class agentController {
         agent.email
       );
       return res.status(200).json({
-        status: "success",
+        success:true,
         message: "OTP  Verified",
         agent: agentData,
       });
@@ -85,7 +85,7 @@ export class agentController {
     try {      
       const { email } = req.body;
       const OTPData = await this.AgentVerification.sendOTP(email);
-      return res.status(200).json({status:"success",message:"OTP Resend",OTPData});
+      return res.status(200).json({success:true,message:"OTP Resend",OTPData});
     } catch (error) {
       return next(error);
     }
@@ -98,7 +98,7 @@ export class agentController {
         email,
         password
       );
-      return res.status(200).json({status:"success",message:"Password Changed",agent});
+      return res.status(200).json({success:true,message:"Password Changed",agent});
     } catch (error) {
       return next(error);
     }

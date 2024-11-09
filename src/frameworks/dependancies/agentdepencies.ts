@@ -1,5 +1,5 @@
-import { MongoAgentRepository } from "../../adapters/repositories/agentRepository";
-import { MongoOTPRepository } from "../../adapters/repositories/otpRepositories";
+import { AgentRepository } from "../../adapters/repositories/agentRepository";
+import { OTPRepository } from "../../adapters/repositories/otpRepositories";
 import { AgentUseCase } from "../../application/usecases/agent";
 import { AgentVerification } from "../../application/usecases/agent/agentVerifcation";
 import { CloudinaryService } from "../services/cloudinaryService";
@@ -9,8 +9,8 @@ import { JwtService } from "../services/jwtService";
 import { PasswordService } from "../services/passwordService";
 
 const Repositories={
-MongoAgentRepository:new MongoAgentRepository(),
-MongoOTPRepository:new MongoOTPRepository()
+AgentRepository:new AgentRepository(),
+OTPRepository:new OTPRepository()
 }
 const Services={
     EmailService:new EmailService(),

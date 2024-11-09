@@ -1,10 +1,10 @@
-import { MongoCategoryRepository } from "../../adapters/repositories/categoryRepository";
+import { CategoryRepository } from "../../adapters/repositories/categoryRepository";
 import { CategoryUseCase } from "../../application/usecases/category";
 import { CloudinaryService } from "../services/cloudinaryService";
 
 
 const Repositories={
-    MongoCategoryRepository:new MongoCategoryRepository()
+    CategoryRepository:new CategoryRepository()
 }
 const Services={
     CloudinaryService:new CloudinaryService()

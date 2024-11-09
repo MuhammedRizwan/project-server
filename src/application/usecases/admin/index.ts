@@ -4,31 +4,33 @@ import { Iuser } from "../../../domain/entities/user/user";
 import { Iagent } from "../../../domain/entities/agent/agent";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface MongoAdminRepository {
+interface AdminRepository {
   changePassword(email: string, password: string): unknown;
   findAdminByEmail(email: string): Promise<Iadmin | null>;
   getAdmin(id: string): Promise<Iadmin | null>;
   addRefreshToken(id: string | undefined, refreshToken: string): Promise<void>;
 }
-interface MongoUserRepository {
+interface UserRepository {
   getAllUsersData(
     query: object,
     page: number,
-    limit: number
+    limit: number,
+    filterData:object
   ): Promise<Iuser[] | null>;
   changeUserStatus(id: ObjectId, is_block: boolean): Promise<Iuser | null>;
-  countUsers(query: object): Promise<number>;
+  countUsers(query: object,filterData:object): Promise<number>;
 }
-interface MongoAgentRepository {
+interface AgentRepository {
   getAllAgenciesData(
     query: object,
     page: number,
-    limit: number
+    limit: number,
+    filterData:object
   ): Promise<Iagent[] | null>;
   changeAgentStatus(id: ObjectId, is_block: boolean): Promise<Iagent | null>;
   getAgent(id: string): Promise<Iagent | null>;
   adminVerifyAgent(id: string, admin_verified: string): Promise<Iagent | null>;
-  countAgencies(query: object): Promise<number>;
+  countAgencies(query: object,filterData:object): Promise<number>;
 }
 interface EmailService {
   sendVerificationEmail(email: string, otp: string): Promise<void>;
@@ -44,9 +46,9 @@ interface JwtService {
 
 interface Dependencies {
   Repositories: {
-    MongoAdminRepository: MongoAdminRepository;
-    MongoUserRepository: MongoUserRepository;
-    MongoAgentRepository: MongoAgentRepository;
+    AdminRepository: AdminRepository;
+    UserRepository: UserRepository;
+    AgentRepository: AgentRepository;
   };
   Services: {
     EmailService: EmailService;
@@ -54,18 +56,18 @@ interface Dependencies {
   };
 }
 export class AdminUseCase {
-  private adminRepository: MongoAdminRepository;
+  private adminRepository: AdminRepository;
 
-  private userRepository: MongoUserRepository;
-  private agentRepository: MongoAgentRepository;
+  private userRepository: UserRepository;
+  private agentRepository: AgentRepository;
   private emailService: EmailService;
   private JwtService: JwtService;
 
   constructor(Dependencies: Dependencies) {
-    this.adminRepository = Dependencies.Repositories.MongoAdminRepository;
+    this.adminRepository = Dependencies.Repositories.AdminRepository;
 
-    this.agentRepository = Dependencies.Repositories.MongoAgentRepository;
-    this.userRepository = Dependencies.Repositories.MongoUserRepository;
+    this.agentRepository = Dependencies.Repositories.AgentRepository;
+    this.userRepository = Dependencies.Repositories.UserRepository;
     this.emailService = Dependencies.Services.EmailService;
     this.JwtService = Dependencies.Services.JwtService;
   }
@@ -77,7 +79,7 @@ export class AdminUseCase {
       }
       const verifiedPassword = password === admin.password;
       if (!verifiedPassword) {
-        throw new CustomError("Invalid password", 401);
+        throw new CustomError("Invalid password", 403);
       }
       const accessToken = this.JwtService.generateAccessToken(admin._id);
       if (!accessToken) {
@@ -129,21 +131,24 @@ export class AdminUseCase {
       throw new Error("Invalid refresh token");
     }
   }
-  async getAllUsers(search: string, page: number, limit: number) {
+  async getAllUsers(search: string, page: number, limit: number,filter:string) {
     try {
       
       const query = search
-        ? { category_name: { $regex: search, $options: "i" } }
+        ? { username: { $regex: search, $options: "i" } }
         : {};
+        const filterData =filter === "all"? {}: { is_block: filter === "blocked" ? true : false };
+
       const users = await this.userRepository.getAllUsersData(
         query,
         page,
-        limit
+        limit,
+        filterData
       );
       if (!users || users.length === 0) {
         throw new CustomError("No users found", 404);
       }
-      const totalItems = await this.userRepository.countUsers(query);
+      const totalItems = await this.userRepository.countUsers(query,filterData);
       if (totalItems === 0) {
         throw new CustomError("No users found", 404);
       }
@@ -168,20 +173,22 @@ export class AdminUseCase {
       throw error;
     }
   }
-  async getAllAgencies(search: string, page: number, limit: number) {
+  async getAllAgencies(search: string, page: number, limit: number,filter:string) {
     try {
       const query = search
-        ? { category_name: { $regex: search, $options: "i" } }
+        ? { agency_name: { $regex: search, $options: "i" } }
         : {};
+        const filterData =filter === "all"? {}: { is_block: filter === "blocked" ? true : false };
       const agencies = await this.agentRepository.getAllAgenciesData(
         query,
         page,
-        limit
+        limit,
+        filterData
       );
       if (!agencies || agencies.length === 0) {
         throw new CustomError("No agencies found", 404);
       }
-      const totalItems = await this.agentRepository.countAgencies(query);
+      const totalItems = await this.agentRepository.countAgencies(query,filterData);
       if (totalItems === 0) {
         throw new CustomError("No agencies found", 404);
       }

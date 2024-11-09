@@ -2,7 +2,7 @@ import { FilterQuery, ObjectId, Types } from "mongoose";
 import { Iagent } from "../../domain/entities/agent/agent";
 import agentModel from "../database/models/agentModel";
 
-export class MongoAgentRepository {
+export class AgentRepository {
   async createAgent(user: Iagent): Promise<Iagent> {
     const agentCreate = await agentModel.create(user);
     if (!agentCreate) {
@@ -40,10 +40,12 @@ export class MongoAgentRepository {
   async getAllAgenciesData(
     query: FilterQuery<Iagent>,
     page: number,
-    limit: number
+    limit: number,
+    filterData: object
   ): Promise<Iagent[] | null> {
+    const completedQuery = { ...query,...filterData };
     const agencies = await agentModel
-      .find(query)
+      .find(completedQuery)
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
@@ -88,7 +90,8 @@ export class MongoAgentRepository {
       { new: true }
     );
   }
-  async countAgencies(query: FilterQuery<Iagent>): Promise<number> {
-    return await agentModel.countDocuments(query);
+  async countAgencies(query: FilterQuery<Iagent>,filterData:object): Promise<number> {
+    const completedQuery = { ...query,...filterData };
+    return await agentModel.countDocuments(completedQuery);
   }
 }
