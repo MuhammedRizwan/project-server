@@ -133,4 +133,13 @@ export class BookingController {
       next(error)
     }
   }
+  async completedTravel(req:Request,res:Response,next:NextFunction){
+   try {
+    const {userId}=req.params
+    const travelHistory=await this.bookingUseCase.getCompletedTravel(userId)
+    return res.status(200).json({success:true,message:"user completed travel history",travelHistory})
+   } catch (error) {
+    next(error)
+   } 
+  }
 }

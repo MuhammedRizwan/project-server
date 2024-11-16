@@ -20,16 +20,14 @@ export class PackageController {
   }
   async createPackage(req: Request, res: Response, next: NextFunction) {
     try {
-      const { original_price, category, agentId } = req.body;
+      const { original_price,agentId } = req.body;
 
       const package_data: Packages = {
         ...req.body,
         travel_agent_id:agentId,
-        category_id: category[0]._id,
         offer_price: original_price,
         images: [],
       };
-console.log(package_data)
       const result = await this.packageUseCase.createPackage(
         package_data,
         req.files

@@ -7,6 +7,7 @@ import { EmailService } from "../services/emailService";
 import { PasswordService } from "../services/passwordService";
 import { GenerateOtp } from "../services/genarateOTP";
 import { JwtService } from "../services/jwtService";
+import { CloudinaryService } from "../services/cloudinaryService";
 
 const Repositories = {
     UserRepository: new UserRepository(), 
@@ -17,7 +18,8 @@ const services={
     EmailService:new EmailService(),
     PasswordService:new PasswordService(),
     GenerateOtp:new GenerateOtp(),
-    JwtService:new JwtService()
+    JwtService:new JwtService(),
+    CloudinaryService:new CloudinaryService()
 }
 
 

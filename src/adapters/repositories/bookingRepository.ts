@@ -5,6 +5,7 @@ import { Packages } from "../../domain/entities/package/package";
 import { Iuser } from "../../domain/entities/user/user";
 import bookingModel from "../database/models/bookingModel";
 import { CustomError } from "../../domain/errors/customError";
+import Review from "../../domain/entities/review/review";
 
 export class BookingRepository {
   async createBooking(booking: Booking): Promise<Booking | null> {
@@ -27,7 +28,7 @@ export class BookingRepository {
     }
   }
   async getAgentBooking(
-    query:FilterQuery<Booking>,
+    query: FilterQuery<Booking>,
     page: number,
     limit: number
   ): Promise<Booking[] | null> {
@@ -37,9 +38,7 @@ export class BookingRepository {
         .populate<{ user_id: Iuser }>("user_id")
         .populate<{ package_id: Packages }>("package_id")
         .skip((page - 1) * limit)
-        .limit(limit)
-
-       
+        .limit(limit);
 
       return booking.map((booking) => {
         const bookingData = booking.toObject() as unknown as Booking;
@@ -88,7 +87,10 @@ export class BookingRepository {
       .exec();
     return booking as Booking[] | [];
   }
-  async cancelBooking(bookingId: string,cancellation_reason:string): Promise<Booking | null> {
+  async cancelBooking(
+    bookingId: string,
+    cancellation_reason: string
+  ): Promise<Booking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
@@ -97,7 +99,7 @@ export class BookingRepository {
             payment_status: "refunded",
             booking_status: "canceled",
             travel_status: "canceled",
-            cancellation_reason
+            cancellation_reason,
           },
         },
         { new: true }
@@ -110,16 +112,16 @@ export class BookingRepository {
   async changeBookingStatus(
     bookingId: string,
     status: string,
-    cancellation_reason:string
+    cancellation_reason: string
   ): Promise<Booking | null> {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
-        {$set: {booking_status: status,cancellation_reason}},
+        { $set: { booking_status: status, cancellation_reason } },
         { new: true }
       );
-      if(!booking){
-        throw new CustomError("booking not found",404)
+      if (!booking) {
+        throw new CustomError("booking not found", 404);
       }
       return booking as unknown as Booking | null;
     } catch (error) {
@@ -133,13 +135,64 @@ export class BookingRepository {
     try {
       const booking = await bookingModel.findOneAndUpdate(
         { _id: bookingId },
-        {$set: {travel_status}},
+        { $set: { travel_status } },
         { new: true }
       );
-      if(!booking){
-        throw new CustomError("booking not found",404)
+      if (!booking) {
+        throw new CustomError("booking not found", 404);
       }
       return booking as unknown as Booking | null;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getCompletedTravel(userId: string): Promise<Booking[]> {
+    const booking = await bookingModel
+      .find({ user_id: userId, travel_status: "completed" })
+      .populate<{ package_id: Packages }>("package_id")
+      .populate<{ review_id: Review }>("review_id")
+      .exec();
+    return booking as Booking[] | [];
+  }
+  async addReview(
+    bookingId: string,
+    reviewId: string | undefined
+  ): Promise<Booking | null> {
+    try {
+      const booking = await bookingModel.findOneAndUpdate(
+        { _id: bookingId },
+        { $set: { review_id: reviewId } },
+        { new: true }
+      );
+      if (!booking) {
+        throw new CustomError("booking not found", 404);
+      }
+      const populatedBooking = await bookingModel
+        .findById(booking._id)
+        .populate<{ package_id: Packages }>("package_id")
+        .populate<{ review_id: Review }>("review_id")
+
+      return populatedBooking as unknown as Booking | null;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async deleteReview(bookingId: string): Promise<Booking | null> {
+    try {
+      const booking = await bookingModel.findOneAndUpdate(
+        { _id: bookingId },
+        { $unset: { review_id: "" } },
+        { new: true }
+      );
+      if (!booking) {
+        throw new CustomError("booking not found", 404);
+      }
+      const populatedBooking = await bookingModel
+        .findById(booking._id)
+        .populate<{ package_id: Packages }>("package_id")
+        .populate<{ review_id: Review }>("review_id")
+
+      return populatedBooking as unknown as Booking | null;
     } catch (error) {
       throw error;
     }

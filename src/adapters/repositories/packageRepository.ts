@@ -13,8 +13,6 @@ export class PackageRepository {
   async getPackage(id: string): Promise<Packages | null> {
     const packageData = await packageModel
       .findOne({ _id: id })
-      .populate<{ category_id: Icategory }>("category_id");
-
     if (!packageData) return null;
     return packageData as unknown as Packages;
   }

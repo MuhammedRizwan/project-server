@@ -137,6 +137,7 @@ export class packageUseCase {
       | Express.Multer.File[]
       | undefined
   ) {
+    packageData.offer_price=packageData.original_price
     const editedPackage = await this.packageRepository.editPackage(
       id,
       packageData

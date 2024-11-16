@@ -43,6 +43,7 @@ const bookingSchema = new Schema(
     start_date: { type: Date, required: true },
     coupon_id: { type: Schema.Types.ObjectId, ref: "Coupon" },
     cancellation_reason: { type: String },
+    review_id: { type: Schema.Types.ObjectId, ref: "Review" },
   },
   {
     timestamps: true,

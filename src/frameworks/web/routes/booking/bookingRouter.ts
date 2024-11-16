@@ -45,4 +45,9 @@ router.patch(
   (req: Request, res: Response, next: NextFunction) =>
     controller.booking.changeStatus(req, res, next)
 );
+router.get(
+  "/travel-completed/:userId",
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.booking.completedTravel(req, res, next)
+);
 export default router;

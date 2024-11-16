@@ -2,6 +2,7 @@ import { ObjectId } from "mongoose";
 import { Iuser } from "../user/user";
 import {Iagent} from "../agent/agent";
 import {Packages } from "../package/package";
+import Review from "../review/review";
 export interface Booking {
   _id?: ObjectId;
   user_id: string|Iuser;
@@ -20,6 +21,8 @@ export interface Booking {
   booking_status: "pending" | "confirmed" | "canceled";
   travel_status: "pending" | "on-going" | "completed"|"canceled";
   coupon_id?:string
-  start_date: string; // Use ISO string for date handling
-  booking_date: string; // ISO string for booking timestamp
+  start_date: string;
+  booking_date: string; 
+  review_id?: string|Review;
+  cancellation_reason?:string
 }

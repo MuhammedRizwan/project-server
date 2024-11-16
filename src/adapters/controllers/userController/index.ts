@@ -122,12 +122,7 @@ export class userController {
   }
   async googleLogin(req: Request, res: Response, next: NextFunction) {
     try {
-      const { user, accessToken, refreshToken } =
-        (await this.UserUseCase.googleLogin(req.body)) as {
-          user: Iuser;
-          accessToken: string;
-          refreshToken: string;
-        };
+      const { user, accessToken, refreshToken } =await this.UserUseCase.googleLogin(req.body)
       return res
         .status(200)
         .json({ success:true,message: "Logged in successfully", user, accessToken, refreshToken });
@@ -147,7 +142,7 @@ export class userController {
   async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const {userId}=req.params
-      const user=await this.UserUseCase.updateProfile(userId,req.body)
+      const user=await this.UserUseCase.updateProfile(userId,req.body,req.file)
       return res.status(200).json({success:true,message:"user profile updated", user });
       
     } catch (error) {
@@ -158,7 +153,6 @@ export class userController {
     try {
       const {userId} = req.params
       const user=await this.UserUseCase.validatePassword(userId,req.body.oldPassword)
-      console.log(user)
       return res.status(200).json({ success:true,message:"password validated", user });
     }catch(error){
       next(error)

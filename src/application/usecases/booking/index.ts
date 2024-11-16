@@ -1,4 +1,3 @@
-
 import { Booking } from "../../../domain/entities/booking/booking";
 import { Coupon } from "../../../domain/entities/coupon/coupon";
 import { Packages } from "../../../domain/entities/package/package";
@@ -21,7 +20,10 @@ interface BookingRepository {
   countDocument(query: object): Promise<number>;
   countDocumentAgent(agentId: string): Promise<number>;
   getTravelHistory(userId: string): Promise<Booking[] | null>;
-  cancelBooking(bookingId: string, cancellation_reason: string): Promise<Booking | null>;
+  cancelBooking(
+    bookingId: string,
+    cancellation_reason: string
+  ): Promise<Booking | null>;
   changeBookingStatus(
     bookingId: string,
     status: string,
@@ -29,7 +31,9 @@ interface BookingRepository {
   ): Promise<Booking | null>;
   changeTravelStatus(
     bookingId: string,
-    travel_status: string): Promise<Booking | null>;
+    travel_status: string
+  ): Promise<Booking | null>;
+  getCompletedTravel(userId: string): Promise<Booking[] | null>;
 }
 
 interface PackageRepository {
@@ -169,11 +173,21 @@ export class BookingUseCase {
       throw error;
     }
   }
-  async getAgentBookings(agentId: string, packageId: string,search:string,page:number,limit:number) {
+  async getAgentBookings(
+    agentId: string,
+    packageId: string,
+    search: string,
+    page: number,
+    limit: number
+  ) {
     try {
       const query = search
-        ? { category_name: { $regex: search, $options: "i" },travel_agent_id:agentId,package_id:packageId }
-        : {travel_agent_id:agentId,package_id:packageId };
+        ? {
+            category_name: { $regex: search, $options: "i" },
+            travel_agent_id: agentId,
+            package_id: packageId,
+          }
+        : { travel_agent_id: agentId, package_id: packageId };
       const bookingData = await this.bookingRepository.getAgentBooking(
         query,
         page,
@@ -202,7 +216,7 @@ export class BookingUseCase {
       const query = search
         ? { category_name: { $regex: search, $options: "i" } }
         : {};
-       
+
       const bookingData = await this.bookingRepository.getAdminBookings(
         query,
         page,
@@ -260,7 +274,10 @@ export class BookingUseCase {
       throw error;
     }
   }
-  async cancelBooking(bookingId: string,cancellation_reason:string): Promise<Booking | null> {
+  async cancelBooking(
+    bookingId: string,
+    cancellation_reason: string
+  ): Promise<Booking | null> {
     try {
       const bookingData = await this.bookingRepository.getBooking(bookingId);
       if (!bookingData) {
@@ -304,7 +321,8 @@ export class BookingUseCase {
         throw new CustomError("Invalid user ID", 400);
       }
       const cancelBooking = await this.bookingRepository.cancelBooking(
-        bookingId,cancellation_reason
+        bookingId,
+        cancellation_reason
       );
       if (!cancelBooking) {
         throw new CustomError("booking not found", 404);
@@ -317,23 +335,24 @@ export class BookingUseCase {
   async changeBookingStatus(
     bookingId: string,
     status: string,
-    cancellation_reason:string
+    cancellation_reason: string
   ): Promise<Booking | null> {
     try {
       const booking = await this.bookingRepository.getBooking(bookingId);
       if (!booking) {
         throw new CustomError("Booking not found", 404);
       }
-      if (booking.booking_status == 'canceled') {
+      if (booking.booking_status == "canceled") {
         throw new CustomError("Booking already canceled", 404);
       }
-      if (booking.travel_status == 'completed') {
+      if (booking.travel_status == "completed") {
         throw new CustomError("Booking already completed", 404);
       }
       const bookingData = await this.bookingRepository.changeBookingStatus(
         bookingId,
         status,
-        cancellation_reason);
+        cancellation_reason
+      );
       if (!bookingData) {
         throw new CustomError("Failed to update booking details", 404);
       }
@@ -343,15 +362,16 @@ export class BookingUseCase {
     }
   }
   async changeTravelStatus(
-    bookingId: string,travel_status:string
+    bookingId: string,
+    travel_status: string
   ): Promise<Booking | null> {
     try {
-      console.log(bookingId,travel_status,"travel status  ");
+      console.log(bookingId, travel_status, "travel status  ");
       const booking = await this.bookingRepository.getBooking(bookingId);
       if (!booking) {
         throw new CustomError("Booking not found", 404);
       }
-      if (booking.travel_status == 'completed') {
+      if (booking.travel_status == "completed") {
         throw new CustomError("Booking already completed", 404);
       }
       const bookingData = await this.bookingRepository.changeTravelStatus(
@@ -362,6 +382,17 @@ export class BookingUseCase {
         throw new CustomError("Failed to update booking details", 404);
       }
       return bookingData;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getCompletedTravel(userId: string) {
+    try {
+      const completedTravel=await this.bookingRepository.getCompletedTravel(userId)
+      if(!completedTravel){
+        throw new CustomError("couldn't find completed travel",500)
+      }
+      return completedTravel
     } catch (error) {
       throw error;
     }

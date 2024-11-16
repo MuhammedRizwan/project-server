@@ -2,7 +2,6 @@ import { Iuser } from "../../../domain/entities/user/user";
 import { IOTP } from "../../../domain/entities/user/otp";
 import { CustomError } from "../../../domain/errors/customError";
 
-
 interface UserRepository {
   createUser(user: Iuser): Promise<Iuser>;
   findUserByEmail(email: string): Promise<Iuser | null>;
@@ -32,7 +31,9 @@ interface JwtService {
   generateAccessToken(userId: string | undefined): string;
   generateRefreshToken(userId: string | undefined): string;
 }
-
+interface CloudinaryService {
+  uploadImage(file: Express.Multer.File): Promise<string>;
+}
 interface Dependencies {
   Repositories: {
     UserRepository: UserRepository;
@@ -43,6 +44,7 @@ interface Dependencies {
     PasswordService: PasswordService;
     GenerateOtp: GenerateOtp;
     JwtService: JwtService;
+    CloudinaryService: CloudinaryService;
   };
 }
 export class UserUseCase {
@@ -52,6 +54,7 @@ export class UserUseCase {
   private passwordService: PasswordService;
   private generateOtp: GenerateOtp;
   private JwtService: JwtService;
+  private CloudinaryService: CloudinaryService;
 
   constructor(dependencies: Dependencies) {
     this.userRepository = dependencies.Repositories.UserRepository;
@@ -60,6 +63,7 @@ export class UserUseCase {
     this.passwordService = dependencies.services.PasswordService;
     this.generateOtp = dependencies.services.GenerateOtp;
     this.JwtService = dependencies.services.JwtService;
+    this.CloudinaryService = dependencies.services.CloudinaryService;
   }
   async signupUser(userData: Iuser) {
     try {
@@ -143,38 +147,37 @@ export class UserUseCase {
         accessToken,
         refreshToken,
       };
-    } catch (error: any) {
+    } catch (error) {
       throw error;
     }
   }
   async googleLogin(googleUser: any) {
     try {
       console.log(googleUser);
-      const user = await this.userRepository.findUserByEmail(googleUser.email);
+      let user = await this.userRepository.findUserByEmail(googleUser.email);
       if (!user) {
         const userData = {
           username: googleUser.name,
           email: googleUser.email,
           password: googleUser.id,
           profile_pic: googleUser.picture,
+          google_authenticated: true,
           is_verified: true,
         };
-        const newUser = await this.userRepository.createUser(userData);
-        if (!newUser) {
+        user = await this.userRepository.createUser(userData);
+        if (!user) {
           throw new CustomError("something went wrong cannot signup user", 500);
         }
-        return newUser;
-      } else {
-        const accessToken = this.JwtService.generateAccessToken(user._id);
-        if (!accessToken) {
-          throw new CustomError("Couldn't generate token", 500);
-        }
-        const refreshToken = this.JwtService.generateRefreshToken(user._id);
-        if (!refreshToken) {
-          throw new CustomError("Couldn't generate token", 500);
-        }
-        return { user, accessToken, refreshToken };
       }
+      const accessToken = this.JwtService.generateAccessToken(user._id);
+      if (!accessToken) {
+        throw new CustomError("Couldn't generate token", 500);
+      }
+      const refreshToken = this.JwtService.generateRefreshToken(user._id);
+      if (!refreshToken) {
+        throw new CustomError("Couldn't generate token", 500);
+      }
+      return { user, accessToken, refreshToken };
     } catch (error) {
       throw error;
     }
@@ -190,8 +193,17 @@ export class UserUseCase {
       throw error;
     }
   }
-  async updateProfile(userId: string, userData: Iuser) {
+  async updateProfile(
+    userId: string,
+    userData: Iuser,
+    file: Express.Multer.File|undefined
+  ) {
     try {
+      if (file) {
+        userData.profile_picture = await this.CloudinaryService.uploadImage(
+          file
+        );
+      }
       const user = await this.userRepository.updateProfile(userId, userData);
       if (!user) {
         throw new CustomError("user not found", 404);
@@ -211,7 +223,6 @@ export class UserUseCase {
         password,
         user.password
       );
-      console.log(verifiedPassword,"+++++++++++++++++++++")
       if (!verifiedPassword) {
         throw new CustomError("Invalid password", 404);
       }
@@ -222,12 +233,14 @@ export class UserUseCase {
   }
   async updatePassword(userId: string, password: string) {
     try {
-      console.log(password,userId)
-      const HashedPssword=await this.passwordService.passwordHash(password)
+      const HashedPssword = await this.passwordService.passwordHash(password);
       if (!HashedPssword) {
         throw new CustomError("something went wrong", 500);
       }
-      const user = await this.userRepository.updatePassword(userId, HashedPssword);
+      const user = await this.userRepository.updatePassword(
+        userId,
+        HashedPssword
+      );
       if (!user) {
         throw new CustomError("user not found", 404);
       }

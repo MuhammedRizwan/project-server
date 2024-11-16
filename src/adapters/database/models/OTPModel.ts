@@ -1,4 +1,4 @@
-import mongoose, { model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const OTPSchema: Schema = new Schema({
   email: { type: String, required: true },

@@ -5,8 +5,11 @@ import { CustomError } from "../../../domain/errors/customError";
 interface AgentRepository {
   createAgent(agent: Iagent): Promise<Iagent>;
   findAgentByEmail(email: string): Promise<Iagent | null>;
-  addRefreshToken(id: string|undefined, refreshToken: string): Promise<void>;
+  addRefreshToken(id: string | undefined, refreshToken: string): Promise<void>;
   verifyAgent(email: string): Promise<Iagent | null>;
+  getAgent(agentId: string): Promise<Iagent | null>;
+  updateAgent(agentId: string, agentData: Iagent): Promise<Iagent | null>;
+  updatePassword(id: string, newPassword: string): Promise<Iagent | null>;
 }
 interface OTPRepository {
   createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
@@ -138,14 +141,14 @@ export class AgentUseCase {
     if (!agent.is_verified) {
       const verificationOtp = this.generateOtp.generate();
       if (!verificationOtp) {
-        throw new CustomError("couldn't genarate OTP",500);
+        throw new CustomError("couldn't genarate OTP", 500);
       }
       const createOTP = await this.OTPRepository.createOTP({
         email: agent.email,
         otp: verificationOtp,
       });
       if (!createOTP) {
-        throw new CustomError("OTP creation failed",500);
+        throw new CustomError("OTP creation failed", 500);
       }
       await this.emailService.sendVerificationEmail(
         agent.email,
@@ -153,24 +156,85 @@ export class AgentUseCase {
       );
     }
     if (agent.admin_verified == "reject") {
-      throw new CustomError("Agency were Rejected",400);
+      throw new CustomError("Agency were Rejected", 400);
     }
     const accessToken = this.JwtService.generateAccessToken(agent._id);
-    if(!accessToken){
-      throw new CustomError("couldn't genarate token",500)
+    if (!accessToken) {
+      throw new CustomError("couldn't genarate token", 500);
     }
     const refreshToken = this.JwtService.generateRefreshToken(agent._id);
-    if(!refreshToken){
-      throw new CustomError("couldn't genarate token",500)
+    if (!refreshToken) {
+      throw new CustomError("couldn't genarate token", 500);
     }
-     await this.agentRepository.addRefreshToken(
-      agent._id,
-      refreshToken
-    )
+    await this.agentRepository.addRefreshToken(agent._id, refreshToken);
     return {
       agent,
       accessToken,
       refreshToken,
     };
+  }
+  async getAgent(agentId: string) {
+    try {
+      const agent = await this.agentRepository.getAgent(agentId);
+      if (!agent) {
+        throw new CustomError("Agent not found", 404);
+      }
+      return agent;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async updateAgent(
+    agentId: string,
+    agentData: Iagent,
+    file:  Express.Multer.File | undefined
+  ) {
+    try {
+      const image = file
+        ? await this.CloudinaryService.uploadImage(file)
+        : null;
+      if (image) {
+        agentData.profile_picture = image;
+      }
+      const agent = await this.agentRepository.updateAgent(agentId, agentData);
+      if (!agent) {
+        throw new CustomError("Agent not found", 404);
+      }
+      return agent;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async validatePassword(agentId: string, password: string) {
+    try {
+      const agent = await this.agentRepository.getAgent(agentId);
+      if (!agent) {
+        throw new CustomError("Agent not found", 404);
+      }
+      const verifiedPassword = await this.passwordService.verifyPassword(
+        password,
+        agent.password
+      );
+      if (!verifiedPassword) {
+        throw new CustomError("Invalid password", 404);
+      }
+      return agent;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async updatePassword(agentId: string, newPassword: string) {
+    try {
+      const agent = await this.agentRepository.updatePassword(
+        agentId,
+        newPassword
+      );
+      if (!agent) {
+        throw new CustomError("Agent not found", 404);
+      }
+      return agent;
+    } catch (error) {
+      throw error;
+    }
   }
 }

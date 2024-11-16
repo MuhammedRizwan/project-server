@@ -20,7 +20,7 @@ const generatedSignature = (
 };
 
 export class RazorPay {
-  async createRazorpayOrder(amount: number): Promise<any> {
+  async createRazorpayOrder(amount: number){
     try {
       const order = await razorpay.orders.create({
         amount,

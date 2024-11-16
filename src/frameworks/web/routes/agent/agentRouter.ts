@@ -41,6 +41,16 @@ router.post(
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.changePassword(req, res, next)
 );
+router.get('/:agentId',jwtAuth,agentBlocked,(req:Request,res:Response,next:NextFunction)=>{
+  controller.agent.getAgent(req,res,next)
+})
+router.put('/update/:agentId',jwtAuth,agentBlocked,upload.single('profile_picture'),(req:Request,res:Response,next:NextFunction)=>{
+  controller.agent.updateAgent(req,res,next)
+})
+router.post('validate-password/:agentId',jwtAuth,agentBlocked,(req:Request,res:Response,next:NextFunction)=>
+controller.agent.validatePassword(req,res,next))
+router.patch('`/change-password/:agentId',jwtAuth,agentBlocked,(req:Request,res:Response,next:NextFunction)=>
+  controller.agent.updatePassword(req,res,next))
 router.use('/package',jwtAuth,agentBlocked,packageRouter);
 router.use('/category',jwtAuth,agentBlocked,categoryRouter);
 router.use('/booking',jwtAuth,agentBlocked,bookingRouter)

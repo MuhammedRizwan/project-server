@@ -94,4 +94,20 @@ export class AgentRepository {
     const completedQuery = { ...query,...filterData };
     return await agentModel.countDocuments(completedQuery);
   }
+  async updateAgent(id: string, agent: Iagent): Promise<Iagent | null> {
+    const updatedAgent: Iagent | null = await agentModel.findOneAndUpdate(
+      { _id: id },
+      { $set: agent },
+      { new: true }
+    );
+    return updatedAgent;
+  }
+  async updatePassword(id: string, newPassword: string): Promise<Iagent | null> {
+    const updatedAgent: Iagent | null = await agentModel.findOneAndUpdate(
+      { _id: id },
+      { $set: { password: newPassword } },
+      { new: true }
+    );
+    return updatedAgent;
+  }
 }

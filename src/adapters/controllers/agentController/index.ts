@@ -115,4 +115,41 @@ export class agentController {
       return res.status(400).json({ error: err.message });
     }
   }
+  async getAgent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {agentId}=req.params
+      const agent = await this.AgentUseCase.getAgent(agentId);
+      return res.status(200).json({success:true,message:"Fetched Agent Data", agent });
+    } catch (error) {
+      next(error)
+    }
+  }
+  async updateAgent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {agentId}=req.params
+      const file = req.file as Express.Multer.File;
+      const agent = await this.AgentUseCase.updateAgent(agentId,req.body,file);
+      return res.status(200).json({success:true,message:"Updated Agent Data", agent });
+    } catch (error) {
+      next(error)
+    }
+  }
+  async validatePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {agentId}=req.params
+      const agent=await this.AgentUseCase.validatePassword(agentId,req.body.oldPassword)
+      return res.status(200).json({success:true,message:"password validated", agent });
+    } catch (error) {
+      next(error)
+    }
+  }
+  async updatePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {agentId}=req.params
+      const agent=await this.AgentUseCase.updatePassword(agentId,req.body.newPassword)
+      return res.status(200).json({success:true,message:"password updated", agent });
+    } catch (error) {
+      next(error)
+    }
+  }
 }
