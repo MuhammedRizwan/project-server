@@ -1,3 +1,4 @@
+import { Orders } from "razorpay/dist/types/orders";
 import { Booking } from "../../../domain/entities/booking/booking";
 import { Coupon } from "../../../domain/entities/coupon/coupon";
 import { Packages } from "../../../domain/entities/package/package";
@@ -54,7 +55,7 @@ interface WalletRepository {
   ): Promise<Wallet | null>;
 }
 interface RazorPay {
-  createRazorpayOrder(amount: number): Promise<any>;
+  createRazorpayOrder(amount: number): Promise<Orders.RazorpayOrder>;
   verifyRazorpayOrder(
     orderId: string,
     razorpayPaymentId: string,
@@ -240,7 +241,7 @@ export class BookingUseCase {
     }
   }
 
-  async createRazorpayOrder(amount: number): Promise<any> {
+  async createRazorpayOrder(amount: number): Promise<Orders.RazorpayOrder> {
     try {
       return await this.razorPayService.createRazorpayOrder(amount);
     } catch (error) {

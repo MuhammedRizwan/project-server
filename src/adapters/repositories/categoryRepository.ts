@@ -29,7 +29,7 @@ export class CategoryRepository {
 
   async findAllCategory(query: FilterQuery<Icategory>, page: number, limit: number,filterData:object): Promise<Icategory[]> {
     const completedQuery = { ...query, ...filterData };
-    const categories = await categoryModel.find(completedQuery).lean().skip((page - 1) * limit).limit(limit);
+    const categories = await categoryModel.find(completedQuery).lean().skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
     return categories.map((category) => ({ ...category, _id: category._id.toString() }));
   }
 
@@ -48,7 +48,7 @@ export class CategoryRepository {
     return updatedCategory;
   }
   async getUnblockedCategories(): Promise<Icategory[] | null> {
-    const categories = await categoryModel.find({is_block: false}).lean();
+    const categories = await categoryModel.find({is_block: false}).lean().sort({ createdAt: -1 });
     return categories.map((category) => ({ ...category, _id: category._id?.toString() }));
   }
 }

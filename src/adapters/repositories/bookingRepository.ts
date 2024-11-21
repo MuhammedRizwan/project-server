@@ -38,8 +38,8 @@ export class BookingRepository {
         .populate<{ user_id: Iuser }>("user_id")
         .populate<{ package_id: Packages }>("package_id")
         .skip((page - 1) * limit)
-        .limit(limit);
-
+        .limit(limit)
+        .sort({ createdAt: -1 });
       return booking.map((booking) => {
         const bookingData = booking.toObject() as unknown as Booking;
         return bookingData;
@@ -62,7 +62,7 @@ export class BookingRepository {
         .populate<{ travel_agent_id: Iagent }>("travel_agent_id")
         .skip((page - 1) * limit)
         .limit(limit)
-        .exec();
+        .sort({ createdAt: -1 });
       return bookings.map((booking) => {
         const bookingData = booking.toObject() as unknown as Booking;
         return bookingData;
@@ -84,7 +84,7 @@ export class BookingRepository {
       .populate<{ user_id: Iuser }>("user_id")
       .populate<{ package_id: Packages }>("package_id")
       .populate<{ travel_agent_id: Iagent }>("travel_agent_id")
-      .exec();
+      .sort({ createdAt: -1 });
     return booking as Booking[] | [];
   }
   async cancelBooking(
@@ -151,7 +151,7 @@ export class BookingRepository {
       .find({ user_id: userId, travel_status: "completed" })
       .populate<{ package_id: Packages }>("package_id")
       .populate<{ review_id: Review }>("review_id")
-      .exec();
+      .sort({ createdAt: -1 });
     return booking as Booking[] | [];
   }
   async addReview(
@@ -170,7 +170,7 @@ export class BookingRepository {
       const populatedBooking = await bookingModel
         .findById(booking._id)
         .populate<{ package_id: Packages }>("package_id")
-        .populate<{ review_id: Review }>("review_id")
+        .populate<{ review_id: Review }>("review_id");
 
       return populatedBooking as unknown as Booking | null;
     } catch (error) {
@@ -190,7 +190,7 @@ export class BookingRepository {
       const populatedBooking = await bookingModel
         .findById(booking._id)
         .populate<{ package_id: Packages }>("package_id")
-        .populate<{ review_id: Review }>("review_id")
+        .populate<{ review_id: Review }>("review_id");
 
       return populatedBooking as unknown as Booking | null;
     } catch (error) {

@@ -65,7 +65,7 @@ export class UserRepository {
     const users = await userModel
       .find(completeQuery)
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit).sort({ createdAt: -1 });
     return users.map((user) => {
       const userData: Iuser = {
         ...(user.toObject() as unknown as Iuser),

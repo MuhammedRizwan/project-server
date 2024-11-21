@@ -2,12 +2,14 @@ import { model, Schema } from "mongoose";
 
 const offerSchema = new Schema(
   {
+    agent_id: { type: Schema.Types.ObjectId, ref: "Agent", required: true },
     offer_name: { type: String, required: true },
     description: { type: String, required: true },
     package_id: [{ type: Schema.Types.ObjectId, ref: "Package" }],
-    Percent: { type: Number, required: true },
-    max_discount: { type: Number, required: true },
-    is_active: { type: Boolean, default: true },
+    image: { type: String, required: true },
+    percentage: { type: Number, required: true },
+    max_offer: { type: Number, required: true },
+    is_active: { type: Boolean,required: true },
     valid_from: { type: Date, required: true },
     valid_upto: { type: Date, required: true },
   },

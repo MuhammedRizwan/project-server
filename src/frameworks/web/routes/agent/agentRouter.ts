@@ -3,7 +3,8 @@ import { agentController } from "../../../../adapters/controllers/agentControlle
 import AgentDepencies from "../../../dependancies/agentdepencies";
 import packageRouter from "../package/packageRouter";
 import categoryRouter from "../category/categoryRouter";
-import bookingRouter from "../booking/bookingRouter"
+import bookingRouter from "../booking/bookingRouter";
+import offerRouter from "../offer/offerRouter";
 
 import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
@@ -41,17 +42,39 @@ router.post(
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.changePassword(req, res, next)
 );
-router.get('/:agentId',jwtAuth,agentBlocked,(req:Request,res:Response,next:NextFunction)=>{
-  controller.agent.getAgent(req,res,next)
-})
-router.put('/update/:agentId',jwtAuth,agentBlocked,upload.single('profile_picture'),(req:Request,res:Response,next:NextFunction)=>{
-  controller.agent.updateAgent(req,res,next)
-})
-router.post('validate-password/:agentId',jwtAuth,agentBlocked,(req:Request,res:Response,next:NextFunction)=>
-controller.agent.validatePassword(req,res,next))
-router.patch('`/change-password/:agentId',jwtAuth,agentBlocked,(req:Request,res:Response,next:NextFunction)=>
-  controller.agent.updatePassword(req,res,next))
-router.use('/package',jwtAuth,agentBlocked,packageRouter);
-router.use('/category',jwtAuth,agentBlocked,categoryRouter);
-router.use('/booking',jwtAuth,agentBlocked,bookingRouter)
+router.get(
+  "/:agentId",
+  jwtAuth,
+  agentBlocked,
+  (req: Request, res: Response, next: NextFunction) => {
+    controller.agent.getAgent(req, res, next);
+  }
+);
+router.put(
+  "/update/:agentId",
+  jwtAuth,
+  agentBlocked,
+  upload.single("profile_picture"),
+  (req: Request, res: Response, next: NextFunction) => {
+    controller.agent.updateAgent(req, res, next);
+  }
+);
+router.post(
+  "validate-password/:agentId",
+  jwtAuth,
+  agentBlocked,
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.agent.validatePassword(req, res, next)
+);
+router.patch(
+  "`/change-password/:agentId",
+  jwtAuth,
+  agentBlocked,
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.agent.updatePassword(req, res, next)
+);
+router.use("/package", jwtAuth, agentBlocked, packageRouter);
+router.use("/category", jwtAuth, agentBlocked, categoryRouter);
+router.use("/booking", jwtAuth, agentBlocked, bookingRouter);
+router.use("/offer", jwtAuth, agentBlocked, offerRouter);
 export default router;

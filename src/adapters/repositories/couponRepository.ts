@@ -14,7 +14,7 @@ export class CouponRepository {
     try {
       const completedQuery={...query,...filterData}
       console.log(filterData)
-      const coupons = await couponModel.find(completedQuery).skip((page - 1) * limit).limit(limit);
+      const coupons = await couponModel.find(completedQuery).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
       if (!coupons) {
         throw new CustomError("Coupons not found", 404);
       }

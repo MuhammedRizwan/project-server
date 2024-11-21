@@ -48,7 +48,7 @@ export class AgentRepository {
       .find(completedQuery)
       .skip((page - 1) * limit)
       .limit(limit)
-      .lean();
+      .lean().sort({ createdAt: -1 });
     if (agencies) {
       return agencies.map((agency) => ({
         ...agency,

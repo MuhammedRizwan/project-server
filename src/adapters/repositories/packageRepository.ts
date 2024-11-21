@@ -11,16 +11,23 @@ export class PackageRepository {
   }
 
   async getPackage(id: string): Promise<Packages | null> {
-    const packageData = await packageModel
-      .findOne({ _id: id })
+    const packageData = await packageModel.findOne({ _id: id });
     if (!packageData) return null;
     return packageData as unknown as Packages;
   }
 
-  async getAllPackages(query: FilterQuery<Packages>, page: number, limit: number){
-    console.log(query,"query")
+  async getAllPackages(
+    query: FilterQuery<Packages>,
+    page: number,
+    limit: number
+  ) {
+    console.log(query, "query");
     const completedQuery = { ...query, is_block: false };
-    const packages= await packageModel.find(completedQuery).lean().skip((page - 1) * limit).limit(limit); 
+    const packages = await packageModel
+      .find(completedQuery)
+      .lean()
+      .skip((page - 1) * limit)
+      .limit(limit);
     return packages;
   }
   async editPackage(
@@ -56,10 +63,11 @@ export class PackageRepository {
     const completedQuery = { travel_agent_id: agentId, ...query };
     const Packages = await packageModel
       .find(completedQuery)
-      .lean() 
+      .lean()
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate<{ category_id: Icategory }>("category_id");
+      .populate<{ category_id: Icategory }>("category_id")
+      .sort({ createdAt: -1 });
     return Packages;
   }
   async getsimilarPackages(offer_price: number): Promise<Packages[] | null> {
@@ -77,5 +85,22 @@ export class PackageRepository {
   async packageCount(query: FilterQuery<Packages>): Promise<number> {
     const totalItems = await packageModel.countDocuments(query);
     return totalItems;
+  }
+  async addofferPackage(agentId: string): Promise<Packages[] | null> {
+    try {
+      const packages: Packages[] | null = await packageModel.find({
+        travel_agent_id: agentId,
+      });
+      return packages;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async updateOfferPrice(packageId:string,offerPrice:number):Promise<void>{
+    try {
+      const updateOffer=await packageModel.updateOne({_id:packageId},{$set:{offer_price:offerPrice}})
+    } catch (error) {
+      throw error
+    }
   }
 }

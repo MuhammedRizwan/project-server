@@ -2,7 +2,6 @@ import walletModel from "../database/models/walletModel";
 import Wallet from "../../domain/entities/wallet/wallet";
 import { CustomError } from "../../domain/errors/customError";
 
-
 interface Transaction {
   amount: number;
   transactionType: "credit" | "debit";
@@ -30,7 +29,7 @@ export class WalletRepository {
         reason,
       };
       const updatedWallet = await walletModel.findOneAndUpdate(
-        { user_id:userId },
+        { user_id: userId },
         {
           $inc: { walletBalance: amount },
           $push: { transaction: newTransaction },
@@ -39,10 +38,14 @@ export class WalletRepository {
       );
 
       if (!updatedWallet) {
-        throw new CustomError("Wallet not found for the given user",404);
+        throw new CustomError("Wallet not found for the given user", 404);
       }
 
-      return {...updatedWallet,_id:updatedWallet._id.toString(),user_id:updatedWallet.user_id.toString()};
+      return {
+        ...updatedWallet,
+        _id: updatedWallet._id.toString(),
+        user_id: updatedWallet.user_id.toString(),
+      };
     } catch (error) {
       console.error("Failed to refund wallet:", error);
       throw error;
