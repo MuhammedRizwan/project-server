@@ -1,5 +1,6 @@
 import { Server } from 'http'
 import configKeys from '../../config'
+import "../cron/sheduleTask"
 
 const serverConfig = (server: Server) => {
     const startServer = () => {

@@ -12,6 +12,7 @@ import bookingRouter from "../booking/bookingRouter";
 import couponRouter from "../coupon/couponRouter";
 import walletRouter from "../wallet/walletRouter";
 import reviewRouter from "../review/reviewRouter";
+import postRouter from "../post/postRouter";
 import jwtAuth from "../../../../adapters/middleware/jwtAuthMiddleware";
 import { userBlocked } from "../../../../adapters/middleware/blockMiddleware";
 import multer from "multer";
@@ -80,5 +81,6 @@ router.use("/booking",jwtAuth,userBlocked,bookingRouter);
 router.use("/coupon",jwtAuth,userBlocked,couponRouter);
 router.use("/wallet",jwtAuth,userBlocked,walletRouter);
 router.use("/review",jwtAuth,userBlocked,reviewRouter);
+router.use("/post",jwtAuth,userBlocked,postRouter);
 
 export default router;
