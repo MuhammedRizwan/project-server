@@ -1,7 +1,7 @@
 import { FilterQuery } from "mongoose";
 import { Icategory } from "../../domain/entities/category/category";
 import { Packages } from "../../domain/entities/package/package";
-import packageModel from "../database/models/packageModel";
+import packageModel from "../database/models/package.model";
 
 export class PackageRepository {
   async createPackage(package_data: Packages): Promise<Packages | null> {

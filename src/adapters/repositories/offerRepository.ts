@@ -1,6 +1,6 @@
 import Offer from "../../domain/entities/offer/offer";
 import { CustomError } from "../../domain/errors/customError";
-import offerModel from "../database/models/offerModel";
+import offerModel from "../database/models/offer.model";
 
 export class OfferRepository {
   async getAllOffers(

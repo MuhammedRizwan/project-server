@@ -1,5 +1,5 @@
 import Post from "../../domain/entities/post/post";
-import postModel from "../database/models/postModel";
+import postModel from "../database/models/post.model";
 
 export class PostRepository {
   async getAllPost(): Promise<Post[]> {
