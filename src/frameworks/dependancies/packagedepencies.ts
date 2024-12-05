@@ -1,4 +1,4 @@
-import { PackageRepository } from "../../adapters/repositories/packageRepository";
+import { PackageRepository } from "../../adapters/repositories/package.repository";
 import { packageUseCase } from "../../application/usecases/package";
 import { CloudinaryService } from "../services/cloudinaryService";
 

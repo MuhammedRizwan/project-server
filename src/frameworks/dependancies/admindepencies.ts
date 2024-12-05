@@ -1,7 +1,7 @@
-import { AdminRepository } from "../../adapters/repositories/adminRepository";
-import { AgentRepository } from "../../adapters/repositories/agentRepository";
-import { OTPRepository } from "../../adapters/repositories/otpRepositories";
-import { UserRepository } from "../../adapters/repositories/userRepositories";
+import { AdminRepository } from "../../adapters/repositories/admin.repository";
+import { AgentRepository } from "../../adapters/repositories/agent.repository";
+import { OTPRepository } from "../../adapters/repositories/otp.repositories";
+import { UserRepository } from "../../adapters/repositories/user.repositories";
 import { AdminUseCase } from "../../application/usecases/admin";
 import { EmailService } from "../services/emailService";
 import { GenerateOtp } from "../services/genarateOTP";

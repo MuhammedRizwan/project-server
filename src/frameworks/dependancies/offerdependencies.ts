@@ -1,5 +1,5 @@
-import { OfferRepository } from "../../adapters/repositories/offerRepository";
-import { PackageRepository } from "../../adapters/repositories/packageRepository";
+import { OfferRepository } from "../../adapters/repositories/offer.repository";
+import { PackageRepository } from "../../adapters/repositories/package.repository";
 import { OfferUseCase } from "../../application/usecases/offer";
 import { CloudinaryService } from "../services/cloudinaryService";
 

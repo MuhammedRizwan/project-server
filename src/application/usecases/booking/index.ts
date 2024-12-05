@@ -265,7 +265,7 @@ export class BookingUseCase {
   }
   async getTravelHistory(userId: string): Promise<Booking[]> {
     try {
-      console.log(userId);
+
       const booking = await this.bookingRepository.getTravelHistory(userId);
       if (!booking || booking.length === 0) {
         throw new CustomError("booking not found", 404);
@@ -367,7 +367,6 @@ export class BookingUseCase {
     travel_status: string
   ): Promise<Booking | null> {
     try {
-      console.log(bookingId, travel_status, "travel status  ");
       const booking = await this.bookingRepository.getBooking(bookingId);
       if (!booking) {
         throw new CustomError("Booking not found", 404);

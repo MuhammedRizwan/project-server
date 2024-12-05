@@ -1,4 +1,4 @@
-import { CategoryRepository } from "../../adapters/repositories/categoryRepository";
+import { CategoryRepository } from "../../adapters/repositories/category.repository";
 import { CategoryUseCase } from "../../application/usecases/category";
 import { CloudinaryService } from "../services/cloudinaryService";
 

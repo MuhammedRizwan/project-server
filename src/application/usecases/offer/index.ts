@@ -195,7 +195,7 @@ export class OfferUseCase {
       for (const offer of offerToday) {
         const { percentage, max_offer, package_id: packages } = offer;
         for (const pkg of packages as Packages[]) {
-          console.log(`Processing offer: ${pkg}`);
+    
           const updatedPrice = pkg.original_price;
           const discount = (updatedPrice * percentage) / 100;
           const maxAllowedDiscount = Math.min(discount, max_offer);
@@ -210,7 +210,6 @@ export class OfferUseCase {
       for (const offer of offerExpired) {
         const { package_id: packages } = offer;
         for (const pkg of packages as Packages[]) {
-          console.log(`Processing offer: ${pkg}`);
           const offerPrice = pkg.original_price;
           await this.PackageRepository.updateOfferPrice(pkg._id, offerPrice);
         }

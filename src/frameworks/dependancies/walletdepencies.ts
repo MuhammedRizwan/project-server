@@ -1,4 +1,4 @@
-import { WalletRepository } from "../../adapters/repositories/walletRepository";
+import { WalletRepository } from "../../adapters/repositories/wallet.repository";
 import { WalletUseCase } from "../../application/usecases/wallet";
 
 

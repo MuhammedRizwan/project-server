@@ -1,5 +1,5 @@
-import { AgentRepository } from "../../adapters/repositories/agentRepository";
-import { OTPRepository } from "../../adapters/repositories/otpRepositories";
+import { AgentRepository } from "../../adapters/repositories/agent.repository";
+import { OTPRepository } from "../../adapters/repositories/otp.repositories";
 import { AgentUseCase } from "../../application/usecases/agent";
 import { AgentVerification } from "../../application/usecases/agent/agentVerifcation";
 import { CloudinaryService } from "../services/cloudinaryService";

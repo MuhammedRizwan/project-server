@@ -26,7 +26,8 @@ interface Dependencies {
     CloudinaryService: CloudinaryService;
   };
 }
-export class CategoryUseCase {
+export class 
+CategoryUseCase {
   private categoryRepository: CategoryRepository;
   private cloudinaryService: CloudinaryService;
   constructor(dependencies: Dependencies) {

@@ -1,8 +1,8 @@
 import { UserUseCase } from "../../application/usecases/user";
 import { Verification } from "../../application/usecases/user/userVerification";
-import { UserRepository } from "../../adapters/repositories/userRepositories";
-import { OTPRepository } from "../../adapters/repositories/otpRepositories";
-import { WalletRepository } from "../../adapters/repositories/walletRepository";
+import { UserRepository } from "../../adapters/repositories/user.repositories";
+import { OTPRepository } from "../../adapters/repositories/otp.repositories";
+import { WalletRepository } from "../../adapters/repositories/wallet.repository";
 import { EmailService } from "../services/emailService";
 import { PasswordService } from "../services/passwordService";
 import { GenerateOtp } from "../services/genarateOTP";

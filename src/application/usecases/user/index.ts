@@ -153,7 +153,6 @@ export class UserUseCase {
   }
   async googleLogin(googleUser: any) {
     try {
-      console.log(googleUser);
       let user = await this.userRepository.findUserByEmail(googleUser.email);
       if (!user) {
         const userData = {

@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { OfferController } from "../../adapters/controllers/offerController";
+import { OfferController } from "../../adapters/controllers/offer.controller";
 import OfferDepencies from "../dependancies/offerdependencies";
 
 const offerExecution=new OfferController(OfferDepencies)

@@ -1,5 +1,5 @@
-import { BookingRepository } from "../../adapters/repositories/bookingRepository";
-import { ReviewRepository } from "../../adapters/repositories/reviewRepository";
+import { BookingRepository } from "../../adapters/repositories/booking.repository";
+import { ReviewRepository } from "../../adapters/repositories/review.repository";
 import { ReviewUseCase } from "../../application/usecases/review";
 
 const Repositories = {

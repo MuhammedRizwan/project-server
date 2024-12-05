@@ -3,7 +3,8 @@ import cors from 'cors'
 
 import cookieParser from 'cookie-parser'
 import router from './routes/router';
-import { errorHandler } from '../../adapters/middleware/errorHandler';
+import { errorHandler } from '../../adapters/middleware/errorHandler.middleware';
+
 
 const expressConfig = (app: Application) => {
     app.use(cors())

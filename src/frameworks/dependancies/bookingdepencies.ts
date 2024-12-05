@@ -1,10 +1,10 @@
 
-import { BookingRepository } from "../../adapters/repositories/bookingRepository";
-import { PackageRepository } from "../../adapters/repositories/packageRepository";
+import { BookingRepository } from "../../adapters/repositories/booking.repository";
+import { PackageRepository } from "../../adapters/repositories/package.repository";
 import { BookingUseCase } from "../../application/usecases/booking";
 import { RazorPay } from "../services/razorpayService";
-import { CouponRepository } from "../../adapters/repositories/couponRepository";
-import { WalletRepository } from "../../adapters/repositories/walletRepository";
+import { CouponRepository } from "../../adapters/repositories/coupon.repository";
+import { WalletRepository } from "../../adapters/repositories/wallet.repository";
 
 const Repositories={
     BookingRepository:new BookingRepository(),

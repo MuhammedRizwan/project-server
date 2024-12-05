@@ -1,4 +1,4 @@
-import { CouponRepository } from "../../adapters/repositories/couponRepository";
+import { CouponRepository } from "../../adapters/repositories/coupon.repository";
 import { CouponUseCase } from "../../application/usecases/coupon/intex";
 
 const Repositories = {

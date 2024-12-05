@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import configKeys from '../../config';
-import { ObjectId } from 'mongoose';
 
 
 const JWT_SECRET = configKeys.JWT_SECRET;
