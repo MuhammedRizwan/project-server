@@ -35,9 +35,7 @@ export class OfferRepository {
   async countDocument(agentId:string,query: object, filterData: object): Promise<number> {
     try {
       const completedQuery = {agent_id:agentId, ...query, ...filterData };
-      console.log(completedQuery)
       const count = await offerModel.countDocuments(completedQuery);
-      console.log(count)
       return count;
     } catch (error) {
       throw error;

@@ -6,6 +6,7 @@ interface ChatRepository {
     roomId: string,
     senderId: string,
     message: string,
+    message_time:Date,
     message_type: string,
   ): Promise<Message>;
   getMessagesByRoom(roomId: string): Promise<Chat>;
@@ -28,9 +29,9 @@ export class ChatUseCase {
     this.chatRepository = dependencies.Repositories.ChatRepository;
     this.cloudinaryService = dependencies.Services.CloudinaryService;
   }
-  async saveMessage( roomId: string, senderId: string, message: string,message_type: string) {
+  async saveMessage( roomId: string, senderId: string, message: string,message_time:Date,message_type: string) {
     try {
-        const savedMessage = await this.chatRepository.saveMessage( roomId, senderId, message,message_type );
+        const savedMessage = await this.chatRepository.saveMessage( roomId, senderId, message,message_time,message_type );
         if(!savedMessage){
             throw new CustomError("message not saved", 500)
         }

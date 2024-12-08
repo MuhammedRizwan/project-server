@@ -60,7 +60,6 @@ export class UserRepository {
     limit: number,
     filterData: object
   ): Promise<Iuser[] | null> {
-    console.log(filterData);
     const completeQuery = { ...query, ...filterData };
     const users = await userModel
       .find(completeQuery)

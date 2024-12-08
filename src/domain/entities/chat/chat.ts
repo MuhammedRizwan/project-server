@@ -4,7 +4,7 @@ export default interface Chat {
     _id:string
     participants: string[]|Iuser[];
     messages: string[]|Message[];
-    lastMessage:string; 
+    lastMessage:string|Message; 
   }
   export interface Message {
     _id:string

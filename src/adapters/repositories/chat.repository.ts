@@ -1,3 +1,4 @@
+import { FilterQuery } from "mongoose";
 import Chat, { Message } from "../../domain/entities/chat/chat";
 import chatModel from "../database/models/chat.model";
 import MessageModel from "../database/models/message.model";
@@ -7,14 +8,16 @@ export default class ChatRepository {
     roomId: string,
     senderId: string,
     message: string,
-    message_type: string,
+    message_time: Date,
+    message_type: string
   ) {
     try {
       const newMessage = await MessageModel.create({
         chatId: roomId,
-        senderId: senderId,
-        message: message,
-        message_type: message_type,
+        senderId,
+        message,
+        message_time,
+        message_type,
       });
 
       await chatModel.findByIdAndUpdate(
@@ -33,15 +36,13 @@ export default class ChatRepository {
 
   async getMessagesByRoom(roomId: string): Promise<Chat> {
     try {
-      const room = await chatModel
-        .findById(roomId)
-        .populate({
-          path: "messages",
-          populate: {
-            path: "senderId",
-            select: "_id username email profile_picture",
-          },
-        }) 
+      const room = await chatModel.findById(roomId).populate({
+        path: "messages",
+        populate: {
+          path: "senderId",
+          select: "_id username email profile_picture",
+        },
+      });
 
       if (!room) {
         throw new Error("Room not found");
@@ -49,7 +50,6 @@ export default class ChatRepository {
 
       // Check if messages array is empty
       if (room.messages.length === 0) {
-        console.log("No messages found for this room.");
         return { ...room.toObject(), messages: [] } as unknown as Chat; // Return the room with an empty messages array
       }
 
@@ -80,15 +80,44 @@ export default class ChatRepository {
       throw error;
     }
   }
-  async getRoomById(roomId: string): Promise<Chat | null> {
+  async getRoomById(roomId: string,userId:String): Promise<Chat | null> {
     try {
+      await MessageModel.updateMany(
+        { chatId:roomId, senderId: { $ne: userId }, isRead: false },
+        { $set: { isRead: true } }
+      );
       const room = await chatModel
         .findById(roomId)
         .populate("participants", "_id username email profile_picture")
-        .populate("messages")
+        .populate("messages");
       return room as unknown as Chat;
     } catch (error) {
       throw error;
     }
+  }
+  async getChats(
+    query: FilterQuery<Chat>,
+    userId: string
+  ): Promise<Chat[] | null> {
+    const chats = await chatModel
+      .find({ participants: userId },{ _id: 1, participants: 1, lastMessage: 1 })
+      .populate({
+        path: "participants",
+        match: { _id: { $ne: userId } },
+        select: "username email profile_picture",
+      })
+      .populate({
+        path: "lastMessage",
+        select: "message -_id",
+      })
+      .exec();
+
+    return chats as unknown as Chat[];
+  }
+  async getUnreadMessageCount(chatId:string,userId:string):Promise<number>{
+    const chatCount:number=await MessageModel.countDocuments({chatId ,senderId: { $ne: userId },
+      isRead: false,
+    })
+    return chatCount
   }
 }

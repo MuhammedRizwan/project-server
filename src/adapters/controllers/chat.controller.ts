@@ -19,20 +19,20 @@ export default class ChatController {
   }
 
   onConnection(socket: Socket) {
-    console.log(`Client connected: ${socket.id}`);
+    console.log(`Client connected: ${socket.handshake.query.userId}`);
+    const userId=socket.handshake.query.userId
+    this.userSocketMap.set(userId as string, socket.id);
 
-    socket.on("joined-room", async (roomId, userId) => {
+    socket.on("joined-room", async (roomId) => {
       console.log(`joined room: ${roomId} by user: ${userId}`);
-      this.userSocketMap.set(userId, socket.id);
       socket.join(roomId);
     });
-    socket.on("message", async ({ roomId, senderId, message }) => {
-      console.log(`Message from ${senderId} in room ${roomId}: ${message}`);
-      const message_type = "text";
+    socket.on("message", async ({ roomId, senderId, message,message_type,message_time }) => {
       const savedMessage = await this.chatUseCase.saveMessage(
         roomId,
         senderId,
         message,
+        message_time,
         message_type
       );
       this.io.to(String(savedMessage.chatId)).emit("new-message", savedMessage);

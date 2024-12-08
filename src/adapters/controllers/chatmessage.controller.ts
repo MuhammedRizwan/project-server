@@ -25,6 +25,18 @@ export class ChatmessageController {
       next(error);
     }
   }
+  async getChats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const search = isString(req.query.search) ? req.query.search : "";
+      const {userId} = req.params
+      const users = await this.chatmessageUseCase.getChats(search,userId);
+      return res
+        .status(200)
+        .json({ success: true, message: "Contacts Fetched", users });
+    } catch (error) {
+      next(error);
+    }
+  }
   async getRoom(req: Request, res: Response, next: NextFunction) {
     try {
         const {recieverId, senderId} = req.params
@@ -36,8 +48,8 @@ export class ChatmessageController {
   }
   async getRoomMessage(req:Request,res:Response,next:NextFunction){
     try {
-        const {roomId}=req.params
-        const room = await this.chatmessageUseCase.getRoomMessage(roomId);
+        const {roomId,userId}=req.params
+        const room = await this.chatmessageUseCase.getRoomMessage(roomId,userId);
         return res.status(200).json({success:true,message:"Reciever Fetched",room})
     } catch (error) {
         throw error
