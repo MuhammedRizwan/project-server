@@ -24,10 +24,9 @@ export default class ChatController {
     this.userSocketMap.set(userId as string, socket.id);
 
     socket.on("joined-room", async (roomId) => {
-      console.log(`joined room: ${roomId} by user: ${userId}`);
       socket.join(roomId);
     });
-    socket.on("message", async ({ roomId, senderId, message,message_type,message_time }) => {
+    socket.on("message", async ({ roomId,recieverId, senderId, message,message_type,message_time }) => {
       const savedMessage = await this.chatUseCase.saveMessage(
         roomId,
         senderId,
@@ -35,6 +34,10 @@ export default class ChatController {
         message_time,
         message_type
       );
+      const toSocketId = this.userSocketMap.get(recieverId);
+      if (toSocketId) {
+        this.io.to(toSocketId).emit("new-badge",savedMessage)
+      }
       this.io.to(String(savedMessage.chatId)).emit("new-message", savedMessage);
     });
     socket.on("initiate-video-call", ({ to, signalData, myId }) => {

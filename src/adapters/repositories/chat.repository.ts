@@ -48,9 +48,8 @@ export default class ChatRepository {
         throw new Error("Room not found");
       }
 
-      // Check if messages array is empty
       if (room.messages.length === 0) {
-        return { ...room.toObject(), messages: [] } as unknown as Chat; // Return the room with an empty messages array
+        return { ...room.toObject(), messages: [] } as unknown as Chat;
       }
 
       return room as unknown as Chat;
@@ -63,7 +62,7 @@ export default class ChatRepository {
   async getRoom(recieverId: string, senderId: string): Promise<Chat | null> {
     try {
       const room = await chatModel.findOne({
-        participants: { $all: [recieverId, senderId] }, // Ensure both IDs exist in participants
+        participants: { $all: [recieverId, senderId] }, 
       });
       return room as unknown as Chat;
     } catch (error) {

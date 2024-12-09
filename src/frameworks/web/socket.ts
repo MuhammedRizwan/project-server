@@ -7,10 +7,6 @@ import ChatController from "../../adapters/controllers/chat.controller";
 
 const Ioconfig = (server: HttpServer) => {
   const io = new SocketIOServer(server, {
-    connectionStateRecovery: {
-      maxDisconnectionDuration: 2 * 60 * 1000,
-      skipMiddlewares: true,
-    },
     cors: {
       origin: "*",
       methods: ["GET", "POST"],

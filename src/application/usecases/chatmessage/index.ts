@@ -77,6 +77,7 @@ export class ChatmessageUseCase {
           const otherParticipant = chat.participants[0];
           return {
             _id: (otherParticipant as Iuser)?._id,
+            chatId:chat._id,
             username: (otherParticipant as Iuser)?.username,
             profile_picture:
               (otherParticipant as Iuser)?.profile_picture || null,
