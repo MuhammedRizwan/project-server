@@ -5,32 +5,21 @@ import { PackageRepository, Packages } from "../../../domain/entities/package/pa
 import { CustomError } from "../../../domain/errors/customError";
 import { CouponRepository } from "../../../domain/entities/coupon/coupon";
 import { WalletRepository } from "../../../domain/entities/wallet/wallet";
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 
-
-interface Dependencies {
-  Repositories: {
-    BookingRepository: BookingRepository;
-    PackageRepository: PackageRepository;
-    CouponRepository: CouponRepository;
-    WalletRepository: WalletRepository;
-  };
-  Services: {
-    RazorPay: RazorPay;
-  };
-}
 export class BookingUseCase {
-  private bookingRepository: BookingRepository;
-  private packageRepository: PackageRepository;
-  private razorPayService: RazorPay;
-  private couponRepository: CouponRepository;
-  private walletRepository: WalletRepository;
+  private _bookingRepository: BookingRepository;
+  private _packageRepository: PackageRepository;
+  private _razorPayService: RazorPay;
+  private _couponRepository: CouponRepository;
+  private _walletRepository: WalletRepository;
 
   constructor(dependencies: Dependencies) {
-    this.bookingRepository = dependencies.Repositories.BookingRepository;
-    this.packageRepository = dependencies.Repositories.PackageRepository;
-    this.couponRepository = dependencies.Repositories.CouponRepository;
-    this.walletRepository = dependencies.Repositories.WalletRepository;
-    this.razorPayService = dependencies.Services.RazorPay;
+    this._bookingRepository = dependencies.Repositories.BookingRepository;
+    this._packageRepository = dependencies.Repositories.PackageRepository;
+    this._couponRepository = dependencies.Repositories.CouponRepository;
+    this._walletRepository = dependencies.Repositories.WalletRepository;
+    this._razorPayService = dependencies.Services.RazorPay;
   }
 
   async createBooking(booking: Booking): Promise<Booking | null> {
@@ -44,7 +33,7 @@ export class BookingUseCase {
         throw new CustomError("Invalid package ID", 400);
       }
 
-      const packageData = await this.packageRepository.getPackage(packageId);
+      const packageData = await this._packageRepository.getPackage(packageId);
       if (!packageData) {
         throw new CustomError("Package not found", 404);
       }
@@ -65,7 +54,7 @@ export class BookingUseCase {
       let totalPrice = packageData.offer_price * booking.members.length;
 
       if (booking.coupon_id) {
-        const couponData = await this.couponRepository.adduserCoupon(
+        const couponData = await this._couponRepository.adduserCoupon(
           booking.coupon_id,
           userId
         );
@@ -95,7 +84,7 @@ export class BookingUseCase {
         booking_date: new Date().toISOString(),
       };
 
-      const createdBooking = await this.bookingRepository.createBooking(
+      const createdBooking = await this._bookingRepository.createBooking(
         bookingData
       );
 
@@ -110,7 +99,7 @@ export class BookingUseCase {
   }
   async getBooking(bookingId: string): Promise<Booking | null> {
     try {
-      const bookingData = await this.bookingRepository.getBooking(bookingId);
+      const bookingData = await this._bookingRepository.getBooking(bookingId);
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
@@ -134,7 +123,7 @@ export class BookingUseCase {
             package_id: packageId,
           }
         : { travel_agent_id: agentId, package_id: packageId };
-      const bookingData = await this.bookingRepository.getAgentBooking(
+      const bookingData = await this._bookingRepository.getAgentBooking(
         query,
         page,
         limit
@@ -142,7 +131,7 @@ export class BookingUseCase {
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
-      const totalItems = await this.bookingRepository.countDocument(query);
+      const totalItems = await this._bookingRepository.countDocument(query);
       if (totalItems === 0) {
         throw new CustomError("booking not found", 404);
       }
@@ -163,7 +152,7 @@ export class BookingUseCase {
         ? { category_name: { $regex: search, $options: "i" } }
         : {};
 
-      const bookingData = await this.bookingRepository.getAdminBookings(
+      const bookingData = await this._bookingRepository.getAdminBookings(
         query,
         page,
         limit
@@ -171,7 +160,7 @@ export class BookingUseCase {
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
-      const totalItems = await this.bookingRepository.countDocument(query);
+      const totalItems = await this._bookingRepository.countDocument(query);
       if (totalItems === 0) {
         throw new CustomError("booking not found", 404);
       }
@@ -188,7 +177,7 @@ export class BookingUseCase {
 
   async createRazorpayOrder(amount: number): Promise<Orders.RazorpayOrder> {
     try {
-      return await this.razorPayService.createRazorpayOrder(amount);
+      return await this._razorPayService.createRazorpayOrder(amount);
     } catch (error) {
       throw error;
     }
@@ -199,7 +188,7 @@ export class BookingUseCase {
     razorpaySignature: string
   ): Promise<string> {
     try {
-      return await this.razorPayService.verifyRazorpayOrder(
+      return await this._razorPayService.verifyRazorpayOrder(
         orderId,
         razorpayPaymentId,
         razorpaySignature
@@ -211,7 +200,7 @@ export class BookingUseCase {
   async getTravelHistory(userId: string): Promise<Booking[]> {
     try {
 
-      const booking = await this.bookingRepository.getTravelHistory(userId);
+      const booking = await this._bookingRepository.getTravelHistory(userId);
       if (!booking || booking.length === 0) {
         throw new CustomError("booking not found", 404);
       }
@@ -225,7 +214,7 @@ export class BookingUseCase {
     cancellation_reason: string
   ): Promise<Booking | null> {
     try {
-      const bookingData = await this.bookingRepository.getBooking(bookingId);
+      const bookingData = await this._bookingRepository.getBooking(bookingId);
       if (!bookingData) {
         throw new CustomError("booking not found", 404);
       }
@@ -239,7 +228,7 @@ export class BookingUseCase {
       let refundAmount = (bookingData.package_id as unknown as Packages)
         .offer_price;
       if (bookingData.payment_status === "pending") {
-        const discount = await this.couponRepository.getCouponById(
+        const discount = await this._couponRepository.getCouponById(
           bookingData.coupon_id
         );
         if (discount) {
@@ -258,7 +247,7 @@ export class BookingUseCase {
       }
       if (typeof bookingData?.user_id === "object") {
         const reason = "booking canceled";
-        await this.walletRepository.refundWallet(
+        await this._walletRepository.refundWallet(
           bookingData.user_id._id,
           refundAmount,
           reason
@@ -266,7 +255,7 @@ export class BookingUseCase {
       } else {
         throw new CustomError("Invalid user ID", 400);
       }
-      const cancelBooking = await this.bookingRepository.cancelBooking(
+      const cancelBooking = await this._bookingRepository.cancelBooking(
         bookingId,
         cancellation_reason
       );
@@ -284,7 +273,7 @@ export class BookingUseCase {
     cancellation_reason: string
   ): Promise<Booking | null> {
     try {
-      const booking = await this.bookingRepository.getBooking(bookingId);
+      const booking = await this._bookingRepository.getBooking(bookingId);
       if (!booking) {
         throw new CustomError("Booking not found", 404);
       }
@@ -294,7 +283,7 @@ export class BookingUseCase {
       if (booking.travel_status == "completed") {
         throw new CustomError("Booking already completed", 404);
       }
-      const bookingData = await this.bookingRepository.changeBookingStatus(
+      const bookingData = await this._bookingRepository.changeBookingStatus(
         bookingId,
         status,
         cancellation_reason
@@ -312,14 +301,14 @@ export class BookingUseCase {
     travel_status: string
   ): Promise<Booking | null> {
     try {
-      const booking = await this.bookingRepository.getBooking(bookingId);
+      const booking = await this._bookingRepository.getBooking(bookingId);
       if (!booking) {
         throw new CustomError("Booking not found", 404);
       }
       if (booking.travel_status == "completed") {
         throw new CustomError("Booking already completed", 404);
       }
-      const bookingData = await this.bookingRepository.changeTravelStatus(
+      const bookingData = await this._bookingRepository.changeTravelStatus(
         bookingId,
         travel_status
       );
@@ -333,7 +322,7 @@ export class BookingUseCase {
   }
   async getCompletedTravel(userId: string) {
     try {
-      const completedTravel=await this.bookingRepository.getCompletedTravel(userId)
+      const completedTravel=await this._bookingRepository.getCompletedTravel(userId)
       if(!completedTravel){
         throw new CustomError("couldn't find completed travel",500)
       }

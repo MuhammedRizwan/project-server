@@ -1,26 +1,20 @@
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import Post, { PostRepository } from "../../../domain/entities/post/post";
 import { CloudinaryService } from "../../../domain/entities/services/service";
 import { CustomError } from "../../../domain/errors/customError";
 
 
-interface Dependencies {
-  Repositories: {
-    PostRepository: PostRepository;
-  };
-  Services: {
-    CloudinaryService: CloudinaryService;
-  };
-}
+
 export class PostUseCase {
-  private postRepository: PostRepository;
-  private cloudinaryService: CloudinaryService;
+  private _postRepository: PostRepository;
+  private _cloudinaryService: CloudinaryService;
   constructor(dependencies: Dependencies) {
-    this.postRepository = dependencies.Repositories.PostRepository;
-    this.cloudinaryService = dependencies.Services.CloudinaryService;
+    this._postRepository = dependencies.Repositories.PostRepository;
+    this._cloudinaryService = dependencies.Services.CloudinaryService;
   }
   async getAllPost() {
     try {
-      const postData = await this.postRepository.getAllPost();
+      const postData = await this._postRepository.getAllPost();
       if (postData.length == 0) {
         throw new CustomError("No post found", 404);
       }
@@ -40,12 +34,12 @@ export class PostUseCase {
       if (Array.isArray(file)) {
         post.image = await Promise.all(
           file.map(async (image) => {
-            const imageUrl = await this.cloudinaryService.uploadImage(image);
+            const imageUrl = await this._cloudinaryService.uploadImage(image);
             return imageUrl;
           })
         );
       }
-      const createdPost = this.postRepository.createPost(post);
+      const createdPost = this._postRepository.createPost(post);
       if (!createdPost) {
         throw new CustomError("couldn't create post", 404);
       }
@@ -66,12 +60,12 @@ export class PostUseCase {
       if (Array.isArray(file)) {
         post.image = await Promise.all(
           file.map(async (image) => {
-            const imageUrl = await this.cloudinaryService.uploadImage(image);
+            const imageUrl = await this._cloudinaryService.uploadImage(image);
             return imageUrl;
           })
         );
       }
-      const editedPost = this.postRepository.editPost(postId, post);
+      const editedPost = this._postRepository.editPost(postId, post);
       if (!editedPost) {
         throw new CustomError("Cannot Edit Post", 500);
       }
@@ -82,7 +76,7 @@ export class PostUseCase {
   }
   async userPost(userId: string) {
     try {
-      const postData = await this.postRepository.userPost(userId);
+      const postData = await this._postRepository.userPost(userId);
       if (!postData) {
         throw new CustomError("cannot fetch post", 404);
       }
@@ -93,7 +87,7 @@ export class PostUseCase {
   }
   async getPost(postId: string) {
     try {
-      const postData = await this.postRepository.getPost(postId);
+      const postData = await this._postRepository.getPost(postId);
       if (!postData) {
         throw new CustomError("cannot found Post", 500);
       }
@@ -104,7 +98,7 @@ export class PostUseCase {
   }
   async addLike(postId: string, userId: string) {
     try {
-      const postData = await this.postRepository.addLike(postId, userId);
+      const postData = await this._postRepository.addLike(postId, userId);
       if (!postData) {
         throw new CustomError("cannot found Post", 500);
       }
@@ -115,7 +109,7 @@ export class PostUseCase {
   }
   async removeLike(postId: string, userId: string) {
     try {
-      const postData = await this.postRepository.removeLike(postId, userId);
+      const postData = await this._postRepository.removeLike(postId, userId);
       if (!postData) {
         throw new CustomError("cannot found Post", 500);
       }
@@ -126,7 +120,7 @@ export class PostUseCase {
   }
   async addComment(postId: string,userId: string, comment: string ) {
     try {
-      const postData = await this.postRepository.addComment(
+      const postData = await this._postRepository.addComment(
         postId,
         userId,
         comment
@@ -141,7 +135,7 @@ export class PostUseCase {
   }
   async removeComment(postId: string, commentId: string) {
     try {
-      const postData = await this.postRepository.removeComment(postId, commentId);
+      const postData = await this._postRepository.removeComment(postId, commentId);
       if (!postData) {
         throw new CustomError("cannot found Post", 500);
       }

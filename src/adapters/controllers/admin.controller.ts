@@ -7,19 +7,20 @@ interface Dependencies {
     AdminUseCase: AdminUseCase;
   };
 }
+
 export const isString = (value: unknown): value is string => typeof value === "string";
 
 export class adminController {
-  private AdminUseCase: AdminUseCase;
+  private _AdminUseCase: AdminUseCase;
   constructor(dependencies: Dependencies) {
-    this.AdminUseCase = dependencies.useCase.AdminUseCase;
+    this._AdminUseCase = dependencies.useCase.AdminUseCase;
   }
 
   async loginAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body as Iadmin;
       const { admin, accessToken, refreshToken } =
-        await this.AdminUseCase.loginAdmin(email, password);
+        await this._AdminUseCase.loginAdmin(email, password);
       return res.status(200).json({
         success: true,
         message: "Admin Logged In",
@@ -33,7 +34,7 @@ export class adminController {
   }
   async RefreshAccessToken(req: Request, res: Response) {
     try {
-      const accessToken = await this.AdminUseCase.refreshAccessToken(
+      const accessToken = await this._AdminUseCase.refreshAccessToken(
         req.body.refreshToken
       );
       if (!accessToken) {
@@ -54,7 +55,7 @@ export class adminController {
         : 8;
         const filter=isString(req.query.filter) ? req.query.filter : "";
       const { users, totalItems, totalPages, currentPage } =
-        await this.AdminUseCase.getAllUsers(search, page, limit,filter);
+        await this._AdminUseCase.getAllUsers(search, page, limit,filter);
       return res
         .status(200)
         .json({
@@ -72,7 +73,7 @@ export class adminController {
   async BlockUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id, is_block } = req.body;
-      const user = await this.AdminUseCase.changeUserStatus(id, is_block);
+      const user = await this._AdminUseCase.changeUserStatus(id, is_block);
       return res.status(200).json({
         success: true,
         message: `${user.is_block ? "user Blocked" : "User Unblocked"}`,
@@ -91,7 +92,7 @@ export class adminController {
         : 8;
         const filter=isString(req.query.filter) ? req.query.filter : "";
       const { agencies, totalItems, totalPages, currentPage } =
-        await this.AdminUseCase.getAllAgencies(search, page, limit,filter);
+        await this._AdminUseCase.getAllAgencies(search, page, limit,filter);
       return res
         .status(200)
         .json({
@@ -109,7 +110,7 @@ export class adminController {
   async BlockAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const { id, is_block } = req.body;
-      const agent = await this.AdminUseCase.changeAgentStatus(id, is_block);
+      const agent = await this._AdminUseCase.changeAgentStatus(id, is_block);
       return res.status(200).json({
         success: true,
         message: `${agent.is_block ? "user Blocked" : "User Unblocked"}`,
@@ -122,7 +123,7 @@ export class adminController {
   async getAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.agentid;
-      const agent = await this.AdminUseCase.getAgent(id);
+      const agent = await this._AdminUseCase.getAgent(id);
       return res
         .status(200)
         .json({ success:true, message: "Fetched Agent Data", agent });
@@ -133,7 +134,7 @@ export class adminController {
   async verifyAgentByAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const { id, admin_verified } = req.body;
-      const agent = await this.AdminUseCase.adminVerifyAgent(
+      const agent = await this._AdminUseCase.adminVerifyAgent(
         id,
         admin_verified
       );
@@ -152,7 +153,7 @@ export class adminController {
   }
   // async getDashboard(req:Request,res:Response,next:NextFunction){
   //   try {
-  //     const users = await this.AdminUseCase.usersData();
+  //     const users = await this._AdminUseCase.usersData();
   //   } catch (error) {
   //     return next(error);
   //   }

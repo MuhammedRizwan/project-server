@@ -9,13 +9,13 @@ interface Dependencies {
 const isString = (value: unknown): value is string => typeof value === 'string';
 
 export class categoryController {
-  private categoryUseCase: CategoryUseCase;
+  private _categoryUseCase: CategoryUseCase;
   constructor(dependencies: Dependencies) {
-    this.categoryUseCase = dependencies.useCase.CategoryUseCase;
+    this._categoryUseCase = dependencies.useCase.CategoryUseCase;
   }
   async createCategory(req: Request, res: Response, next: NextFunction) {
     try {
-      const category = await this.categoryUseCase.createCategory(req.body, {
+      const category = await this._categoryUseCase.createCategory(req.body, {
         Document: req.file,
       });
       return res
@@ -32,7 +32,7 @@ export class categoryController {
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
       const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 3;
       const filter=isString(req.query.filter) ? req.query.filter : "";
-      const { categories ,totalItems,totalPages,currentPage} = await this.categoryUseCase.findAllCategory(
+      const { categories ,totalItems,totalPages,currentPage} = await this._categoryUseCase.findAllCategory(
         search,
         page,
         limit,
@@ -53,7 +53,7 @@ export class categoryController {
   async blockNUnblockCategory(req: Request, res: Response, next: NextFunction) {
     try {
       const { id, is_block } = req.body;
-      const category = await this.categoryUseCase.blocknUnblockCategory(
+      const category = await this._categoryUseCase.blocknUnblockCategory(
         id,
         is_block
       );
@@ -71,7 +71,7 @@ export class categoryController {
   async updateCategory(req: Request, res: Response, next: NextFunction) {
     try {
       const { categoryId } = req.params;
-      const category = await this.categoryUseCase.updateCategory(
+      const category = await this._categoryUseCase.updateCategory(
         categoryId,
         req.body,
         {
@@ -87,7 +87,7 @@ export class categoryController {
   }
   async getUnblockedCategories(req:Request,res:Response,next:NextFunction){
     try {
-      const categories=await this.categoryUseCase.getUnblockedCategories();
+      const categories=await this._categoryUseCase.getUnblockedCategories();
       return res.status(200).json({success:true,message:"Fetched All Categories",categories})
     } catch (error) {
       next(error)

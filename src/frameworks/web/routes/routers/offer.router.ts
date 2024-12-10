@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response, Router } from "express";
 import multer from "multer";
 import { OfferController } from "../../../../adapters/controllers/offer.controller";
-import OfferDepencies from "../../../dependancies/offerdependencies";
+import Depencies from "../../../dependancies/depencies";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const controller = {
-  offer: new OfferController(OfferDepencies),
+  offer: new OfferController(Depencies),
 };
 
 router.get("/:agentId", (req: Request, res: Response, next: NextFunction) =>

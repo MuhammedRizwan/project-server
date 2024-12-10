@@ -1,21 +1,16 @@
 import { ChatRepository, Message } from "../../../domain/entities/chat/chat";
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import { Iuser, UserRepository } from "../../../domain/entities/user/user";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface Dependencies {
-  Repositories: {
-    ChatRepository: ChatRepository;
-    UserRepository: UserRepository;
-  };
-}
 
 export class ChatmessageUseCase {
-  private chatRepository: ChatRepository;
-  private userRepository: UserRepository;
+  private _chatRepository: ChatRepository;
+  private _userRepository: UserRepository;
 
   constructor(dependencies: Dependencies) {
-    this.chatRepository = dependencies.Repositories.ChatRepository;
-    this.userRepository = dependencies.Repositories.UserRepository;
+    this._chatRepository = dependencies.Repositories.ChatRepository;
+    this._userRepository = dependencies.Repositories.UserRepository;
   }
 
   async getContacts(search: string, userId: string | undefined) {
@@ -23,7 +18,7 @@ export class ChatmessageUseCase {
       const query = search
         ? { username: { $regex: search, $options: "i" } }
         : {};
-      const users = await this.userRepository.getContacts(query, userId);
+      const users = await this._userRepository.getContacts(query, userId);
       if (!users) {
         throw new CustomError("No users found", 404);
       }
@@ -38,14 +33,14 @@ export class ChatmessageUseCase {
       const query = search
         ? { username: { $regex: search, $options: "i" } }
         : {};
-      const chats = await this.chatRepository.getChats(query, userId);
+      const chats = await this._chatRepository.getChats(query, userId);
       if (!chats) {
         throw new CustomError("No users found", 404);
       }
 
       const result = await Promise.all(
         chats.map(async (chat) => {
-          const unReadCount = await this.chatRepository.getUnreadMessageCount(
+          const unReadCount = await this._chatRepository.getUnreadMessageCount(
             chat._id,
             userId
           );
@@ -69,9 +64,9 @@ export class ChatmessageUseCase {
 
   async getRoom(recieverId: string, senderId: string) {
     try {
-      let room = await this.chatRepository.getRoom(recieverId, senderId);
+      let room = await this._chatRepository.getRoom(recieverId, senderId);
       if (!room) {
-        room = await this.chatRepository.createRoom(recieverId, senderId);
+        room = await this._chatRepository.createRoom(recieverId, senderId);
       }
       return room;
     } catch (error) {
@@ -81,7 +76,7 @@ export class ChatmessageUseCase {
 
   async getRoomMessage(roomId: string, userId: string) {
     try {
-      const room = await this.chatRepository.getRoomById(roomId, userId);
+      const room = await this._chatRepository.getRoomById(roomId, userId);
       if (!room) {
         throw new CustomError("No room found", 404);
       }

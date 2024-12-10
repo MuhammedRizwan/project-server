@@ -1,11 +1,11 @@
 import {Request,Response,Router,NextFunction} from "express"
 import { CouponController } from "../../../../adapters/controllers/coupon.controller";
-import CouponDependancies from "../../../dependancies/coupondepencies";
+import Depencies from "../../../dependancies/depencies";
 
 
 const router = Router();    
 const controller = {
-    coupon: new CouponController(CouponDependancies)
+    coupon: new CouponController(Depencies)
 }
 router.get("/",(req:Request,res:Response,next:NextFunction)=>{
     controller.coupon.getAllCoupons(req,res,next)

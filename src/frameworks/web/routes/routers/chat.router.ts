@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response, Router } from "express";
-import multer from "multer";
 import { ChatmessageController } from "../../../../adapters/controllers/chatmessage.controller";
-import ChatmessageDependencies from "../../../dependancies/chatmessagedepencies";
+import Depencies from "../../../dependancies/depencies";
+
 
 const router = Router();
-// const upload = multer({ storage: multer.memoryStorage() });
+
 
 const controller = {
-  chatMessage: new ChatmessageController(ChatmessageDependencies),
+  chatMessage: new ChatmessageController(Depencies),
 };
 router.get("/contacts/:userId", (req: Request, res: Response, next: NextFunction) =>
   controller.chatMessage.getContacts(req, res, next)

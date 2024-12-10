@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { BookingController } from "../../../../adapters/controllers/booking.controller";
-import BookingDepencies from "../../../dependancies/bookingdepencies";
+import Depencies from "../../../dependancies/depencies";
+
 const router = Router();
 const controller = {
-  booking: new BookingController(BookingDepencies),
+  booking: new BookingController(Depencies),
 };
 router.get("/admin", (req: Request, res: Response, next: NextFunction) =>
   controller.booking.getAdminBookings(req, res, next)

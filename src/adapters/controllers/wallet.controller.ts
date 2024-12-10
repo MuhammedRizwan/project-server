@@ -7,14 +7,14 @@ interface Dependencies {
   };
 }
 export class walletController {
-    private walletUseCase: WalletUseCase;
+    private _walletUseCase: WalletUseCase;
     constructor(dependencies: Dependencies) {
-      this.walletUseCase = dependencies.useCase.WalletUseCase;
+      this._walletUseCase = dependencies.useCase.WalletUseCase;
     }
     async getAllWallet(req: Request, res: Response, next: NextFunction) {
         try {
             const {userId}=req.params;
-            const wallet = await this.walletUseCase.getAllWallet(userId);
+            const wallet = await this._walletUseCase.getAllWallet(userId);
             return res.status(200).json({
                 success:true,
                 message: "Fetched All Wallet",

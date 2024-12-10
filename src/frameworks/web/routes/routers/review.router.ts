@@ -1,10 +1,10 @@
 import {Request,Response,Router,NextFunction} from "express"
 import { ReviewController } from "../../../../adapters/controllers/review.controller";
-import ReviewDependancies from "../../../dependancies/reviewdepencies";
+import Depencies from "../../../dependancies/depencies";
 
 const router = Router();    
 const controller = {
-    review: new ReviewController(ReviewDependancies)
+    review: new ReviewController(Depencies)
 }
 router.get("/:packageId",(req:Request,res:Response,next:NextFunction)=>{
     controller.review.getReviews(req,res,next)

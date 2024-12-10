@@ -1,28 +1,24 @@
 import { Booking, BookingRepository } from "../../../domain/entities/booking/booking";
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import Review, { ReviewRepository } from "../../../domain/entities/review/review";
 import { CustomError } from "../../../domain/errors/customError";
 
 
-interface Dependencies {
-  Repositories: {
-    ReviewRepository: ReviewRepository;
-    BookingRepository: BookingRepository;
-  };
-}
+
 
 export class ReviewUseCase {
-  private reviewRepository: ReviewRepository;
-  private bookingRepository: BookingRepository;
+  private _reviewRepository: ReviewRepository;
+  private _bookingRepository: BookingRepository;
   constructor(dependencies: Dependencies) {
-    this.reviewRepository = dependencies.Repositories.ReviewRepository;
-    this.bookingRepository = dependencies.Repositories.BookingRepository;
+    this._reviewRepository = dependencies.Repositories.ReviewRepository;
+    this._bookingRepository = dependencies.Repositories.BookingRepository;
   }
 
   async createReview(bookingId: string, reviewData: Review): Promise<Booking> {
     try {
-      const review = await this.reviewRepository.createReview(reviewData);
+      const review = await this._reviewRepository.createReview(reviewData);
       if (!review) throw new CustomError("Review not created", 500);
-      const addToBooking = await this.bookingRepository.addReview(
+      const addToBooking = await this._bookingRepository.addReview(
         bookingId,
         review._id
       );
@@ -35,7 +31,7 @@ export class ReviewUseCase {
   }
   async editReview(reviewId: string, reviewData: Review): Promise<Review> {
     try {
-      const review = await this.reviewRepository.editReview(
+      const review = await this._reviewRepository.editReview(
         reviewId,
         reviewData
       );
@@ -47,9 +43,9 @@ export class ReviewUseCase {
   }
   async deleteReview(bookingId: string, reviewId: string) {
     try {
-      const review = await this.reviewRepository.deleteReview(reviewId);
+      const review = await this._reviewRepository.deleteReview(reviewId);
       if (!review) throw new CustomError("Review not created", 500);
-      const deletedFromBooking = await this.bookingRepository.deleteReview(
+      const deletedFromBooking = await this._bookingRepository.deleteReview(
         bookingId
       );
       if (!deletedFromBooking)
@@ -61,7 +57,7 @@ export class ReviewUseCase {
   }
   async getReviews(packageId: string): Promise<Review[]> {
     try {
-      const reviews = await this.reviewRepository.getReviews(packageId);
+      const reviews = await this._reviewRepository.getReviews(packageId);
       if (!reviews) throw new CustomError("Reviews not found", 404);
       return reviews;
     } catch (error) {

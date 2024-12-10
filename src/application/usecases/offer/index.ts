@@ -1,26 +1,19 @@
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import Offer, { OfferRepository } from "../../../domain/entities/offer/offer";
 import { PackageRepository, Packages } from "../../../domain/entities/package/package";
 import { CloudinaryService } from "../../../domain/entities/services/service";
 import { CustomError } from "../../../domain/errors/customError";
 
 
-interface Dependencies {
-  Repositories: {
-    OfferRepository: OfferRepository;
-    PackageRepository: PackageRepository;
-  };
-  Services: {
-    CloudinaryService: CloudinaryService;
-  };
-}
+
 export class OfferUseCase {
-  private offerRepository: OfferRepository;
-  private cloudinaryService: CloudinaryService;
-  private PackageRepository: PackageRepository;
+  private _offerRepository: OfferRepository;
+  private _cloudinaryService: CloudinaryService;
+  private _PackageRepository: PackageRepository;
   constructor(dependencies: Dependencies) {
-    this.offerRepository = dependencies.Repositories.OfferRepository;
-    this.cloudinaryService = dependencies.Services.CloudinaryService;
-    this.PackageRepository = dependencies.Repositories.PackageRepository;
+    this._offerRepository = dependencies.Repositories.OfferRepository;
+    this._cloudinaryService = dependencies.Services.CloudinaryService;
+    this._PackageRepository = dependencies.Repositories.PackageRepository;
   }
   async getAllOffers(
     agentId: string,
@@ -37,7 +30,7 @@ export class OfferUseCase {
         filter === "all"
           ? {}
           : { is_active: filter === "blocked" ? true : false };
-      const offers = await this.offerRepository.getAllOffers(
+      const offers = await this._offerRepository.getAllOffers(
         agentId,
         query,
         page,
@@ -47,7 +40,7 @@ export class OfferUseCase {
       if (!offers) {
         throw new CustomError("Offers not found", 404);
       }
-      const totalItems = await this.offerRepository.countDocument(
+      const totalItems = await this._offerRepository.countDocument(
         agentId,
         query,
         filterData
@@ -71,9 +64,9 @@ export class OfferUseCase {
   ): Promise<Offer> {
     try {
       if (file) {
-        offer.image = await this.cloudinaryService.uploadImage(file);
+        offer.image = await this._cloudinaryService.uploadImage(file);
       }
-      const newOffer = await this.offerRepository.createOffer(offer);
+      const newOffer = await this._offerRepository.createOffer(offer);
       if (!newOffer) {
         throw new CustomError("Offer not created", 500);
       }
@@ -84,7 +77,7 @@ export class OfferUseCase {
   }
   async getOffer(offerId: string) {
     try {
-      const offer = await this.offerRepository.getOffer(offerId);
+      const offer = await this._offerRepository.getOffer(offerId);
       if (!offer) {
         throw new CustomError("Offer not found", 404);
       }
@@ -100,9 +93,9 @@ export class OfferUseCase {
   ) {
     try {
       if (file) {
-        offer.image = await this.cloudinaryService.uploadImage(file);
+        offer.image = await this._cloudinaryService.uploadImage(file);
       }
-      const updatedOffer = await this.offerRepository.updateOffer(
+      const updatedOffer = await this._offerRepository.updateOffer(
         offerId,
         offer
       );
@@ -116,7 +109,7 @@ export class OfferUseCase {
   }
   async blockNUnblockOffer(offerId: string, is_active: boolean) {
     try {
-      const offer = await this.offerRepository.blockNUnblockOffer(
+      const offer = await this._offerRepository.blockNUnblockOffer(
         offerId,
         is_active
       );
@@ -131,7 +124,7 @@ export class OfferUseCase {
             const discount = (originalPrice * percentage) / 100;
             const maxAllowedDiscount = Math.min(discount, max_offer);
             const offerPrice = originalPrice - maxAllowedDiscount;
-            await this.PackageRepository.updateOfferPrice(pkg._id, offerPrice);
+            await this._PackageRepository.updateOfferPrice(pkg._id, offerPrice);
           }
         }
       } else {
@@ -139,7 +132,7 @@ export class OfferUseCase {
           const { package_id: packages } = offer;
           for (const pkg of packages as Packages[]) {
             const offerPrice = pkg.original_price;
-            await this.PackageRepository.updateOfferPrice(pkg._id, offerPrice);
+            await this._PackageRepository.updateOfferPrice(pkg._id, offerPrice);
           }
         }
       }
@@ -150,7 +143,7 @@ export class OfferUseCase {
   }
   async addofferPackage(agentId: string) {
     try {
-      const packageData = this.PackageRepository.addofferPackage(agentId);
+      const packageData = this._PackageRepository.addofferPackage(agentId);
       if (!packageData) {
         throw new CustomError("package Not found", 404);
       }
@@ -161,7 +154,7 @@ export class OfferUseCase {
   }
   async executeOffers() {
     const today = new Date();
-    const offerToday = await this.offerRepository.getAllOffersToday(today);
+    const offerToday = await this._offerRepository.getAllOffersToday(today);
     if (offerToday.length > 0) {
       for (const offer of offerToday) {
         const { percentage, max_offer, package_id: packages } = offer;
@@ -172,17 +165,17 @@ export class OfferUseCase {
           const maxAllowedDiscount = Math.min(discount, max_offer);
 
           const offerPrice = updatedPrice - Math.floor(maxAllowedDiscount);
-          await this.PackageRepository.updateOfferPrice(pkg._id, offerPrice);
+          await this._PackageRepository.updateOfferPrice(pkg._id, offerPrice);
         }
       }
     }
-    const offerExpired = await this.offerRepository.getAllOffersExpired(today);
+    const offerExpired = await this._offerRepository.getAllOffersExpired(today);
     if (offerExpired.length > 0) {
       for (const offer of offerExpired) {
         const { package_id: packages } = offer;
         for (const pkg of packages as Packages[]) {
           const offerPrice = pkg.original_price;
-          await this.PackageRepository.updateOfferPrice(pkg._id, offerPrice);
+          await this._PackageRepository.updateOfferPrice(pkg._id, offerPrice);
         }
       }
     }

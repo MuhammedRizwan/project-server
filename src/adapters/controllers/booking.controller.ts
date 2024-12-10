@@ -8,13 +8,13 @@ interface Dependencies {
 }
 const isString = (value: unknown): value is string => typeof value === 'string';
 export class BookingController {
-  private bookingUseCase: BookingUseCase;
+  private _bookingUseCase: BookingUseCase;
   constructor(dependencies: Dependencies) {
-    this.bookingUseCase = dependencies.useCase.BookingUseCase;
+    this._bookingUseCase = dependencies.useCase.BookingUseCase;
   }
   async createBooking(req: Request, res: Response, next: NextFunction) {
     try {
-      const booking = await this.bookingUseCase.createBooking(req.body);
+      const booking = await this._bookingUseCase.createBooking(req.body);
       return res
         .status(201)
         .json({ success:true, message: "Booking Created", booking });
@@ -25,7 +25,7 @@ export class BookingController {
   async getBooking(req: Request, res: Response, next: NextFunction) {
     try {
       const { bookingId } = req.params;
-      const booking = await this.bookingUseCase.getBooking(bookingId);
+      const booking = await this._bookingUseCase.getBooking(bookingId);
       return res
         .status(200)
         .json({ success:true, message: "Fetched Booking", booking });
@@ -41,7 +41,7 @@ export class BookingController {
         ? parseInt(req.query.limit, 10)
         : 3;
       const { agentId,packageId } = req.params;
-      const {bookingData,totalItems,totalPages,currentPage}= await this.bookingUseCase.getAgentBookings(agentId,packageId,search,page,limit);
+      const {bookingData,totalItems,totalPages,currentPage}= await this._bookingUseCase.getAgentBookings(agentId,packageId,search,page,limit);
       return res
         .status(200)
         .json({ success:true, message: "Fetched All Bookings",bookingData,totalItems,totalPages,currentPage });
@@ -55,7 +55,7 @@ export class BookingController {
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
       const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 8;
 
-      const {bookingData,totalItems,totalPages,currentPage}= await this.bookingUseCase.getAdminBookings(search,
+      const {bookingData,totalItems,totalPages,currentPage}= await this._bookingUseCase.getAdminBookings(search,
         page,
         limit);
       return res
@@ -68,7 +68,7 @@ export class BookingController {
   async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { amount } = req.body;
-      const order = await this.bookingUseCase.createRazorpayOrder(amount);
+      const order = await this._bookingUseCase.createRazorpayOrder(amount);
       return res
         .status(200)
         .json({ success:true, message: "razorpay Created", order });
@@ -79,7 +79,7 @@ export class BookingController {
   async verifyOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { orderId, razorpayPaymentId, razorpaySignature } = req.body;
-      const successpayment = await this.bookingUseCase.verifyRazorpayOrder(
+      const successpayment = await this._bookingUseCase.verifyRazorpayOrder(
         orderId,
         razorpayPaymentId,
         razorpaySignature
@@ -94,7 +94,7 @@ export class BookingController {
   async getTravelHistory(req:Request,res:Response,next:NextFunction){
     try {
       const {userId}=req.params
-      const travelHistory=await this.bookingUseCase.getTravelHistory(userId)
+      const travelHistory=await this._bookingUseCase.getTravelHistory(userId)
       return res.status(200).json({success:true,message:"user travel history",travelHistory})
     } catch (error) {
       next(error)
@@ -104,7 +104,7 @@ export class BookingController {
     try {
       const {bookingId}=req.params
       const {cancellation_reason}=req.body
-      const cancelBooking=await this.bookingUseCase.cancelBooking(bookingId,cancellation_reason)
+      const cancelBooking=await this._bookingUseCase.cancelBooking(bookingId,cancellation_reason)
       return res.status(200).json({success:true,message:"booking canceled",cancelBooking})
     } catch (error) {
       next(error)
@@ -114,7 +114,7 @@ export class BookingController {
     try {
       const {bookingId}=req.params
       const {status,cancellation_reason}=req.body
-      const changeBookingstatus=await this.bookingUseCase.changeBookingStatus(bookingId,status,cancellation_reason)
+      const changeBookingstatus=await this._bookingUseCase.changeBookingStatus(bookingId,status,cancellation_reason)
       return res.status(200).json({success:true,message:"booking status updated",changeBookingstatus})
     } catch (error) {
       next(error)
@@ -124,7 +124,7 @@ export class BookingController {
     try {
       const {bookingId}=req.params
       const {travel_status}=req.body
-      const changeTravelstatus=await this.bookingUseCase.changeTravelStatus(bookingId,travel_status)
+      const changeTravelstatus=await this._bookingUseCase.changeTravelStatus(bookingId,travel_status)
       return res.status(200).json({success:true,message:"booking status updated",changeTravelstatus})
     } catch (error) {
       next(error)
@@ -133,7 +133,7 @@ export class BookingController {
   async completedTravel(req:Request,res:Response,next:NextFunction){
    try {
     const {userId}=req.params
-    const travelHistory=await this.bookingUseCase.getCompletedTravel(userId)
+    const travelHistory=await this._bookingUseCase.getCompletedTravel(userId)
     return res.status(200).json({success:true,message:"user completed travel history",travelHistory})
    } catch (error) {
     next(error)

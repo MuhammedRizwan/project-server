@@ -10,9 +10,9 @@ interface Dependencies {
 }
 
 export class OfferController {
-  private OfferUseCase: OfferUseCase;
+  private _OfferUseCase: OfferUseCase;
   constructor(dependencies: Dependencies) {
-    this.OfferUseCase = dependencies.useCase.OfferUseCase;
+    this._OfferUseCase = dependencies.useCase.OfferUseCase;
   }
   async getAllOffers(req: Request, res: Response, next: NextFunction) {
     try {
@@ -24,7 +24,7 @@ export class OfferController {
         : 3;
       const filter = isString(req.query.filter) ? req.query.filter : "";
       const { offers, totalItems, totalPages, currentPage } =
-        await this.OfferUseCase.getAllOffers(
+        await this._OfferUseCase.getAllOffers(
           agentId,
           search,
           page,
@@ -45,7 +45,7 @@ export class OfferController {
   }
   async createOffer(req: Request, res: Response, next: NextFunction) {
     try {
-      const offer = await this.OfferUseCase.createOffer(req.body, req.file);
+      const offer = await this._OfferUseCase.createOffer(req.body, req.file);
       res
         .status(201)
         .json({ success: true, message: "Offer created successfully", offer });
@@ -56,7 +56,7 @@ export class OfferController {
   async getOffer(req: Request, res: Response, next: NextFunction) {
     try {
       const { offerId } = req.params;
-      const offer = await this.OfferUseCase.getOffer(offerId);
+      const offer = await this._OfferUseCase.getOffer(offerId);
       return res
         .status(200)
         .json({ success: true, message: "Offer fetched successfully", offer });
@@ -67,7 +67,7 @@ export class OfferController {
   async updateOffer(req: Request, res: Response, next: NextFunction) {
     try {
       const { offerId } = req.params;
-      const offer = await this.OfferUseCase.updateOffer(
+      const offer = await this._OfferUseCase.updateOffer(
         offerId,
         req.body,
         req.file
@@ -83,7 +83,7 @@ export class OfferController {
     try {
       const { offerId } = req.params;
       const { is_active } = req.body;
-      const offer = await this.OfferUseCase.blockNUnblockOffer(
+      const offer = await this._OfferUseCase.blockNUnblockOffer(
         offerId,
         is_active
       );
@@ -97,7 +97,7 @@ export class OfferController {
   async addofferPackage(req: Request, res: Response, next: NextFunction) {
     try {
       const { agentId } = req.params;
-      const packages = await this.OfferUseCase.addofferPackage(agentId);
+      const packages = await this._OfferUseCase.addofferPackage(agentId);
       return res
         .status(200)
         .json({
@@ -111,7 +111,7 @@ export class OfferController {
   }
   async execute(){
     try {
-      await this.OfferUseCase.executeOffers()
+      await this._OfferUseCase.executeOffers()
     } catch (error) {
       throw new CustomError("internal seerver error",500)
     }

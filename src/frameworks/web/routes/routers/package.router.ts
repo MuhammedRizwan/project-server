@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response, Router } from "express";
 import multer from "multer";
 import { PackageController } from "../../../../adapters/controllers/package.controller";
-import PackageDepencies from "../../../dependancies/packagedepencies";
+import Depencies from "../../../dependancies/depencies";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 const controller = {
-  package: new PackageController(PackageDepencies),
+  package: new PackageController(Depencies),
 };
 
 router.get("/", (req: Request, res: Response, next: NextFunction) =>

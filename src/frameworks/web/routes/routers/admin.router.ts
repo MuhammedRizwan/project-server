@@ -1,15 +1,15 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { adminController } from "../../../../adapters/controllers/admin.controller";
-import AdminDepencies from "../../../dependancies/admindepencies";
 import categoryRouter from "./category.router";
 import bookingRouter from "./booking.router";
 import couponRouter from "./coupon.router";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
+import Depencies from "../../../dependancies/depencies";
 
 const router = Router();
 
 const controller = {
-  admin: new adminController(AdminDepencies),
+  admin: new adminController(Depencies),
 };
 
 router.post("/login", (req: Request, res: Response, next: NextFunction) =>

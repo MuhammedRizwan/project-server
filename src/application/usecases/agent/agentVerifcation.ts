@@ -1,37 +1,24 @@
-
 import { AgentRepository} from "../../../domain/entities/agent/agent";
 import { CustomError } from "../../../domain/errors/customError";
 import { EmailService, GenerateOtp, JwtService, PasswordService } from "../../../domain/entities/services/service";
 import { OTPRepository } from "../../../adapters/repositories/otp.repositories";
-
-interface Dependencies {
-  Services: {
-    JwtService: JwtService;
-    EmailService: EmailService;
-    GenerateOtp: GenerateOtp;
-    PasswordService: PasswordService;
-  };
-  Repositories: {
-    OTPRepository: OTPRepository;
-    AgentRepository: AgentRepository;
-  };
-}
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 
 export class AgentVerification {
-  private jwtService: JwtService;
-  private OTPRepository: OTPRepository;
-  private agentRepository: AgentRepository;
-  private generateOtp: GenerateOtp;
-  private emailService: EmailService;
-  private passwordService: PasswordService;
+  private _jwtService: JwtService;
+  private _OTPRepository: OTPRepository;
+  private _agentRepository: AgentRepository;
+  private _generateOtp: GenerateOtp;
+  private _emailService: EmailService;
+  private _passwordService: PasswordService;
 
   constructor(dependencies: Dependencies) {
-    this.jwtService = dependencies.Services.JwtService;
-    this.OTPRepository = dependencies.Repositories.OTPRepository;
-    this.agentRepository = dependencies.Repositories.AgentRepository;
-    this.generateOtp = dependencies.Services.GenerateOtp;
-    this.emailService = dependencies.Services.EmailService;
-    this.passwordService = dependencies.Services.PasswordService;
+    this._jwtService = dependencies.Services.JwtService;
+    this._OTPRepository = dependencies.Repositories.OTPRepository;
+    this._agentRepository = dependencies.Repositories.AgentRepository;
+    this._generateOtp = dependencies.Services.GenerateOtp;
+    this._emailService = dependencies.Services.EmailService;
+    this._passwordService = dependencies.Services.PasswordService;
   }
 
   async refreshAccessToken(token: string): Promise<string> {
@@ -40,18 +27,18 @@ export class AgentVerification {
       if (!incommingRefreshToken) {
         throw new CustomError("Invalid refresh token", 401);
       }
-      const decoded = this.jwtService.verifyRefreshToken(incommingRefreshToken);
+      const decoded = this._jwtService.verifyRefreshToken(incommingRefreshToken);
       if (!decoded) {
         throw new CustomError("Invalid refresh token", 401);
       }
-      const agent = await this.agentRepository.getAgent(decoded.userId);
+      const agent = await this._agentRepository.getAgent(decoded.userId);
       if (!agent) {
         throw new CustomError("Invalid refresh token", 401);
       }
       if (incommingRefreshToken !== agent?.refreshToken) {
         throw new CustomError("Invalid refresh token", 401);
       }
-      const accessToken = this.jwtService.generateAccessToken(agent?._id);
+      const accessToken = this._jwtService.generateAccessToken(agent?._id);
       if (!accessToken) {
         throw new CustomError("token Error", 500);
       }      
@@ -62,14 +49,14 @@ export class AgentVerification {
   }
   async OTPVerification(Otp: string, email: string) {
     try {
-      const OTP = await this.OTPRepository.findOTPbyEmail(email);
+      const OTP = await this._OTPRepository.findOTPbyEmail(email);
       if (!OTP) {
         throw new CustomError("OTP expired", 410);
       }
       if (OTP.otp !== Otp) {
         throw new CustomError("Incorrect OTP", 403);
       }
-      const agentData = await this.agentRepository.verifyAgent(email);
+      const agentData = await this._agentRepository.verifyAgent(email);
       if (!agentData) {
         throw new CustomError("couldn't verify", 400);
       }
@@ -80,16 +67,16 @@ export class AgentVerification {
   }
   async sendOTP(email: string) {
     try {
-      const existUser = await this.agentRepository.findAgentByEmail(email);
+      const existUser = await this._agentRepository.findAgentByEmail(email);
       if (!existUser) {
         throw new CustomError("Agency not exist", 404);
       }
-      const verificationOtp = this.generateOtp.generate();
+      const verificationOtp = this._generateOtp.generate();
       if (!verificationOtp) {
         throw new CustomError("something went wrong", 500);
       }
-      await this.emailService.sendVerificationEmail(email, verificationOtp);
-      const createOTP = await this.OTPRepository.createOTP({
+      await this._emailService.sendVerificationEmail(email, verificationOtp);
+      const createOTP = await this._OTPRepository.createOTP({
         email: email,
         otp: verificationOtp,
       });
@@ -103,12 +90,12 @@ export class AgentVerification {
   }
   async changePassword(email: string, password: string) {
     try {
-      const isAgent = await this.agentRepository.findAgentByEmail(email);
+      const isAgent = await this._agentRepository.findAgentByEmail(email);
       if (!isAgent) {
         throw new CustomError("Invalid user", 404);
       }
-      password = await this.passwordService.passwordHash(password);
-      const updatePassword = this.agentRepository.changePassword(
+      password = await this._passwordService.passwordHash(password);
+      const updatePassword = this._agentRepository.changePassword(
         email,
         password
       );

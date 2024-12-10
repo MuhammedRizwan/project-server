@@ -14,9 +14,9 @@ export interface filterData{
   days:string
 }
 export class PackageController {
-  private packageUseCase: packageUseCase;
+  private _packageUseCase: packageUseCase;
   constructor(dependencies: Dependencies) {
-    this.packageUseCase = dependencies.useCase.packageUseCase;
+    this._packageUseCase = dependencies.useCase.packageUseCase;
   }
   async createPackage(req: Request, res: Response, next: NextFunction) {
     try {
@@ -28,7 +28,7 @@ export class PackageController {
         offer_price: original_price,
         images: [],
       };
-      const result = await this.packageUseCase.createPackage(
+      const result = await this._packageUseCase.createPackage(
         package_data,
         req.files
       );
@@ -53,7 +53,7 @@ export class PackageController {
       const startRange=isString(req.query.startRange) ? req.query.startRange : "",
       endRange=isString(req.query.endRange) ? req.query.endRange : ""
       const { packages, totalItems, totalPages, currentPage } =
-        await this.packageUseCase.getAllPackages(search, page, limit,categoryId,days,startRange,endRange);
+        await this._packageUseCase.getAllPackages(search, page, limit,categoryId,days,startRange,endRange);
       return res.status(200).json({
         success: true,
         message: "packages fetched successfully",
@@ -69,7 +69,7 @@ export class PackageController {
   async editPackage(req: Request, res: Response, next: NextFunction) {
     try {
       const { packageId } = req.params;
-      const result = await this.packageUseCase.editPackage(
+      const result = await this._packageUseCase.editPackage(
         packageId,
         req.body,
         req.files
@@ -87,7 +87,7 @@ export class PackageController {
     try {
       const { is_block } = req.body;
       const { packageId } = req.params;
-      const Package = await this.packageUseCase.blocknUnblockPackage(
+      const Package = await this._packageUseCase.blocknUnblockPackage(
         packageId,
         is_block
       );
@@ -103,7 +103,7 @@ export class PackageController {
   async getPackageById(req: Request, res: Response, next: NextFunction) {
     try {
       const { packageId } = req.params;
-      const packageData = await this.packageUseCase.getPackage(packageId);
+      const packageData = await this._packageUseCase.getPackage(packageId);
       return res.status(200).json({
         success: true,
         message: "package fetched successfully",
@@ -122,7 +122,7 @@ export class PackageController {
         ? parseInt(req.query.limit, 10)
         : 3;
       const { packages, totalItems, totalPages, currentPage } =
-        await this.packageUseCase.getAgentPackages(
+        await this._packageUseCase.getAgentPackages(
           agentId,
           search,
           page,
@@ -143,7 +143,7 @@ export class PackageController {
   async getSimilarPackages(req: Request, res: Response, next: NextFunction) {
     try {
       const { packageId } = req.params;
-      const packageList = await this.packageUseCase.getSimilarPackages(
+      const packageList = await this._packageUseCase.getSimilarPackages(
         packageId
       );
       return res.status(200).json({

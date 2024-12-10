@@ -11,17 +11,17 @@ interface Dependencies {
 }
 
 export class agentController {
-  private AgentUseCase: AgentUseCase;
-  private AgentVerification: AgentVerification;
+  private _AgentUseCase: AgentUseCase;
+  private _AgentVerification: AgentVerification;
   constructor(dependencies: Dependencies) {
-    this.AgentUseCase = dependencies.useCase.AgentUseCase;
-    this.AgentVerification = dependencies.useCase.AgentVerification;
+    this._AgentUseCase = dependencies.useCase.AgentUseCase;
+    this._AgentVerification = dependencies.useCase.AgentVerification;
   }
   async createAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const { agency_name, email, phone, location, password } =
         req.body as Iagent;
-      const agent = await this.AgentUseCase.signupAgent(
+      const agent = await this._AgentUseCase.signupAgent(
         {
           agency_name,
           email,
@@ -43,7 +43,7 @@ export class agentController {
     try {
       const { email, password } = req.body as Iagent;
       const { agent, accessToken, refreshToken } =
-        await this.AgentUseCase.loginAgent(email, password);
+        await this._AgentUseCase.loginAgent(email, password);
         if (!agent.is_verified) {
           return res.status(403).json({
             status: "error",
@@ -67,7 +67,7 @@ export class agentController {
       if (Otp.length != 4) {
         res.status(400).json({ message: "Incorrect OTP" });
       }
-      const agentData= await this.AgentVerification.OTPVerification(
+      const agentData= await this._AgentVerification.OTPVerification(
         Otp,
         agent.email
       );
@@ -84,7 +84,7 @@ export class agentController {
   async sendOTP(req: Request, res: Response, next: NextFunction) {
     try {      
       const { email } = req.body;
-      const OTPData = await this.AgentVerification.sendOTP(email);
+      const OTPData = await this._AgentVerification.sendOTP(email);
       return res.status(200).json({success:true,message:"OTP Resend",OTPData});
     } catch (error) {
       return next(error);
@@ -94,7 +94,7 @@ export class agentController {
   async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
-      const agent = await this.AgentVerification.changePassword(
+      const agent = await this._AgentVerification.changePassword(
         email,
         password
       );
@@ -106,7 +106,7 @@ export class agentController {
 
   async RefreshAccessToken(req: Request, res: Response) {
     try {
-      const accessToken = await this.AgentVerification.refreshAccessToken(
+      const accessToken = await this._AgentVerification.refreshAccessToken(
         req.body.refreshToken
       );
       return res.status(200).json({ accessToken });
@@ -118,7 +118,7 @@ export class agentController {
   async getAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const {agentId}=req.params
-      const agent = await this.AgentUseCase.getAgent(agentId);
+      const agent = await this._AgentUseCase.getAgent(agentId);
       return res.status(200).json({success:true,message:"Fetched Agent Data", agent });
     } catch (error) {
       next(error)
@@ -128,7 +128,7 @@ export class agentController {
     try {
       const {agentId}=req.params
       const file = req.file as Express.Multer.File;
-      const agent = await this.AgentUseCase.updateAgent(agentId,req.body,file);
+      const agent = await this._AgentUseCase.updateAgent(agentId,req.body,file);
       return res.status(200).json({success:true,message:"Updated Agent Data", agent });
     } catch (error) {
       next(error)
@@ -137,7 +137,7 @@ export class agentController {
   async validatePassword(req: Request, res: Response, next: NextFunction) {
     try {
       const {agentId}=req.params
-      const agent=await this.AgentUseCase.validatePassword(agentId,req.body.oldPassword)
+      const agent=await this._AgentUseCase.validatePassword(agentId,req.body.oldPassword)
       return res.status(200).json({success:true,message:"password validated", agent });
     } catch (error) {
       next(error)
@@ -146,7 +146,7 @@ export class agentController {
   async updatePassword(req: Request, res: Response, next: NextFunction) {
     try {
       const {agentId}=req.params
-      const agent=await this.AgentUseCase.updatePassword(agentId,req.body.newPassword)
+      const agent=await this._AgentUseCase.updatePassword(agentId,req.body.newPassword)
       return res.status(200).json({success:true,message:"password updated", agent });
     } catch (error) {
       next(error)

@@ -4,37 +4,26 @@ import { CustomError } from "../../../domain/errors/customError";
 import { AdminRepository } from "../../../domain/entities/admin/admin";
 import { AgentRepository } from "../../../domain/entities/agent/agent";
 import { EmailService, JwtService } from "../../../domain/entities/services/service";
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 
-interface Dependencies {
-  Repositories: {
-    AdminRepository: AdminRepository;
-    UserRepository: UserRepository;
-    AgentRepository: AgentRepository;
-  };
-  Services: {
-    EmailService: EmailService;
-    JwtService: JwtService;
-  };
-}
+
 export class AdminUseCase {
-  private adminRepository: AdminRepository;
-
-  private userRepository: UserRepository;
-  private agentRepository: AgentRepository;
-  private emailService: EmailService;
-  private JwtService: JwtService;
+  private _adminRepository: AdminRepository;
+  private _userRepository: UserRepository;
+  private _agentRepository: AgentRepository;
+  private _emailService: EmailService;
+  private _JwtService: JwtService;
 
   constructor(Dependencies: Dependencies) {
-    this.adminRepository = Dependencies.Repositories.AdminRepository;
-
-    this.agentRepository = Dependencies.Repositories.AgentRepository;
-    this.userRepository = Dependencies.Repositories.UserRepository;
-    this.emailService = Dependencies.Services.EmailService;
-    this.JwtService = Dependencies.Services.JwtService;
+    this._adminRepository = Dependencies.Repositories.AdminRepository;
+    this._agentRepository = Dependencies.Repositories.AgentRepository;
+    this._userRepository = Dependencies.Repositories.UserRepository;
+    this._emailService = Dependencies.Services.EmailService;
+    this._JwtService = Dependencies.Services.JwtService;
   }
   async loginAdmin(email: string, password: string) {
     try {
-      const admin = await this.adminRepository.findAdminByEmail(email);
+      const admin = await this._adminRepository.findAdminByEmail(email);
       if (!admin) {
         throw new CustomError("Email not found", 404);
       }
@@ -42,15 +31,15 @@ export class AdminUseCase {
       if (!verifiedPassword) {
         throw new CustomError("Invalid password", 403);
       }
-      const accessToken = this.JwtService.generateAccessToken(admin._id);
+      const accessToken = this._JwtService.generateAccessToken(admin._id);
       if (!accessToken) {
         throw new CustomError("couldn't genarate token", 500);
       }
-      const refreshToken = this.JwtService.generateRefreshToken(admin._id);
+      const refreshToken = this._JwtService.generateRefreshToken(admin._id);
       if (!refreshToken) {
         throw new CustomError("couldn't genarate token", 500);
       }
-      await this.adminRepository.addRefreshToken(admin._id, refreshToken);
+      await this._adminRepository.addRefreshToken(admin._id, refreshToken);
       return {
         admin,
         accessToken,
@@ -67,20 +56,20 @@ export class AdminUseCase {
         if (!incommingRefreshToken) {
           throw new CustomError("Invalid refresh token", 401);
         }
-        const decoded = this.JwtService.verifyRefreshToken(
+        const decoded = this._JwtService.verifyRefreshToken(
           incommingRefreshToken
         );
         if (!decoded) {
           throw new CustomError("Invalid refresh token", 401);
         }
-        const admin = await this.adminRepository.getAdmin(decoded.userId);
+        const admin = await this._adminRepository.getAdmin(decoded.userId);
         if (!admin) {
           throw new CustomError("Invalid refresh token", 401);
         }
         if (incommingRefreshToken !== admin?.refreshToken) {
           throw new CustomError("Invalid refresh token", 401);
         }
-        const accessToken = this.JwtService.generateAccessToken(admin?._id);
+        const accessToken = this._JwtService.generateAccessToken(admin?._id);
         if (!accessToken) {
           throw new CustomError("token Error", 500);
         }
@@ -100,7 +89,7 @@ export class AdminUseCase {
         : {};
         const filterData =filter === "all"? {}: { is_block: filter === "blocked" ? true : false };
 
-      const users = await this.userRepository.getAllUsersData(
+      const users = await this._userRepository.getAllUsersData(
         query,
         page,
         limit,
@@ -109,7 +98,7 @@ export class AdminUseCase {
       if (!users || users.length === 0) {
         throw new CustomError("No users found", 404);
       }
-      const totalItems = await this.userRepository.countUsers(query,filterData);
+      const totalItems = await this._userRepository.countUsers(query,filterData);
       if (totalItems === 0) {
         throw new CustomError("No users found", 404);
       }
@@ -125,7 +114,7 @@ export class AdminUseCase {
   }
   async changeUserStatus(id: ObjectId, is_block: boolean) {
     try {
-      const user = await this.userRepository.changeUserStatus(id, is_block);
+      const user = await this._userRepository.changeUserStatus(id, is_block);
       if (!user) {
         throw new CustomError("User status not updated", 500);
       }
@@ -140,7 +129,7 @@ export class AdminUseCase {
         ? { agency_name: { $regex: search, $options: "i" } }
         : {};
         const filterData =filter === "all"? {}: { is_block: filter === "blocked" ? true : false };
-      const agencies = await this.agentRepository.getAllAgenciesData(
+      const agencies = await this._agentRepository.getAllAgenciesData(
         query,
         page,
         limit,
@@ -149,7 +138,7 @@ export class AdminUseCase {
       if (!agencies || agencies.length === 0) {
         throw new CustomError("No agencies found", 404);
       }
-      const totalItems = await this.agentRepository.countAgencies(query,filterData);
+      const totalItems = await this._agentRepository.countAgencies(query,filterData);
       if (totalItems === 0) {
         throw new CustomError("No agencies found", 404);
       }
@@ -165,7 +154,7 @@ export class AdminUseCase {
   }
   async changeAgentStatus(id: ObjectId, is_block: boolean) {
     try {
-      const agent = await this.agentRepository.changeAgentStatus(id, is_block);
+      const agent = await this._agentRepository.changeAgentStatus(id, is_block);
       if (!agent) {
         throw new CustomError("Agent status not updated", 500);
       }
@@ -176,7 +165,7 @@ export class AdminUseCase {
   }
   async getAgent(id: string) {
     try {
-      const agent = await this.agentRepository.getAgent(id);
+      const agent = await this._agentRepository.getAgent(id);
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
@@ -187,7 +176,7 @@ export class AdminUseCase {
   }
   async adminVerifyAgent(id: string, admin_verified: string) {
     try {
-      const agent = await this.agentRepository.adminVerifyAgent(
+      const agent = await this._agentRepository.adminVerifyAgent(
         id,
         admin_verified
       );
@@ -195,9 +184,9 @@ export class AdminUseCase {
         throw new CustomError("Agent verification failed", 500);
       }
       if (admin_verified === "accept") {
-        await this.emailService.sendAcceptanceEmail(agent.email);
+        await this._emailService.sendAcceptanceEmail(agent.email);
       } else {
-        await this.emailService.sendRejectionEmail(agent.email);
+        await this._emailService.sendRejectionEmail(agent.email);
       }
       return agent;
     } catch (error) {

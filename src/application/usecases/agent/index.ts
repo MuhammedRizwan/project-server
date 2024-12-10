@@ -1,45 +1,34 @@
 import { AgentRepository, Iagent } from "../../../domain/entities/agent/agent";
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import { OTPRepository } from "../../../domain/entities/OTP/otp";
 import { CloudinaryService, EmailService, GenerateOtp, JwtService, PasswordService } from "../../../domain/entities/services/service";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface Dependencies {
-  Repositories: {
-    AgentRepository: AgentRepository;
-    OTPRepository: OTPRepository;
-  };
-  Services: {
-    EmailService: EmailService;
-    PasswordService: PasswordService;
-    GenerateOtp: GenerateOtp;
-    JwtService: JwtService;
-    CloudinaryService: CloudinaryService;
-  };
-}
+
 export class AgentUseCase {
-  private agentRepository: AgentRepository;
-  private OTPRepository: OTPRepository;
-  private emailService: EmailService;
-  private passwordService: PasswordService;
-  private JwtService: JwtService;
-  private generateOtp: GenerateOtp;
-  private CloudinaryService: CloudinaryService;
+  private _agentRepository: AgentRepository;
+  private _OTPRepository: OTPRepository;
+  private _emailService: EmailService;
+  private _passwordService: PasswordService;
+  private _JwtService: JwtService;
+  private _generateOtp: GenerateOtp;
+  private _CloudinaryService: CloudinaryService;
 
   constructor(Dependencies: Dependencies) {
-    this.agentRepository = Dependencies.Repositories.AgentRepository;
-    this.OTPRepository = Dependencies.Repositories.OTPRepository;
-    this.emailService = Dependencies.Services.EmailService;
-    this.passwordService = Dependencies.Services.PasswordService;
-    this.JwtService = Dependencies.Services.JwtService;
-    this.generateOtp = Dependencies.Services.GenerateOtp;
-    this.CloudinaryService = Dependencies.Services.CloudinaryService;
+    this._agentRepository = Dependencies.Repositories.AgentRepository;
+    this._OTPRepository = Dependencies.Repositories.OTPRepository;
+    this._emailService = Dependencies.Services.EmailService;
+    this._passwordService = Dependencies.Services.PasswordService;
+    this._JwtService = Dependencies.Services.JwtService;
+    this._generateOtp = Dependencies.Services.GenerateOtp;
+    this._CloudinaryService = Dependencies.Services.CloudinaryService;
   }
   async signupAgent(
     agentData: Iagent,
     file: { Document: Express.Multer.File | undefined }
   ) {
     try {
-      const existUser = await this.agentRepository.findAgentByEmail(
+      const existUser = await this._agentRepository.findAgentByEmail(
         agentData.email
       );
       if (existUser) {
@@ -49,13 +38,13 @@ export class AgentUseCase {
       if (file.Document) {
         const fileType = file.Document?.mimetype;
         if (fileType === "application/pdf") {
-          const pdfUrl = await this.CloudinaryService.uploadPDF(file.Document);
+          const pdfUrl = await this._CloudinaryService.uploadPDF(file.Document);
           if (!pdfUrl) {
             throw new CustomError("pdf cannot upload to cloudinary", 500);
           }
           agentData.DocumentURL = pdfUrl;
         } else if (fileType.startsWith("image/")) {
-          const imageUrl = await this.CloudinaryService.uploadImage(
+          const imageUrl = await this._CloudinaryService.uploadImage(
             file.Document
           );
           if (!imageUrl) {
@@ -65,25 +54,25 @@ export class AgentUseCase {
         }
       }
 
-      agentData.password = await this.passwordService.passwordHash(
+      agentData.password = await this._passwordService.passwordHash(
         agentData.password
       );
-      const verificationOtp = this.generateOtp.generate();
+      const verificationOtp = this._generateOtp.generate();
       if (!verificationOtp) {
         throw new CustomError("something went wrong", 500);
       }
-      const createOTP = await this.OTPRepository.createOTP({
+      const createOTP = await this._OTPRepository.createOTP({
         email: agentData.email,
         otp: verificationOtp,
       });
       if (!createOTP) {
         throw new CustomError("OTP creation failed", 500);
       }
-      await this.emailService.sendVerificationEmail(
+      await this._emailService.sendVerificationEmail(
         agentData.email,
         verificationOtp
       );
-      const agent = await this.agentRepository.createAgent(agentData);
+      const agent = await this._agentRepository.createAgent(agentData);
       if (!agent) {
         throw new CustomError("cannot signup user", 404);
       }
@@ -93,11 +82,11 @@ export class AgentUseCase {
     }
   }
   async loginAgent(email: string, password: string) {
-    const agent = await this.agentRepository.findAgentByEmail(email);
+    const agent = await this._agentRepository.findAgentByEmail(email);
     if (!agent) {
       throw new CustomError("Email Not Found", 404);
     }
-    const verifiedPassword = await this.passwordService.verifyPassword(
+    const verifiedPassword = await this._passwordService.verifyPassword(
       password,
       agent.password
     );
@@ -108,18 +97,18 @@ export class AgentUseCase {
       throw new CustomError("Agency has been Blocked", 403);
     }
     if (!agent.is_verified) {
-      const verificationOtp = this.generateOtp.generate();
+      const verificationOtp = this._generateOtp.generate();
       if (!verificationOtp) {
         throw new CustomError("couldn't genarate OTP", 500);
       }
-      const createOTP = await this.OTPRepository.createOTP({
+      const createOTP = await this._OTPRepository.createOTP({
         email: agent.email,
         otp: verificationOtp,
       });
       if (!createOTP) {
         throw new CustomError("OTP creation failed", 500);
       }
-      await this.emailService.sendVerificationEmail(
+      await this._emailService.sendVerificationEmail(
         agent.email,
         verificationOtp
       );
@@ -127,15 +116,15 @@ export class AgentUseCase {
     if (agent.admin_verified == "reject") {
       throw new CustomError("Agency were Rejected", 400);
     }
-    const accessToken = this.JwtService.generateAccessToken(agent._id);
+    const accessToken = this._JwtService.generateAccessToken(agent._id);
     if (!accessToken) {
       throw new CustomError("couldn't genarate token", 500);
     }
-    const refreshToken = this.JwtService.generateRefreshToken(agent._id);
+    const refreshToken = this._JwtService.generateRefreshToken(agent._id);
     if (!refreshToken) {
       throw new CustomError("couldn't genarate token", 500);
     }
-    await this.agentRepository.addRefreshToken(agent._id, refreshToken);
+    await this._agentRepository.addRefreshToken(agent._id, refreshToken);
     return {
       agent,
       accessToken,
@@ -144,7 +133,7 @@ export class AgentUseCase {
   }
   async getAgent(agentId: string) {
     try {
-      const agent = await this.agentRepository.getAgent(agentId);
+      const agent = await this._agentRepository.getAgent(agentId);
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
@@ -160,12 +149,12 @@ export class AgentUseCase {
   ) {
     try {
       const image = file
-        ? await this.CloudinaryService.uploadImage(file)
+        ? await this._CloudinaryService.uploadImage(file)
         : null;
       if (image) {
         agentData.profile_picture = image;
       }
-      const agent = await this.agentRepository.updateAgent(agentId, agentData);
+      const agent = await this._agentRepository.updateAgent(agentId, agentData);
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
@@ -176,11 +165,11 @@ export class AgentUseCase {
   }
   async validatePassword(agentId: string, password: string) {
     try {
-      const agent = await this.agentRepository.getAgent(agentId);
+      const agent = await this._agentRepository.getAgent(agentId);
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
-      const verifiedPassword = await this.passwordService.verifyPassword(
+      const verifiedPassword = await this._passwordService.verifyPassword(
         password,
         agent.password
       );
@@ -194,7 +183,7 @@ export class AgentUseCase {
   }
   async updatePassword(agentId: string, newPassword: string) {
     try {
-      const agent = await this.agentRepository.updatePassword(
+      const agent = await this._agentRepository.updatePassword(
         agentId,
         newPassword
       );

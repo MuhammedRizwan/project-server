@@ -8,16 +8,16 @@ interface Dependencies {
 }
 
 export class ReviewController {
-  private reviewUseCase: ReviewUseCase;
+  private _reviewUseCase: ReviewUseCase;
 
   constructor(dependencies: Dependencies) {
-    this.reviewUseCase = dependencies.useCase.ReviewUseCase;
+    this._reviewUseCase = dependencies.useCase.ReviewUseCase;
   }
 
   async createReview(req: Request, res: Response, next: NextFunction) {
     try {
       const { bookingId } = req.params;
-      const booking = await this.reviewUseCase.createReview(bookingId,req.body);
+      const booking = await this._reviewUseCase.createReview(bookingId,req.body);
       return res
         .status(200)
         .json({
@@ -32,7 +32,7 @@ export class ReviewController {
   async editReview(req: Request, res: Response, next: NextFunction) {
     try {
       const { reviewId } = req.params;
-      const review = await this.reviewUseCase.editReview(reviewId,req.body);
+      const review = await this._reviewUseCase.editReview(reviewId,req.body);
       return res
         .status(200)
         .json({ success: true, message: "Review edited successfully", review });
@@ -43,7 +43,7 @@ export class ReviewController {
   async deleteReview(req: Request, res: Response, next: NextFunction) {
     try {
       const { bookingId, reviewId } = req.params;
-      const booking = await this.reviewUseCase.deleteReview(bookingId,reviewId);
+      const booking = await this._reviewUseCase.deleteReview(bookingId,reviewId);
       return res
         .status(200)
         .json({ success: true, message: "Review deleted successfully", booking });
@@ -54,7 +54,7 @@ export class ReviewController {
   async getReviews(req: Request, res: Response, next: NextFunction) {
     try {
       const { packageId } = req.params;
-      const review = await this.reviewUseCase.getReviews(packageId);
+      const review = await this._reviewUseCase.getReviews(packageId);
       return res
         .status(200)
         .json({ success: true, message: "Reviews fetched successfully", review });

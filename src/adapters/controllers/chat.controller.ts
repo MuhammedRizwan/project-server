@@ -2,85 +2,85 @@ import { Server, Socket } from "socket.io";
 import { ChatUseCase } from "../../application/usecases/chat";
 
 interface Dependencies {
-  UseCase: {
+  useCase: {
     ChatUseCase: ChatUseCase;
   };
 }
 
 export default class ChatController {
-  private io: Server;
-  private chatUseCase: ChatUseCase;
-  private userSocketMap: Map<string, string>;
+  private _io: Server;
+  private _chatUseCase: ChatUseCase;
+  private _userSocketMap: Map<string, string>;
 
   constructor(io: Server, dependencies: Dependencies) {
-    this.io = io;
-    this.chatUseCase = dependencies.UseCase.ChatUseCase;
-    this.userSocketMap = new Map();
+    this._io = io;
+    this._chatUseCase = dependencies.useCase.ChatUseCase;
+    this._userSocketMap = new Map();
   }
 
   onConnection(socket: Socket) {
     console.log(`Client connected: ${socket.handshake.query.userId}`);
     const userId=socket.handshake.query.userId
-    this.userSocketMap.set(userId as string, socket.id);
-    console.log(this.userSocketMap);
-    socket.emit('get-online-users', Array.from(this.userSocketMap.keys()));
+    this._userSocketMap.set(userId as string, socket.id);
+    console.log(this._userSocketMap);
+    socket.emit('get-online-users', Array.from(this._userSocketMap.keys()));
 
     socket.on("joined-room", async (roomId) => {
       socket.join(roomId);
     });
     socket.on("message", async ({ roomId,recieverId, senderId, message,message_type,message_time }) => {
-      const savedMessage = await this.chatUseCase.saveMessage(
+      const savedMessage = await this._chatUseCase.saveMessage(
         roomId,
         senderId,
         message,
         message_time,
         message_type
       );
-      const toSocketId = this.userSocketMap.get(recieverId);
+      const toSocketId = this._userSocketMap.get(recieverId);
       if (toSocketId) {
-        this.io.to(toSocketId).emit("new-badge",savedMessage)
+        this._io.to(toSocketId).emit("new-badge",savedMessage)
       }
-      this.io.to(String(savedMessage.chatId)).emit("new-message", savedMessage);
+      this._io.to(String(savedMessage.chatId)).emit("new-message", savedMessage);
     });
     socket.on("initiate-video-call", ({ to, signalData, myId }) => {
-      const toSocketId = this.userSocketMap.get(to);
+      const toSocketId = this._userSocketMap.get(to);
       if (!toSocketId) return;
-      this.io
+      this._io
         .to(toSocketId)
         .emit("incomming-video-call", { signalData, from: myId });
     });
 
     socket.on("answer-video-call", (data) => {
-      const toSocketId = this.userSocketMap.get(data.to);
+      const toSocketId = this._userSocketMap.get(data.to);
       if (toSocketId) {
-        this.io.to(toSocketId).emit("accept-video-call", data.signal);
+        this._io.to(toSocketId).emit("accept-video-call", data.signal);
       }
     });
 
     socket.on("end-video-call", ({ to }) => {
-      const toSocketId = this.userSocketMap.get(to);
+      const toSocketId = this._userSocketMap.get(to);
       if (toSocketId) {
-        this.io.to(toSocketId).emit("video-call-ended");
+        this._io.to(toSocketId).emit("video-call-ended");
       }
     });
     socket.on("audio-mute", ({ isMuted, reciever }) => {
-      const toSocketId = this.userSocketMap.get(reciever);
+      const toSocketId = this._userSocketMap.get(reciever);
       if (toSocketId) {
         socket.to(toSocketId).emit("audio-muted", { isMuted });
       }
     });
 
     socket.on("video-mute", ({ isMuted, reciever }) => {
-      const toSocketId = this.userSocketMap.get(reciever);
+      const toSocketId = this._userSocketMap.get(reciever);
       if (toSocketId) {
         socket.to(toSocketId).emit("video-muted", { isMuted });
       }
     });
     socket.on("disconnect", () => {
-      for (const [key, value] of this.userSocketMap.entries()) {
+      for (const [key, value] of this._userSocketMap.entries()) {
         if (value === socket.id) {
           console.log(`Removing userId: ${key} for socket.id: ${socket.id}`);
-          this.userSocketMap.delete(key); 
+          this._userSocketMap.delete(key); 
           break;
         }
       }

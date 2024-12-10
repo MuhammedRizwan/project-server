@@ -1,6 +1,4 @@
 import { NextFunction, Request, Response, Router } from "express";
-import UserDependancies from "../../../dependancies/userDepencies";
-
 import userSignupSchema from "../../../../domain/validator/userSignup";
 import userLoginSchema from "../../../../domain/validator/userLogin";
 import { emailValidationSchema } from "../../../../domain/validator/emailvalidation";
@@ -18,12 +16,13 @@ import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import { userBlocked } from "../../../../adapters/middleware/block.middleware";
 import { userController } from "../../../../adapters/controllers/user.controller";
 import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
+import Depencies from "../../../dependancies/depencies";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const controller = {
-  user: new userController(UserDependancies),
+  user: new userController(Depencies),
 };
 
 router.post(

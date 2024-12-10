@@ -3,38 +3,25 @@ import { OTPRepository } from "../../../domain/entities/OTP/otp";
 import { UserRepository } from "../../../domain/entities/user/user";
 import { CustomError } from "../../../domain/errors/customError";
 import { WalletRepository } from "../../../domain/entities/wallet/wallet";
-
-interface Dependencies {
-  services: {
-    JwtService: JwtService;
-    EmailService: EmailService;
-    GenerateOtp: GenerateOtp;
-    PasswordService: PasswordService;
-  };
-  Repositories: {
-    OTPRepository: OTPRepository;
-    UserRepository: UserRepository;
-    WalletRepository:WalletRepository
-  };
-}
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 
 export class Verification {
-  private jwtService: JwtService;
-  private OTPRepository: OTPRepository;
-  private userRepository: UserRepository;
-  private walletRepository:WalletRepository
-  private generateOtp: GenerateOtp;
-  private emailService: EmailService;
-  private passwordService: PasswordService;
+  private _jwtService: JwtService;
+  private _OTPRepository: OTPRepository;
+  private _userRepository: UserRepository;
+  private _walletRepository:WalletRepository
+  private _generateOtp: GenerateOtp;
+  private _emailService: EmailService;
+  private _passwordService: PasswordService;
 
   constructor(dependencies: Dependencies) {
-    this.jwtService = dependencies.services.JwtService;
-    this.OTPRepository = dependencies.Repositories.OTPRepository;
-    this.userRepository = dependencies.Repositories.UserRepository;
-    this.walletRepository=dependencies.Repositories.WalletRepository
-    this.generateOtp = dependencies.services.GenerateOtp;
-    this.emailService = dependencies.services.EmailService;
-    this.passwordService = dependencies.services.PasswordService;
+    this._jwtService = dependencies.Services.JwtService;
+    this._OTPRepository = dependencies.Repositories.OTPRepository;
+    this._userRepository = dependencies.Repositories.UserRepository;
+    this._walletRepository=dependencies.Repositories.WalletRepository
+    this._generateOtp = dependencies.Services.GenerateOtp;
+    this._emailService = dependencies.Services.EmailService;
+    this._passwordService = dependencies.Services.PasswordService;
   }
 
   async refreshAccessToken(token: string): Promise<string> {
@@ -43,18 +30,18 @@ export class Verification {
       if (!incommingRefreshToken) {
         throw new CustomError("Invalid refresh token", 401);
       }
-      const decoded = this.jwtService.verifyRefreshToken(incommingRefreshToken);
+      const decoded = this._jwtService.verifyRefreshToken(incommingRefreshToken);
       if (!decoded) {
         throw new CustomError("Invalid refresh token", 401);
       }
-      const user = await this.userRepository.getUser(decoded.userId);
+      const user = await this._userRepository.getUser(decoded.userId);
       if (!user) {
         throw new CustomError("Invalid refresh token", 401);
       }
       if (incommingRefreshToken !== user?.refreshToken) {
         throw new CustomError("Invalid refresh token", 401);
       }
-      const accessToken = this.jwtService.generateAccessToken(user?._id);
+      const accessToken = this._jwtService.generateAccessToken(user?._id);
       if (!accessToken) {
         throw new CustomError("token Error", 500);
       }      
@@ -66,26 +53,26 @@ export class Verification {
 
   async OTPVerification(Otp: string, email: string) {
     try {
-      const OTP = await this.OTPRepository.findOTPbyEmail(email);      
+      const OTP = await this._OTPRepository.findOTPbyEmail(email);      
       if (!OTP) {
         throw new CustomError("OTP expired", 410);
       }
       if (OTP.otp !== Otp) {
         throw new CustomError("Incorrect OTP", 400);
       }
-      const userData = await this.userRepository.verifyuser(email);
+      const userData = await this._userRepository.verifyuser(email);
       if (!userData) {
         throw new CustomError("User not verified", 400);
       }
-      const accessToken = this.jwtService.generateAccessToken(userData._id);
+      const accessToken = this._jwtService.generateAccessToken(userData._id);
       if (!accessToken) {
         throw new CustomError("Couldn't generate token", 500);
       }
-      const refreshToken = this.jwtService.generateRefreshToken(userData._id);
+      const refreshToken = this._jwtService.generateRefreshToken(userData._id);
       if (!refreshToken) {
         throw new CustomError("Couldn't generate token", 500);
       }
-      await this.walletRepository.createWallet(userData._id)
+      await this._walletRepository.createWallet(userData._id)
       return { userData, accessToken, refreshToken };
     } catch (error) {
       throw error;
@@ -93,16 +80,16 @@ export class Verification {
   }
   async sendOTP(email: string) {
     try {
-      const existUser = await this.userRepository.findUserByEmail(email);
+      const existUser = await this._userRepository.findUserByEmail(email);
       if (!existUser) {
         throw new CustomError("user not exist", 409);
       }
-      const verificationOtp = this.generateOtp.generate();
+      const verificationOtp = this._generateOtp.generate();
       if (!verificationOtp) {
         throw new CustomError("Coudn't genarete OTP", 500);
       }
-      await this.emailService.sendVerificationEmail(email, verificationOtp);
-      const createOTP = await this.OTPRepository.createOTP({
+      await this._emailService.sendVerificationEmail(email, verificationOtp);
+      const createOTP = await this._OTPRepository.createOTP({
         email: email,
         otp: verificationOtp,
       });
@@ -116,12 +103,12 @@ export class Verification {
   }
   async changePassword(email: string, password: string) {
     try {
-      const isUser = await this.userRepository.findUserByEmail(email);
+      const isUser = await this._userRepository.findUserByEmail(email);
       if (!isUser) {
         throw new CustomError("Invalid user", 404);
       }
-      password = await this.passwordService.passwordHash(password);
-      const updatePassword = this.userRepository.changePassword(
+      password = await this._passwordService.passwordHash(password);
+      const updatePassword = this._userRepository.changePassword(
         email,
         password
       );

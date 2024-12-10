@@ -1,26 +1,23 @@
 import { Coupon, CouponRepository } from "../../../domain/entities/coupon/coupon";
+import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import { CustomError } from "../../../domain/errors/customError";
 
 
-interface Dependencies {
-  Repositories: {
-    CouponRepository: CouponRepository;
-  };
-}
+
 export class CouponUseCase {
-  private couponRepository: CouponRepository;
+  private _couponRepository: CouponRepository;
   constructor(dependencies: Dependencies) {
-    this.couponRepository = dependencies.Repositories.CouponRepository;
+    this._couponRepository = dependencies.Repositories.CouponRepository;
   }
   async createCoupon(coupon: Coupon): Promise<Coupon> {
     try {
-      const couponExists = await this.couponRepository.getCouponByCode(
+      const couponExists = await this._couponRepository.getCouponByCode(
         coupon.coupon_code
       )
       if(couponExists) {
         throw new CustomError("coupon already exists", 409)
       }
-      const createdCoupon = await this.couponRepository.createCoupon(coupon);
+      const createdCoupon = await this._couponRepository.createCoupon(coupon);
       if (!createdCoupon) {
         throw new CustomError("coupon not created", 500);
       }
@@ -32,7 +29,7 @@ export class CouponUseCase {
 
   async getCouponByCode(coupon_code: string): Promise<Coupon | null> {
     try {
-      const coupon = await this.couponRepository.getCouponByCode(coupon_code);
+      const coupon = await this._couponRepository.getCouponByCode(coupon_code);
       if (!coupon) {
         throw new CustomError("coupon not found", 404);
       }
@@ -47,7 +44,7 @@ export class CouponUseCase {
         ? { coupon_code: { $regex: search, $options: "i" } }
         : {};
         const filterData =filter === "all"? {}: {  is_active: filter === "blocked" ? false : true };
-      const coupons = await this.couponRepository.getAllCoupons(
+      const coupons = await this._couponRepository.getAllCoupons(
         query,
         page,
         limit,
@@ -56,7 +53,7 @@ export class CouponUseCase {
       if (!coupons) {
         throw new CustomError("coupons not found", 404);
       }
-      const totalItems = await this.couponRepository.couponCount(query,filterData);
+      const totalItems = await this._couponRepository.couponCount(query,filterData);
       if (totalItems === 0) {
         throw new CustomError("coupons not found", 404);
       }
@@ -74,7 +71,7 @@ export class CouponUseCase {
 
   async getCouponById(coupon_id: string): Promise<Coupon | null> {
     try {
-      const coupon = await this.couponRepository.getCouponById(coupon_id);
+      const coupon = await this._couponRepository.getCouponById(coupon_id);
       if (!coupon) {
         throw new CustomError("coupon not found", 404);
       }
@@ -85,7 +82,7 @@ export class CouponUseCase {
   }
   async editCoupon(coupon_id: string, coupon: Coupon): Promise<Coupon | null> {
     try {
-      const couponData = await this.couponRepository.editCoupon(
+      const couponData = await this._couponRepository.editCoupon(
         coupon_id,
         coupon
       );
@@ -102,7 +99,7 @@ export class CouponUseCase {
     is_active: boolean
   ): Promise<Coupon | null> {
     try {
-      const couponData = await this.couponRepository.blockCoupon(
+      const couponData = await this._couponRepository.blockCoupon(
         coupon_id,
         is_active
       );
@@ -116,7 +113,7 @@ export class CouponUseCase {
   }
   async getUnblockedCoupons(): Promise<Coupon[] | null> {
     try {
-      const coupons = await this.couponRepository.getUnblockedCoupons();
+      const coupons = await this._couponRepository.getUnblockedCoupons();
       if (!coupons) {
         throw new CustomError("coupons not found", 404);
       }
@@ -127,7 +124,7 @@ export class CouponUseCase {
   }
   async getUsedCoupons(coupon_id: string, user_id: string, totalPrice: number) {
     try {
-      const coupon = await this.couponRepository.getCouponById(coupon_id);
+      const coupon = await this._couponRepository.getCouponById(coupon_id);
       if (!coupon) {
         throw new CustomError("coupon not found", 404);
       }
