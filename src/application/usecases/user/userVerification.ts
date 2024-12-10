@@ -1,34 +1,8 @@
-import { IOTP } from "../../../domain/entities/user/otp";
-import { Iuser } from "../../../domain/entities/user/user";
+import { EmailService, GenerateOtp, JwtService, PasswordService } from "../../../domain/entities/services/service";
+import { OTPRepository } from "../../../domain/entities/OTP/otp";
+import { UserRepository } from "../../../domain/entities/user/user";
 import { CustomError } from "../../../domain/errors/customError";
-
-interface JwtService {
-  verifyRefreshToken(refreshToken: string): any;
-  generateAccessToken(userId: string | undefined): string;
-  generateRefreshToken(userId: string | undefined): string;
-}
-interface GenerateOtp {
-  generate(): string;
-}
-interface PasswordService {
-  passwordHash(password: string): Promise<string>;
-}
-interface EmailService {
-  sendVerificationEmail(email: string, otp: string): Promise<void>;
-}
-interface UserRepository {
-  findUserByEmail(email: string): Promise<Iuser | null>;
-  verifyuser(email: string): Promise<Iuser | null>;
-  changePassword(email: string, password: string): Promise<Iuser | null>;
-  getUser(id: string): Promise<Iuser | null>;
-}
-interface OTPRepository {
-  createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
-  findOTPbyEmail(email: string): Promise<IOTP | null>;
-}
-interface walletRepository{
-  createWallet(user_id:string|undefined): Promise<void>;
-}
+import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 
 interface Dependencies {
   services: {
@@ -40,7 +14,7 @@ interface Dependencies {
   Repositories: {
     OTPRepository: OTPRepository;
     UserRepository: UserRepository;
-    WalletRepository:walletRepository
+    WalletRepository:WalletRepository
   };
 }
 
@@ -48,7 +22,7 @@ export class Verification {
   private jwtService: JwtService;
   private OTPRepository: OTPRepository;
   private userRepository: UserRepository;
-  private walletRepository:walletRepository
+  private walletRepository:WalletRepository
   private generateOtp: GenerateOtp;
   private emailService: EmailService;
   private passwordService: PasswordService;

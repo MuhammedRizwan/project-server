@@ -1,38 +1,7 @@
-import { Iagent } from "../../../domain/entities/agent/agent";
-import { IOTP } from "../../../domain/entities/user/otp";
+import { AgentRepository, Iagent } from "../../../domain/entities/agent/agent";
+import { OTPRepository } from "../../../domain/entities/OTP/otp";
+import { CloudinaryService, EmailService, GenerateOtp, JwtService, PasswordService } from "../../../domain/entities/services/service";
 import { CustomError } from "../../../domain/errors/customError";
-
-interface AgentRepository {
-  createAgent(agent: Iagent): Promise<Iagent>;
-  findAgentByEmail(email: string): Promise<Iagent | null>;
-  addRefreshToken(id: string | undefined, refreshToken: string): Promise<void>;
-  verifyAgent(email: string): Promise<Iagent | null>;
-  getAgent(agentId: string): Promise<Iagent | null>;
-  updateAgent(agentId: string, agentData: Iagent): Promise<Iagent | null>;
-  updatePassword(id: string, newPassword: string): Promise<Iagent | null>;
-}
-interface OTPRepository {
-  createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
-  findOTPbyEmail(email: string): Promise<IOTP | null>;
-}
-interface EmailService {
-  sendVerificationEmail(email: string, otp: string): Promise<void>;
-}
-interface PasswordService {
-  passwordHash(password: string): Promise<string>;
-  verifyPassword(password: string, userPassword: string): Promise<boolean>;
-}
-interface GenerateOtp {
-  generate(): string;
-}
-interface JwtService {
-  generateAccessToken(userId: string | undefined): string;
-  generateRefreshToken(userId: string | undefined): string;
-}
-interface CloudinaryService {
-  uploadImage(file: Express.Multer.File): Promise<string>;
-  uploadPDF(file: Express.Multer.File): Promise<string>;
-}
 
 interface Dependencies {
   Repositories: {

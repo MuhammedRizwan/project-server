@@ -1,37 +1,8 @@
-import Offer from "../../../domain/entities/offer/offer";
-import { Packages } from "../../../domain/entities/package/package";
+import Offer, { OfferRepository } from "../../../domain/entities/offer/offer";
+import { PackageRepository, Packages } from "../../../domain/entities/package/package";
+import { CloudinaryService } from "../../../domain/entities/services/service";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface OfferRepository {
-  getAllOffers(
-    agentId: string,
-    query: object,
-    page: number,
-    limit: number,
-    filter: object
-  ): Promise<Offer[]>;
-  createOffer(offer: Offer): Promise<Offer>;
-  countDocument(
-    agentId: string,
-    query: object,
-    filter: object
-  ): Promise<number>;
-  getOffer(offerId: string): Promise<Offer>;
-  updateOffer(offerId: string, offer: Offer): Promise<Offer>;
-  blockNUnblockOffer(offerId: string, is_active: boolean): Promise<Offer>;
-  getAllOffersToday(today: Date): Promise<Offer[]>;
-  getAllOffersExpired(today: Date): Promise<Offer[]>;
-}
-interface PackageRepository {
-  addofferPackage(agentId: string): Promise<Packages[] | null>;
-  updateOfferPrice(
-    package_id: string | undefined,
-    offerPrice: number
-  ): Promise<void>;
-}
-interface CloudinaryService {
-  uploadImage(file: Express.Multer.File): Promise<string>;
-}
 
 interface Dependencies {
   Repositories: {

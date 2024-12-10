@@ -150,4 +150,11 @@ export class adminController {
       return next(error);
     }
   }
+  // async getDashboard(req:Request,res:Response,next:NextFunction){
+  //   try {
+  //     const users = await this.AdminUseCase.usersData();
+  //   } catch (error) {
+  //     return next(error);
+  //   }
+  // }
 }

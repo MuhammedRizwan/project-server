@@ -1,33 +1,16 @@
-import Chat, { Message } from "../../../domain/entities/chat/chat";
+import { ChatRepository } from "../../../domain/entities/chat/chat";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface ChatRepository {
-  saveMessage(
-    roomId: string,
-    senderId: string,
-    message: string,
-    message_time:Date,
-    message_type: string,
-  ): Promise<Message>;
-  getMessagesByRoom(roomId: string): Promise<Chat>;
-}
-interface CloudinaryService {
-  uploadImage(file: Express.Multer.File | undefined): Promise<string>;
-}
+
 interface Dependencies {
   Repositories: {
     ChatRepository: ChatRepository;
   };
-  Services: {
-    CloudinaryService: CloudinaryService;
-  };
 }
 export class ChatUseCase {
   private chatRepository: ChatRepository;
-  private cloudinaryService: CloudinaryService;
   constructor(dependencies: Dependencies) {
     this.chatRepository = dependencies.Repositories.ChatRepository;
-    this.cloudinaryService = dependencies.Services.CloudinaryService;
   }
   async saveMessage( roomId: string, senderId: string, message: string,message_time:Date,message_type: string) {
     try {

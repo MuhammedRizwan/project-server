@@ -5,3 +5,9 @@ export default interface Review {
     rating: number;
     feedback: string;
 }
+export interface ReviewRepository {
+    createReview(reviewData: Review): Promise<Review>;
+    editReview(reviewId: string, reviewData: Review): Promise<Review>;
+    deleteReview(reviewId: string): Promise<boolean>;
+    getReviews(packageId: string): Promise<Review[]>;
+  }

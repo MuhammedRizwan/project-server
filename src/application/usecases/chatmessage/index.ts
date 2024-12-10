@@ -1,45 +1,20 @@
-import Chat, { Message } from "../../../domain/entities/chat/chat";
-import { Iuser } from "../../../domain/entities/user/user";
+import { ChatRepository, Message } from "../../../domain/entities/chat/chat";
+import { Iuser, UserRepository } from "../../../domain/entities/user/user";
 import { CustomError } from "../../../domain/errors/customError";
-
-interface CloudinaryService {
-  uploadImage(file: Express.Multer.File | undefined): Promise<string>;
-}
-interface UserRepository {
-  getContacts(
-    query: object,
-    userId: string | undefined
-  ): Promise<Iuser[] | null>;
-}
-interface ChatRepository {
-  getRoom(recieverId: string, senderId: string): Promise<Chat | null>;
-  createRoom(recieverId: string, senderId: string): Promise<Chat>;
-  getRoomById(roomId: string,userId:string): Promise<Chat | null>;
-  getChats(query: object, userId: string | undefined): Promise<Chat[] | null>;
-  getUnreadMessageCount(
-    chatId: string,
-    userId: string | undefined
-  ): Promise<number>;
-}
 
 interface Dependencies {
   Repositories: {
     ChatRepository: ChatRepository;
     UserRepository: UserRepository;
   };
-  Services: {
-    CloudinaryService: CloudinaryService;
-  };
 }
 
 export class ChatmessageUseCase {
   private chatRepository: ChatRepository;
-  private cloudinaryService: CloudinaryService;
   private userRepository: UserRepository;
 
   constructor(dependencies: Dependencies) {
     this.chatRepository = dependencies.Repositories.ChatRepository;
-    this.cloudinaryService = dependencies.Services.CloudinaryService;
     this.userRepository = dependencies.Repositories.UserRepository;
   }
 
@@ -77,7 +52,7 @@ export class ChatmessageUseCase {
           const otherParticipant = chat.participants[0];
           return {
             _id: (otherParticipant as Iuser)?._id,
-            chatId:chat._id,
+            chatId: chat._id,
             username: (otherParticipant as Iuser)?.username,
             profile_picture:
               (otherParticipant as Iuser)?.profile_picture || null,
@@ -104,9 +79,9 @@ export class ChatmessageUseCase {
     }
   }
 
-  async getRoomMessage(roomId: string,userId:string) {
+  async getRoomMessage(roomId: string, userId: string) {
     try {
-      const room = await this.chatRepository.getRoomById(roomId,userId);
+      const room = await this.chatRepository.getRoomById(roomId, userId);
       if (!room) {
         throw new CustomError("No room found", 404);
       }

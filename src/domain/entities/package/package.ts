@@ -1,5 +1,5 @@
 
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { Icategory } from "../category/category";
 
 export interface Itinerary {
@@ -25,5 +25,43 @@ export interface Itinerary {
     excludedItems:string[],
     description?: string;
     departure_place:string
+  }
+
+  interface PackageQuery {
+    $or?:
+      | { package_name: { $regex: string; $options: string } }[]
+      | { destinations: { $regex: string; $options: string } }[];
+    category_id?: string;
+    no_of_days?: string;
+    price?: { $gte?: number; $lte?: number };
+  }
+
+
+   export interface PackageRepository {
+    createPackage(package_data: Packages): Promise<Packages | null>;
+    getPackage(id: string): Promise<Packages | null>;
+    getAllPackages(
+      query: FilterQuery<Packages>,
+      page: number,
+      limit: number
+    ): Promise<unknown>;
+    editPackage(id: string, packageData: Packages): Promise<Packages | null>;
+    blockNUnblockPackage(
+      packageId: string,
+      isBlock: boolean
+    ): Promise<Packages | null>;
+    getAgentPackages(
+      agentId: string,
+      query: FilterQuery<Packages>,
+      page: number,
+      limit: number
+    ): Promise<unknown>;
+    getsimilarPackages(offer_price: number): Promise<Packages[] | null>;
+    packageCount(query: FilterQuery<Packages>): Promise<number>;
+    addofferPackage(agentId: string): Promise<Packages[] | null>;
+    updateOfferPrice(
+      package_id: string | undefined,
+      offerPrice: number
+    ): Promise<void>;
   }
   

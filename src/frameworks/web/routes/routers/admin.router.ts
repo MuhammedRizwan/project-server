@@ -54,6 +54,7 @@ router.patch(
   (req: Request, res: Response, next: NextFunction) =>
     controller.admin.verifyAgentByAdmin(req, res, next)
 );
+// router.get('/dashboard', jwtAuth, (req: Request, res: Response, next: NextFunction) => controller.admin.getDashboard(req, res, next))
 router.use("/category", jwtAuth, categoryRouter);
 router.use("/booking", jwtAuth, bookingRouter);
 router.use("/coupon", jwtAuth, couponRouter);

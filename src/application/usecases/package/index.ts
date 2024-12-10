@@ -1,32 +1,7 @@
-import { FilterQuery } from "mongoose";
-import { Packages } from "../../../domain/entities/package/package";
+import { PackageRepository, Packages } from "../../../domain/entities/package/package";
 import { CustomError } from "../../../domain/errors/customError";
+import { CloudinaryService } from "../../../domain/entities/services/service";
 
-interface PackageRepository {
-  createPackage(package_data: Packages): Promise<Packages | null>;
-  getPackage(id: string): Promise<Packages | null>;
-  getAllPackages(
-    query: FilterQuery<Packages>,
-    page: number,
-    limit: number
-  ): Promise<unknown>;
-  editPackage(id: string, packageData: Packages): Promise<Packages | null>;
-  blockNUnblockPackage(
-    packageId: string,
-    isBlock: boolean
-  ): Promise<Packages | null>;
-  getAgentPackages(
-    agentId: string,
-    query: FilterQuery<Packages>,
-    page: number,
-    limit: number
-  ): Promise<unknown>;
-  getsimilarPackages(offer_price: number): Promise<Packages[] | null>;
-  packageCount(query: FilterQuery<Packages>): Promise<number>;
-}
-interface CloudinaryService {
-  uploadImage(file: Express.Multer.File | undefined): Promise<string>;
-}
 interface Dependencies {
   Repositories: {
     PackageRepository: PackageRepository;
@@ -36,14 +11,6 @@ interface Dependencies {
   };
 }
 
-interface PackageQuery {
-  $or?:
-    | { package_name: { $regex: string; $options: string } }[]
-    | { destinations: { $regex: string; $options: string } }[];
-  category_id?: string;
-  no_of_days?: string;
-  price?: { $gte?: number; $lte?: number };
-}
 export class packageUseCase {
   private packageRepository: PackageRepository;
   private cloudinaryService: CloudinaryService;

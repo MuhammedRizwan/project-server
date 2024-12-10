@@ -1,67 +1,12 @@
+
 import { Orders } from "razorpay/dist/types/orders";
-import { Booking } from "../../../domain/entities/booking/booking";
-import { Coupon } from "../../../domain/entities/coupon/coupon";
-import { Packages } from "../../../domain/entities/package/package";
-import Wallet from "../../../domain/entities/wallet/wallet";
+import { Booking, BookingRepository, RazorPay } from "../../../domain/entities/booking/booking";
+import { PackageRepository, Packages } from "../../../domain/entities/package/package";
 import { CustomError } from "../../../domain/errors/customError";
+import { CouponRepository } from "../../../domain/entities/coupon/coupon";
+import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 
-interface BookingRepository {
-  createBooking(booking: Booking): Promise<Booking | null>;
-  getBooking(bookingId: string): Promise<Booking | null>;
-  getAgentBooking(
-    query: object,
-    page: number,
-    limit: number
-  ): Promise<Booking[] | null>;
-  getAdminBookings(
-    query: object,
-    page: number,
-    limit: number
-  ): Promise<Booking[] | null>;
-  countDocument(query: object): Promise<number>;
-  countDocumentAgent(agentId: string): Promise<number>;
-  getTravelHistory(userId: string): Promise<Booking[] | null>;
-  cancelBooking(
-    bookingId: string,
-    cancellation_reason: string
-  ): Promise<Booking | null>;
-  changeBookingStatus(
-    bookingId: string,
-    status: string,
-    cancellation_reason: string
-  ): Promise<Booking | null>;
-  changeTravelStatus(
-    bookingId: string,
-    travel_status: string
-  ): Promise<Booking | null>;
-  getCompletedTravel(userId: string): Promise<Booking[] | null>;
-}
 
-interface PackageRepository {
-  getPackage(id: string): Promise<Packages | null>;
-}
-interface CouponRepository {
-  getCouponById(coupon_id: string | undefined): Promise<Coupon | null>;
-  adduserCoupon(
-    coupon_id: string | undefined,
-    user_id: string
-  ): Promise<Coupon | null>;
-}
-interface WalletRepository {
-  refundWallet(
-    userId: string | undefined,
-    amount: number,
-    reason: string
-  ): Promise<Wallet | null>;
-}
-interface RazorPay {
-  createRazorpayOrder(amount: number): Promise<Orders.RazorpayOrder>;
-  verifyRazorpayOrder(
-    orderId: string,
-    razorpayPaymentId: string,
-    razorpaySignature: string
-  ): Promise<string>;
-}
 interface Dependencies {
   Repositories: {
     BookingRepository: BookingRepository;

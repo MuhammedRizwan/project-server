@@ -1,48 +1,9 @@
 import { ObjectId } from "mongoose";
-import { Iadmin } from "../../../domain/entities/admin/admin";
-import { Iuser } from "../../../domain/entities/user/user";
-import { Iagent } from "../../../domain/entities/agent/agent";
+import { UserRepository } from "../../../domain/entities/user/user";
 import { CustomError } from "../../../domain/errors/customError";
-
-interface AdminRepository {
-  changePassword(email: string, password: string): unknown;
-  findAdminByEmail(email: string): Promise<Iadmin | null>;
-  getAdmin(id: string): Promise<Iadmin | null>;
-  addRefreshToken(id: string | undefined, refreshToken: string): Promise<void>;
-}
-interface UserRepository {
-  getAllUsersData(
-    query: object,
-    page: number,
-    limit: number,
-    filterData:object
-  ): Promise<Iuser[] | null>;
-  changeUserStatus(id: ObjectId, is_block: boolean): Promise<Iuser | null>;
-  countUsers(query: object,filterData:object): Promise<number>;
-}
-interface AgentRepository {
-  getAllAgenciesData(
-    query: object,
-    page: number,
-    limit: number,
-    filterData:object
-  ): Promise<Iagent[] | null>;
-  changeAgentStatus(id: ObjectId, is_block: boolean): Promise<Iagent | null>;
-  getAgent(id: string): Promise<Iagent | null>;
-  adminVerifyAgent(id: string, admin_verified: string): Promise<Iagent | null>;
-  countAgencies(query: object,filterData:object): Promise<number>;
-}
-interface EmailService {
-  sendVerificationEmail(email: string, otp: string): Promise<void>;
-  sendAcceptanceEmail(email: string): Promise<void>;
-  sendRejectionEmail(email: string): Promise<void>;
-}
-
-interface JwtService {
-  verifyRefreshToken(refreshToken: string): any;
-  generateAccessToken(userId: string | undefined): string;
-  generateRefreshToken(userId: string | undefined): string;
-}
+import { AdminRepository } from "../../../domain/entities/admin/admin";
+import { AgentRepository } from "../../../domain/entities/agent/agent";
+import { EmailService, JwtService } from "../../../domain/entities/services/service";
 
 interface Dependencies {
   Repositories: {
@@ -243,4 +204,11 @@ export class AdminUseCase {
       throw error;
     }
   }
+  // async usersData(){
+  //   try {
+  //     const users = await this.userRepository.getAllUsers();
+  //     return users;
+  //   } catch (error) {
+  //     throw error;
+  // }
 }

@@ -1,20 +1,8 @@
-import { Booking } from "../../../domain/entities/booking/booking";
-import Review from "../../../domain/entities/review/review";
+import { Booking, BookingRepository } from "../../../domain/entities/booking/booking";
+import Review, { ReviewRepository } from "../../../domain/entities/review/review";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface ReviewRepository {
-  createReview(reviewData: Review): Promise<Review>;
-  editReview(reviewId: string, reviewData: Review): Promise<Review>;
-  deleteReview(reviewId: string): Promise<boolean>;
-  getReviews(packageId: string): Promise<Review[]>;
-}
-interface BookingRepository {
-  addReview(
-    bookingId: string,
-    reviewId: string | undefined
-  ): Promise<Booking | null>;
-  deleteReview(bookingId: string): Promise<Booking | null>;
-}
+
 interface Dependencies {
   Repositories: {
     ReviewRepository: ReviewRepository;

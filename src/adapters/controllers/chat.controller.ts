@@ -22,6 +22,8 @@ export default class ChatController {
     console.log(`Client connected: ${socket.handshake.query.userId}`);
     const userId=socket.handshake.query.userId
     this.userSocketMap.set(userId as string, socket.id);
+    console.log(this.userSocketMap);
+    socket.emit('get-online-users', Array.from(this.userSocketMap.keys()));
 
     socket.on("joined-room", async (roomId) => {
       socket.join(roomId);
@@ -75,7 +77,13 @@ export default class ChatController {
       }
     });
     socket.on("disconnect", () => {
-      console.log(`Client disconnected: ${socket.id}`);
+      for (const [key, value] of this.userSocketMap.entries()) {
+        if (value === socket.id) {
+          console.log(`Removing userId: ${key} for socket.id: ${socket.id}`);
+          this.userSocketMap.delete(key); 
+          break;
+        }
+      }
     });
   }
 }

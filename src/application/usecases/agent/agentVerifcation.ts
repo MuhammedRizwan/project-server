@@ -1,37 +1,8 @@
 
-import { IOTP } from "../../../domain/entities/user/otp";
-import { Iagent } from "../../../domain/entities/agent/agent";
+import { AgentRepository} from "../../../domain/entities/agent/agent";
 import { CustomError } from "../../../domain/errors/customError";
-
-// interface DecodedToken extends JwtPayload {
-//   userId: ObjectId;
-// }
-
-interface JwtService {
-  verifyRefreshToken(refreshToken: string): any;
-  generateAccessToken(userId: string | undefined): string;
-  generateRefreshToken(userId: string | undefined): string;
-}
-interface GenerateOtp {
-  generate(): string;
-}
-interface PasswordService {
-  passwordHash(password: string): Promise<string>;
-}
-interface EmailService {
-  sendVerificationEmail(email: string, otp: string): Promise<void>;
-}
-interface AgentRepository {
-  findAgentByEmail(email: string): Promise<Iagent | null>;
-  verifyAgent(email: string): Promise<Iagent | null>;
-  changePassword(email: string, password: string): Promise<Iagent | null>;
-  getAgent(userId: string): Promise<Iagent | null>;
-}
-
-interface OTPRepository {
-  createOTP({ email, otp }: { email: string; otp: string }): Promise<IOTP>;
-  findOTPbyEmail(email: string): Promise<IOTP | null>;
-}
+import { EmailService, GenerateOtp, JwtService, PasswordService } from "../../../domain/entities/services/service";
+import { OTPRepository } from "../../../adapters/repositories/otp.repositories";
 
 interface Dependencies {
   Services: {

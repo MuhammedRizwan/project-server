@@ -1,21 +1,7 @@
-import { Coupon } from "../../../domain/entities/coupon/coupon";
+import { Coupon, CouponRepository } from "../../../domain/entities/coupon/coupon";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface CouponRepository {
-  createCoupon(coupon: Coupon): Promise<Coupon>;
-  getCouponByCode(coupon_code: string): Promise<Coupon | null>;
-  getCouponById(coupon_id: string): Promise<Coupon | null>;
-  getAllCoupons(
-    query: object,
-    page: number,
-    limit: number,
-    filterData:object
-  ): Promise<Coupon[] | null>;
-  editCoupon(coupon_id: string, coupon: Coupon): Promise<Coupon | null>;
-  blockCoupon(coupon_id: string, is_active: boolean): Promise<Coupon | null>;
-  couponCount(query: object,filterData:object): Promise<number>;
-  getUnblockedCoupons(): Promise<Coupon[] | null>;
-}
+
 interface Dependencies {
   Repositories: {
     CouponRepository: CouponRepository;

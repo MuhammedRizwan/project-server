@@ -1,21 +1,7 @@
-import Post from "../../../domain/entities/post/post";
+import Post, { PostRepository } from "../../../domain/entities/post/post";
+import { CloudinaryService } from "../../../domain/entities/services/service";
 import { CustomError } from "../../../domain/errors/customError";
 
-interface PostRepository {
-  getAllPost(): Promise<Post[]>;
-  createPost(post: Post): Promise<Post>;
-  editPost(postId: string, post: Post): Promise<Post>;
-  userPost(userId: string): Promise<Post[]>;
-  getPost(postId: string): Promise<Post>;
-  addLike(postId: string, userId: string): Promise<Post>;
-  removeLike(postId: string, userId: string): Promise<Post>;
-  addComment(postId: string, userId: string, comment: string): Promise<Post>;
-  removeComment(postId: string, commentId: string): Promise<Post>;
-}
-
-interface CloudinaryService {
-  uploadImage(file: Express.Multer.File | undefined): Promise<string>;
-}
 
 interface Dependencies {
   Repositories: {

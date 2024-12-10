@@ -1,5 +1,5 @@
 import { ObjectId } from "mongoose";
-import { IOTP } from "../../domain/entities/user/otp";
+import { IOTP } from "../../domain/entities/OTP/otp";
 import OTPModel from "../database/models/otp.model";
 
 export class OTPRepository {

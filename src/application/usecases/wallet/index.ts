@@ -1,10 +1,5 @@
-import Wallet from "../../../domain/entities/wallet/wallet";
+import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 import { CustomError } from "../../../domain/errors/customError";
-
-interface WalletRepository {
-    createWallet(user_id:string): Promise<void>;
-    getWallet(user_id:string): Promise<Wallet|null>;
-}
 
 interface Dependencies {
     Repositories: {
