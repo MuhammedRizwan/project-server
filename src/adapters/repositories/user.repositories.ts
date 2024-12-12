@@ -64,7 +64,8 @@ export class UserRepository {
     const users = await userModel
       .find(completeQuery)
       .skip((page - 1) * limit)
-      .limit(limit).sort({ createdAt: -1 });
+      .limit(limit)
+      .sort({ createdAt: -1 });
     return users.map((user) => {
       const userData: Iuser = {
         ...(user.toObject() as unknown as Iuser),
@@ -143,14 +144,38 @@ export class UserRepository {
       throw error;
     }
   }
-  async getContacts(query: FilterQuery<Iuser>,userId: string|undefined): Promise<Iuser[] | null> {
+  async getContacts(
+    query: FilterQuery<Iuser>,
+    userId: string | undefined
+  ): Promise<Iuser[] | null> {
     try {
-      const completedQuery = { ...query, is_block: false,_id: { $ne: userId  }};
-      const users: Iuser[] | null = await userModel.find(completedQuery,{_id:1,username:1,email:1,profile_picture:1});
+      const completedQuery = {
+        ...query,
+        is_block: false,
+        _id: { $ne: userId },
+      };
+      const users: Iuser[] | null = await userModel.find(completedQuery, {
+        _id: 1,
+        username: 1,
+        email: 1,
+        profile_picture: 1,
+      });
       if (!users) {
         throw new CustomError("No users found", 404);
       }
       return users;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllUsersCount(): Promise<{
+    usercount: number;
+    unblockeduser: number;
+  }> {
+    try {
+      const usercount = await userModel.countDocuments();
+      const unblockeduser = await userModel.countDocuments({ is_block: false });
+      return { usercount,unblockeduser };
     } catch (error) {
       throw error;
     }

@@ -43,12 +43,13 @@ export class AgentRepository {
     limit: number,
     filterData: object
   ): Promise<Iagent[] | null> {
-    const completedQuery = { ...query,...filterData };
+    const completedQuery = { ...query, ...filterData };
     const agencies = await agentModel
       .find(completedQuery)
       .skip((page - 1) * limit)
       .limit(limit)
-      .lean().sort({ createdAt: -1 });
+      .lean()
+      .sort({ createdAt: -1 });
     if (agencies) {
       return agencies.map((agency) => ({
         ...agency,
@@ -90,8 +91,11 @@ export class AgentRepository {
       { new: true }
     );
   }
-  async countAgencies(query: FilterQuery<Iagent>,filterData:object): Promise<number> {
-    const completedQuery = { ...query,...filterData };
+  async countAgencies(
+    query: FilterQuery<Iagent>,
+    filterData: object
+  ): Promise<number> {
+    const completedQuery = { ...query, ...filterData };
     return await agentModel.countDocuments(completedQuery);
   }
   async updateAgent(id: string, agent: Iagent): Promise<Iagent | null> {
@@ -102,12 +106,45 @@ export class AgentRepository {
     );
     return updatedAgent;
   }
-  async updatePassword(id: string, newPassword: string): Promise<Iagent | null> {
+  async updatePassword(
+    id: string,
+    newPassword: string
+  ): Promise<Iagent | null> {
     const updatedAgent: Iagent | null = await agentModel.findOneAndUpdate(
       { _id: id },
       { $set: { password: newPassword } },
       { new: true }
     );
     return updatedAgent;
+  }
+  async getAllAgentCount(): Promise<{
+    agentcount: number;
+    unblockedagent: number;
+  }> {
+    try {
+      const agentcount = await agentModel.countDocuments();
+      const unblockedagent = await agentModel.countDocuments({
+        is_block: false,
+      });
+      return { agentcount, unblockedagent };
+    } catch (error) {
+      throw error;
+    }
+  }
+  async unconfirmedagent(): Promise<Iagent[] | null> {
+    try {
+      const agent = await agentModel.find({ admin_verified: "pending",is_block:false },{_id:1,agency_name:1,profile_picture:1,createdAt:1}).limit(5);
+      return agent as unknown as Iagent[]
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllagent(): Promise<Iagent[] | null> {
+    try {
+      const agent = await agentModel.find({is_block:false},{_id:1,agency_name:1})
+      return agent as unknown as Iagent[]
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -3,14 +3,21 @@ import { UserRepository } from "../../../domain/entities/user/user";
 import { CustomError } from "../../../domain/errors/customError";
 import { AdminRepository } from "../../../domain/entities/admin/admin";
 import { AgentRepository } from "../../../domain/entities/agent/agent";
-import { EmailService, JwtService } from "../../../domain/entities/services/service";
+import {
+  EmailService,
+  JwtService,
+} from "../../../domain/entities/services/service";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
-
+import { PackageRepository } from "../../../domain/entities/package/package";
+import { BookingRepository } from "../../../adapters/repositories/booking.repository";
+import { response } from "express";
 
 export class AdminUseCase {
   private _adminRepository: AdminRepository;
   private _userRepository: UserRepository;
   private _agentRepository: AgentRepository;
+  private _packageRepository: PackageRepository;
+  private _bookingRepository:BookingRepository;
   private _emailService: EmailService;
   private _JwtService: JwtService;
 
@@ -18,6 +25,8 @@ export class AdminUseCase {
     this._adminRepository = Dependencies.Repositories.AdminRepository;
     this._agentRepository = Dependencies.Repositories.AgentRepository;
     this._userRepository = Dependencies.Repositories.UserRepository;
+    this._packageRepository = Dependencies.Repositories.PackageRepository;
+    this._bookingRepository=Dependencies.Repositories.BookingRepository;
     this._emailService = Dependencies.Services.EmailService;
     this._JwtService = Dependencies.Services.JwtService;
   }
@@ -81,13 +90,20 @@ export class AdminUseCase {
       throw new Error("Invalid refresh token");
     }
   }
-  async getAllUsers(search: string, page: number, limit: number,filter:string) {
+  async getAllUsers(
+    search: string,
+    page: number,
+    limit: number,
+    filter: string
+  ) {
     try {
-      
       const query = search
         ? { username: { $regex: search, $options: "i" } }
         : {};
-        const filterData =filter === "all"? {}: { is_block: filter === "blocked" ? true : false };
+      const filterData =
+        filter === "all"
+          ? {}
+          : { is_block: filter === "blocked" ? true : false };
 
       const users = await this._userRepository.getAllUsersData(
         query,
@@ -98,7 +114,10 @@ export class AdminUseCase {
       if (!users || users.length === 0) {
         throw new CustomError("No users found", 404);
       }
-      const totalItems = await this._userRepository.countUsers(query,filterData);
+      const totalItems = await this._userRepository.countUsers(
+        query,
+        filterData
+      );
       if (totalItems === 0) {
         throw new CustomError("No users found", 404);
       }
@@ -123,12 +142,20 @@ export class AdminUseCase {
       throw error;
     }
   }
-  async getAllAgencies(search: string, page: number, limit: number,filter:string) {
+  async getAllAgencies(
+    search: string,
+    page: number,
+    limit: number,
+    filter: string
+  ) {
     try {
       const query = search
         ? { agency_name: { $regex: search, $options: "i" } }
         : {};
-        const filterData =filter === "all"? {}: { is_block: filter === "blocked" ? true : false };
+      const filterData =
+        filter === "all"
+          ? {}
+          : { is_block: filter === "blocked" ? true : false };
       const agencies = await this._agentRepository.getAllAgenciesData(
         query,
         page,
@@ -138,7 +165,10 @@ export class AdminUseCase {
       if (!agencies || agencies.length === 0) {
         throw new CustomError("No agencies found", 404);
       }
-      const totalItems = await this._agentRepository.countAgencies(query,filterData);
+      const totalItems = await this._agentRepository.countAgencies(
+        query,
+        filterData
+      );
       if (totalItems === 0) {
         throw new CustomError("No agencies found", 404);
       }
@@ -193,11 +223,50 @@ export class AdminUseCase {
       throw error;
     }
   }
-  // async usersData(){
-  //   try {
-  //     const users = await this.userRepository.getAllUsers();
-  //     return users;
-  //   } catch (error) {
-  //     throw error;
-  // }
+  async getDashboardData() {
+    try {
+      const users = await this._userRepository.getAllUsersCount();
+      if (!users) {
+        throw new CustomError("User Not Found", 404);
+      }
+      const agent = await this._agentRepository.getAllAgentCount();
+      if (!agent) {
+        throw new CustomError("Agent Not Found", 404);
+      }
+      const packages = await this._packageRepository.getAllPackageCount();
+      if (!packages) {
+        throw new CustomError("Pcakge Not Found", 404);
+      }
+      const bookings= await this._bookingRepository.getAllBookingsCount();
+      if(!bookings){
+        throw new CustomError("booking Not Found",404)
+      }
+      const unconfirmedagency= await this._agentRepository.unconfirmedagent()     
+      return {users,agent,packages,bookings,unconfirmedagency};
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllAgents() {
+    try {
+      const agents = await this._agentRepository.getAllagent();
+      if (!agents) {
+        throw new CustomError("Agent Not Found", 404);
+      }
+      return agents;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAgentBookingData(agentId: string) {
+    try {
+      const agentBookingData = await this._bookingRepository.getAgentBookingData(agentId);
+      if (!agentBookingData) {
+        throw new CustomError("No agent booking data found", 404);
+      }
+      return agentBookingData;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

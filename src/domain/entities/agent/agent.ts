@@ -12,22 +12,21 @@ export interface Iagent {
   is_verified?: boolean;
   admin_verified?: string;
   is_block?: boolean;
-  profile_picture?: string|null;
+  profile_picture?: string | null;
   refreshToken?: string;
 }
-
 
 export interface AgentRepository {
   getAllAgenciesData(
     query: object,
     page: number,
     limit: number,
-    filterData:object
+    filterData: object
   ): Promise<Iagent[] | null>;
   changeAgentStatus(id: ObjectId, is_block: boolean): Promise<Iagent | null>;
   getAgent(id: string): Promise<Iagent | null>;
   adminVerifyAgent(id: string, admin_verified: string): Promise<Iagent | null>;
-  countAgencies(query: object,filterData:object): Promise<number>;
+  countAgencies(query: object, filterData: object): Promise<number>;
   findAgentByEmail(email: string): Promise<Iagent | null>;
   verifyAgent(email: string): Promise<Iagent | null>;
   changePassword(email: string, password: string): Promise<Iagent | null>;
@@ -39,5 +38,10 @@ export interface AgentRepository {
   getAgent(agentId: string): Promise<Iagent | null>;
   updateAgent(agentId: string, agentData: Iagent): Promise<Iagent | null>;
   updatePassword(id: string, newPassword: string): Promise<Iagent | null>;
+  getAllAgentCount(): Promise<{
+    agentcount: number;
+    unblockedagent: number;
+  }>;
+  unconfirmedagent():Promise<Iagent[]|null>
+  getAllagent():Promise<Iagent[]|null>
 }
-

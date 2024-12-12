@@ -78,7 +78,7 @@ export class BookingRepository {
   async countDocumentAgent(agentId: string): Promise<number> {
     return bookingModel.countDocuments({ travel_agent_id: agentId });
   }
-  async getTravelHistory(userId: string): Promise<Booking[]> {
+  async getTravelHistory(userId: string): Promise<Booking[] | null> {
     const booking = await bookingModel
       .find({ user_id: userId })
       .populate<{ user_id: Iuser }>("user_id")
@@ -146,7 +146,7 @@ export class BookingRepository {
       throw error;
     }
   }
-  async getCompletedTravel(userId: string): Promise<Booking[]> {
+  async getCompletedTravel(userId: string): Promise<Booking[] | null> {
     const booking = await bookingModel
       .find({ user_id: userId, travel_status: "completed" })
       .populate<{ package_id: Packages }>("package_id")
@@ -193,6 +193,78 @@ export class BookingRepository {
         .populate<{ review_id: Review }>("review_id");
 
       return populatedBooking as unknown as Booking | null;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAllBookingsCount(): Promise<{
+    bookingcount: number;
+    completedbooking: number;
+    ongoingbooking: number;
+    pendingbooking: number;
+    cancelbooking: number;
+  }> {
+    try {
+      const bookingcount = await bookingModel.countDocuments();
+      const completedbooking = await bookingModel.countDocuments({
+        travel_status: "completed",
+      });
+      const ongoingbooking = await bookingModel.countDocuments({
+        travel_status: "ongoing",
+      });
+      const pendingbooking = await bookingModel.countDocuments({
+        travel_status: "pending",
+      });
+      const cancelbooking = await bookingModel.countDocuments({
+        travel_status: "canceled",
+      });
+      return {
+        bookingcount,
+        completedbooking,
+        ongoingbooking,
+        pendingbooking,
+        cancelbooking,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getAgentBookingData(
+    agentId: string
+  ): Promise<{
+    totalbooking: number;
+    completed: number;
+    ongoing: number;
+    pending: number;
+    cancel: number;
+  }> {
+    try {
+      const totalbooking = await bookingModel.countDocuments({
+        travel_agent_id: agentId,
+      });
+      const completed = await bookingModel.countDocuments({
+        travel_agent_id: agentId,
+        travel_status: "completed",
+      });
+      const ongoing = await bookingModel.countDocuments({
+        travel_agent_id: agentId,
+        travel_status: "ongoing",
+      });
+      const pending = await bookingModel.countDocuments({
+        travel_agent_id: agentId,
+        travel_status: "pending",
+      })
+      const cancel = await bookingModel.countDocuments({
+        travel_agent_id: agentId,
+        travel_status: "canceled",
+      });
+      return {
+        totalbooking,
+        completed,
+        ongoing,
+        pending,
+        cancel,
+      };
     } catch (error) {
       throw error;
     }

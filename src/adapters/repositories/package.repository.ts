@@ -44,7 +44,6 @@ export class PackageRepository {
     packageId: string,
     isBlock: boolean
   ): Promise<Packages | null> {
-
     const updatedPackage: Packages | null = await packageModel.findOneAndUpdate(
       { _id: packageId },
       { $set: { is_block: isBlock } },
@@ -95,11 +94,32 @@ export class PackageRepository {
       throw error;
     }
   }
-  async updateOfferPrice(packageId:string,offerPrice:number):Promise<void>{
+  async updateOfferPrice(packageId: string, offerPrice: number): Promise<void> {
     try {
-      const updateOffer=await packageModel.updateOne({_id:packageId},{$set:{offer_price:offerPrice}})
+      const updateOffer = await packageModel.updateOne(
+        { _id: packageId },
+        { $set: { offer_price: offerPrice } }
+      );
     } catch (error) {
-      throw error
+      throw error;
+    }
+  }
+  async getAllPackageCount(): Promise<{
+    packagecount: number;
+    blockedpackage: number;
+    unblockedpackage: number;
+  }> {
+    try {
+      const packagecount = await packageModel.countDocuments();
+      const blockedpackage = await packageModel.countDocuments({
+        is_block: true,
+      });
+      const unblockedpackage = await packageModel.countDocuments({
+        is_block: false,
+      });
+      return { packagecount, blockedpackage, unblockedpackage };
+    } catch (error) {
+      throw error;
     }
   }
 }

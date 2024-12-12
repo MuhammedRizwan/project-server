@@ -41,4 +41,8 @@ export interface UserRepository {
   verifyuser(email: string): Promise<Iuser | null>;
   changePassword(email: string, password: string): Promise<Iuser | null>;
   getUser(id: string): Promise<Iuser | null>;
+  getAllUsersCount(): Promise<{
+    usercount: number;
+    unblockeduser: number;
+  }>;
 }

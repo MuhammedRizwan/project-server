@@ -8,7 +8,8 @@ interface Dependencies {
   };
 }
 
-export const isString = (value: unknown): value is string => typeof value === "string";
+export const isString = (value: unknown): value is string =>
+  typeof value === "string";
 
 export class adminController {
   private _AdminUseCase: AdminUseCase;
@@ -53,19 +54,17 @@ export class adminController {
       const limit = isString(req.query.limit)
         ? parseInt(req.query.limit, 10)
         : 8;
-        const filter=isString(req.query.filter) ? req.query.filter : "";
+      const filter = isString(req.query.filter) ? req.query.filter : "";
       const { users, totalItems, totalPages, currentPage } =
-        await this._AdminUseCase.getAllUsers(search, page, limit,filter);
-      return res
-        .status(200)
-        .json({
-          success:true,
-          message: "Fetched All Users",
-          filterData: users,
-          totalItems,
-          totalPages,
-          currentPage,
-        });
+        await this._AdminUseCase.getAllUsers(search, page, limit, filter);
+      return res.status(200).json({
+        success: true,
+        message: "Fetched All Users",
+        filterData: users,
+        totalItems,
+        totalPages,
+        currentPage,
+      });
     } catch (error) {
       return next(error);
     }
@@ -90,19 +89,17 @@ export class adminController {
       const limit = isString(req.query.limit)
         ? parseInt(req.query.limit, 10)
         : 8;
-        const filter=isString(req.query.filter) ? req.query.filter : "";
+      const filter = isString(req.query.filter) ? req.query.filter : "";
       const { agencies, totalItems, totalPages, currentPage } =
-        await this._AdminUseCase.getAllAgencies(search, page, limit,filter);
-      return res
-        .status(200)
-        .json({
-          success:true,
-          message: "Fetch all agencies",
-          filterData: agencies,
-          totalItems,
-          totalPages,
-          currentPage,
-        });
+        await this._AdminUseCase.getAllAgencies(search, page, limit, filter);
+      return res.status(200).json({
+        success: true,
+        message: "Fetch all agencies",
+        filterData: agencies,
+        totalItems,
+        totalPages,
+        currentPage,
+      });
     } catch (error) {
       return next(error);
     }
@@ -126,7 +123,7 @@ export class adminController {
       const agent = await this._AdminUseCase.getAgent(id);
       return res
         .status(200)
-        .json({ success:true, message: "Fetched Agent Data", agent });
+        .json({ success: true, message: "Fetched Agent Data", agent });
     } catch (error) {
       return next(error);
     }
@@ -139,7 +136,7 @@ export class adminController {
         admin_verified
       );
       return res.status(200).json({
-        success:true,
+        success: true,
         message: `${
           agent.admin_verified == "accept"
             ? "Agency Aceepted"
@@ -151,11 +148,43 @@ export class adminController {
       return next(error);
     }
   }
-  // async getDashboard(req:Request,res:Response,next:NextFunction){
-  //   try {
-  //     const users = await this._AdminUseCase.usersData();
-  //   } catch (error) {
-  //     return next(error);
-  //   }
-  // }
+  async getDashboard(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { users, agent, packages, bookings, unconfirmedagency } =
+        await this._AdminUseCase.getDashboardData();
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Dashboard data fetched successfully",
+          users,
+          agent,
+          packages,
+          bookings,
+          unconfirmedagency,
+        });
+    } catch (error) {
+      return next(error);
+    }
+  }
+  async getAllAgents(req: Request, res: Response, next: NextFunction) {
+    try {
+      const agents = await this._AdminUseCase.getAllAgents();
+      return res
+        .status(200)
+        .json({ success: true, message: "Fetched all agents", agents });
+    } catch (error) {
+      return next(error);
+    }
+  }
+  async getAgentBookingData(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {agentId}=req.params
+      const bookingData=await this._AdminUseCase.getAgentBookingData(agentId);
+      console.log(bookingData,"bookingData");
+      return res.status(200).json({success:true,message:"Fetched agent booking data",bookingData});
+    } catch (error) {
+      next(error);
+    }
+  }
 }

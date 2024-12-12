@@ -1,32 +1,32 @@
 import { ObjectId } from "mongoose";
 import { Iuser } from "../user/user";
-import {Iagent} from "../agent/agent";
-import {Packages } from "../package/package";
+import { Iagent } from "../agent/agent";
+import { Packages } from "../package/package";
 import Review from "../review/review";
 import { Orders } from "razorpay/dist/types/orders";
 
 export interface Booking {
   _id?: ObjectId;
-  user_id: string|Iuser;
-  travel_agent_id: string|Iagent;
-  package_id: string|Packages;
+  user_id: string | Iuser;
+  travel_agent_id: string | Iagent;
+  package_id: string | Packages;
   bill_details: {
-      first_name: string;
-      last_name: string;
-      email: string;
-      phone: string;
-      address: string;
-    };
-  members: { name: string,age: number}[];
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+  members: { name: string; age: number }[];
   payment_amount: number;
   payment_status: "pending" | "paid" | "refunded";
   booking_status: "pending" | "confirmed" | "canceled";
-  travel_status: "pending" | "on-going" | "completed"|"canceled";
-  coupon_id?:string
+  travel_status: "pending" | "on-going" | "completed" | "canceled";
+  coupon_id?: string;
   start_date: string;
-  booking_date: string; 
-  review_id?: string|Review;
-  cancellation_reason?:string
+  booking_date: string;
+  review_id?: string | Review;
+  cancellation_reason?: string;
 }
 
 export interface BookingRepository {
@@ -64,9 +64,23 @@ export interface BookingRepository {
     reviewId: string | undefined
   ): Promise<Booking | null>;
   deleteReview(bookingId: string): Promise<Booking | null>;
+  getAllBookingsCount(): Promise<{
+    bookingcount: number;
+    completedbooking: number;
+    ongoingbooking: number;
+    pendingbooking: number;
+    cancelbooking: number;
+  }>;
+  getAgentBookingData(agentId:string): Promise<{
+    totalbooking: number;
+    completed: number;
+    ongoing: number;
+    pending: number;
+    cancel: number;
+  }>;
 }
 
- export interface RazorPay {
+export interface RazorPay {
   createRazorpayOrder(amount: number): Promise<Orders.RazorpayOrder>;
   verifyRazorpayOrder(
     orderId: string,
