@@ -41,4 +41,8 @@ router.get(
   (req: Request, res: Response, next: NextFunction) =>
     controller.package.getSimilarPackages(req, res, next)
 );
+router.post("/update-image",upload.single("file"),(req: Request, res: Response, next: NextFunction) => 
+  controller.package.updatePackageImage(req, res, next))
+router.post('/delete-image',(req: Request, res: Response, next: NextFunction) =>
+controller.package.deletePackageImage(req, res, next))
 export default router;

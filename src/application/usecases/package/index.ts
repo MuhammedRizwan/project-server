@@ -165,4 +165,22 @@ export class packageUseCase {
       throw error;
     }
   }
+  async updatePackageImage(image: Express.Multer.File|undefined,publicId:string){
+    try {
+      const imageUrl = await this._cloudinaryService.updateImage(image,publicId);
+      if (!imageUrl) {
+        throw new CustomError("Package not found", 404);
+      }
+      return imageUrl;
+    } catch (error) {
+      throw error
+    }
+  }
+  async deletePackageImage(publicId:string) {
+    try {
+      await this._cloudinaryService.deleteImage(publicId);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

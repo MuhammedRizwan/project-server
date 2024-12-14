@@ -3,6 +3,7 @@ import { adminController } from "../../../../adapters/controllers/admin.controll
 import categoryRouter from "./category.router";
 import bookingRouter from "./booking.router";
 import couponRouter from "./coupon.router";
+import walletRouter from "./wallet.router";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import Depencies from "../../../dependancies/depencies";
 
@@ -75,4 +76,5 @@ router.get(
 router.use("/category", jwtAuth, categoryRouter);
 router.use("/booking", jwtAuth, bookingRouter);
 router.use("/coupon", jwtAuth, couponRouter);
+router.use("/wallet",jwtAuth,walletRouter);
 export default router;

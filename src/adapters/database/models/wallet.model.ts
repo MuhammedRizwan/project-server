@@ -2,18 +2,19 @@ import { model, Schema } from "mongoose";
 
 const walletSchema = new Schema(
   {
-    user_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    wallet_user: { type: Schema.Types.ObjectId, required: true },
     walletBalance: { type: Number, default: 0 },
     transaction: [
       {
         amount: { type: Number, required: true },
+        bookingId: { type: Schema.Types.ObjectId, required: true ,ref:"Booking"},
         reason: { type: String },
         transactionType: {
           type: String,
           enum: ["credit", "debit"],
           required: true,
         },
-        date: { type: String, default: Date.now() },
+        date: { type: Date, default: new Date() },
       },
     ],
   },

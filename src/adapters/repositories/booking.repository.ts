@@ -269,4 +269,13 @@ export class BookingRepository {
       throw error;
     }
   }
+  async getAgentBookingRevenue(agentId: string): Promise<number> {  
+    try {
+      const totalRevenue = await bookingModel.find({ travel_agent_id: agentId,travel_status: "completed" }, { payment_amount:1,});
+      const revenue = totalRevenue.reduce((acc, booking) => acc + booking.payment_amount, 0);
+      return Math.floor(revenue);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

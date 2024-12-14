@@ -181,7 +181,6 @@ export class adminController {
     try {
       const {agentId}=req.params
       const bookingData=await this._AdminUseCase.getAgentBookingData(agentId);
-      console.log(bookingData,"bookingData");
       return res.status(200).json({success:true,message:"Fetched agent booking data",bookingData});
     } catch (error) {
       next(error);

@@ -122,4 +122,21 @@ export class PackageRepository {
       throw error;
     }
   }
+  async getpackageCount(agentId: string): Promise<{
+    packagecount: number;
+    unblockedpackage: number;
+  }> {
+    try {
+      const packagecount = await packageModel.countDocuments({
+        travel_agent_id: agentId,
+      });
+      const unblockedpackage = await packageModel.countDocuments({
+        travel_agent_id: agentId,
+        is_block: false,
+      });
+      return { packagecount, unblockedpackage };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

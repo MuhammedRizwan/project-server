@@ -66,4 +66,8 @@ export interface PackageRepository {
     blockedpackage: number;
     unblockedpackage: number;
   }>;
+  getpackageCount(agentId: string): Promise<{
+    packagecount: number;
+    unblockedpackage: number;
+  }>;
 }

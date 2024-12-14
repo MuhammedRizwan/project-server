@@ -11,18 +11,36 @@ export default class ChatController {
   private _io: Server;
   private _chatUseCase: ChatUseCase;
   private _userSocketMap: Map<string, string>;
+  private _agentSocketMap: Map<string, string>;
+  private _adminSocketMap: Map<string, string>;
 
   constructor(io: Server, dependencies: Dependencies) {
     this._io = io;
     this._chatUseCase = dependencies.useCase.ChatUseCase;
     this._userSocketMap = new Map();
+    this._agentSocketMap = new Map();
+    this._adminSocketMap = new Map();
   }
 
   onConnection(socket: Socket) {
     console.log(`Client connected: ${socket.handshake.query.userId}`);
     const userId=socket.handshake.query.userId
-    this._userSocketMap.set(userId as string, socket.id);
-    console.log(this._userSocketMap);
+    const role=socket.handshake.query.role
+    switch (role) {
+      case "user":
+        this._userSocketMap.set(userId as string, socket.id);
+        break;
+      case "agent":
+        this._agentSocketMap.set(userId as string, socket.id);
+        break;
+      case "admin":
+        this._adminSocketMap.set(userId as string, socket.id);
+        break;
+      default:
+        console.error(`Invalid role: ${role}`);
+        return;
+    }
+
     socket.emit('get-online-users', Array.from(this._userSocketMap.keys()));
 
     socket.on("joined-room", async (roomId) => {
@@ -77,13 +95,22 @@ export default class ChatController {
       }
     });
     socket.on("disconnect", () => {
-      for (const [key, value] of this._userSocketMap.entries()) {
-        if (value === socket.id) {
-          console.log(`Removing userId: ${key} for socket.id: ${socket.id}`);
-          this._userSocketMap.delete(key); 
-          break;
-        }
-      }
+     this.removeSocket(userId as string, role as string);
     });
+  }
+   private removeSocket(userId: string, role: string) {
+    switch (role) {
+      case "user":
+        this._userSocketMap.delete(userId);
+        break;
+      case "agent":
+        this._agentSocketMap.delete(userId);
+        break;
+      case "admin":
+        this._adminSocketMap.delete(userId);
+        break;
+      default:
+        console.error(`Invalid role: ${role}`);
+    }
   }
 }

@@ -1,11 +1,18 @@
-
 import { Orders } from "razorpay/dist/types/orders";
-import { Booking, BookingRepository, RazorPay } from "../../../domain/entities/booking/booking";
-import { PackageRepository, Packages } from "../../../domain/entities/package/package";
+import {
+  Booking,
+  BookingRepository,
+  RazorPay,
+} from "../../../domain/entities/booking/booking";
+import {
+  PackageRepository,
+  Packages,
+} from "../../../domain/entities/package/package";
 import { CustomError } from "../../../domain/errors/customError";
 import { CouponRepository } from "../../../domain/entities/coupon/coupon";
 import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
+import configKeys from "../../../config";
 
 export class BookingUseCase {
   private _bookingRepository: BookingRepository;
@@ -91,6 +98,36 @@ export class BookingUseCase {
       if (!createdBooking) {
         throw new CustomError("Booking creation failed", 500);
       }
+      const adminWallet = await this._walletRepository.getWallet(
+        configKeys.ADMIN_ID
+      );
+      if (!adminWallet) {
+        await this._walletRepository.createWallet(configKeys.ADMIN_ID);
+      }
+      const admincommision =
+        (totalPrice * Number(configKeys.ADMIN_COMMISION)) / 100;
+      console.log(admincommision);
+      const addAdminWallet = await this._walletRepository.addAdminWallet(
+        createdBooking._id as unknown as string,
+        configKeys.ADMIN_ID,
+        admincommision,
+        "admin commission for booking"
+      );
+      const agentWallet = await this._walletRepository.getWallet(
+        createdBooking.travel_agent_id as unknown as string
+      );
+      if (!agentWallet) {
+        await this._walletRepository.createWallet(
+          createdBooking.travel_agent_id as unknown as string
+        );
+      }
+      const addAgentWallet = await this._walletRepository.addAdminWallet(
+        createdBooking._id as unknown as string,
+        createdBooking.travel_agent_id as string,
+        totalPrice - admincommision,
+        "user booked a package"
+      );
+      console.log(addAgentWallet);
 
       return createdBooking;
     } catch (error) {
@@ -199,7 +236,6 @@ export class BookingUseCase {
   }
   async getTravelHistory(userId: string): Promise<Booking[]> {
     try {
-
       const booking = await this._bookingRepository.getTravelHistory(userId);
       if (!booking || booking.length === 0) {
         throw new CustomError("booking not found", 404);
@@ -245,9 +281,29 @@ export class BookingUseCase {
           }
         }
       }
+      const reason = "Booking Cancelled";
+      const admindebitAmount =
+        (refundAmount * Number(configKeys.ADMIN_COMMISION)) / 100;
+      await this._walletRepository.debitWallet(
+        bookingData._id as unknown as string,
+        configKeys.ADMIN_ID,
+        admindebitAmount,
+        reason
+      );
+      await this._walletRepository.debitWallet(
+        bookingData._id as unknown as string,
+        bookingData.travel_agent_id as unknown as string,
+        bookingData.payment_amount - admindebitAmount,
+        reason
+      );
       if (typeof bookingData?.user_id === "object") {
+        const userWallet=await this._walletRepository.getWallet(bookingData.user_id._id as string);
+        if (!userWallet) {
+          await this._walletRepository.createWallet(bookingData.user_id._id);
+        }
         const reason = "booking canceled";
         await this._walletRepository.refundWallet(
+          bookingData._id as unknown as string,
           bookingData.user_id._id,
           refundAmount,
           reason
@@ -322,11 +378,13 @@ export class BookingUseCase {
   }
   async getCompletedTravel(userId: string) {
     try {
-      const completedTravel=await this._bookingRepository.getCompletedTravel(userId)
-      if(!completedTravel){
-        throw new CustomError("couldn't find completed travel",500)
+      const completedTravel = await this._bookingRepository.getCompletedTravel(
+        userId
+      );
+      if (!completedTravel) {
+        throw new CustomError("couldn't find completed travel", 500);
       }
-      return completedTravel
+      return completedTravel;
     } catch (error) {
       throw error;
     }

@@ -21,6 +21,7 @@ export class agentController {
     try {
       const { agency_name, email, phone, location, password } =
         req.body as Iagent;
+        console.log(agency_name)
       const agent = await this._AgentUseCase.signupAgent(
         {
           agency_name,
@@ -34,27 +35,35 @@ export class agentController {
       );
       return res
         .status(201)
-        .json({ success:true, message: "Agency Registered", agent });
+        .json({ success: true, message: "Agency Registered", agent });
     } catch (error) {
       return next(error);
     }
   }
-  async loginAgent(req: Request, res: Response,next:NextFunction) {
+  async loginAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body as Iagent;
       const { agent, accessToken, refreshToken } =
         await this._AgentUseCase.loginAgent(email, password);
-        if (!agent.is_verified) {
-          return res.status(403).json({
-            status: "error",
-            message: "Please verify Email",
-            agent,
-            redirect: "/agent/verification",
-          });
-        }
-        return res.status(200).json({success:true,message:"Agency Logged In", agent, accessToken,refreshToken });
+      if (!agent.admin_verified) {
+        return res.status(403).json({
+          status: "error",
+          message: "Please verify Email",
+          agent,
+          redirect: "/agent/verification",
+        });
+      }
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Agency Logged In",
+          agent,
+          accessToken,
+          refreshToken,
+        });
     } catch (error) {
-      return next(error)
+      return next(error);
     }
   }
 
@@ -67,12 +76,12 @@ export class agentController {
       if (Otp.length != 4) {
         res.status(400).json({ message: "Incorrect OTP" });
       }
-      const agentData= await this._AgentVerification.OTPVerification(
+      const agentData = await this._AgentVerification.OTPVerification(
         Otp,
         agent.email
       );
       return res.status(200).json({
-        success:true,
+        success: true,
         message: "OTP  Verified",
         agent: agentData,
       });
@@ -82,10 +91,12 @@ export class agentController {
   }
 
   async sendOTP(req: Request, res: Response, next: NextFunction) {
-    try {      
+    try {
       const { email } = req.body;
       const OTPData = await this._AgentVerification.sendOTP(email);
-      return res.status(200).json({success:true,message:"OTP Resend",OTPData});
+      return res
+        .status(200)
+        .json({ success: true, message: "OTP Resend", OTPData });
     } catch (error) {
       return next(error);
     }
@@ -98,7 +109,9 @@ export class agentController {
         email,
         password
       );
-      return res.status(200).json({success:true,message:"Password Changed",agent});
+      return res
+        .status(200)
+        .json({ success: true, message: "Password Changed", agent });
     } catch (error) {
       return next(error);
     }
@@ -117,39 +130,70 @@ export class agentController {
   }
   async getAgent(req: Request, res: Response, next: NextFunction) {
     try {
-      const {agentId}=req.params
+      const { agentId } = req.params;
       const agent = await this._AgentUseCase.getAgent(agentId);
-      return res.status(200).json({success:true,message:"Fetched Agent Data", agent });
+      return res
+        .status(200)
+        .json({ success: true, message: "Fetched Agent Data", agent });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
   async updateAgent(req: Request, res: Response, next: NextFunction) {
     try {
-      const {agentId}=req.params
+      const { agentId } = req.params;
       const file = req.file as Express.Multer.File;
-      const agent = await this._AgentUseCase.updateAgent(agentId,req.body,file);
-      return res.status(200).json({success:true,message:"Updated Agent Data", agent });
+      const agent = await this._AgentUseCase.updateAgent(
+        agentId,
+        req.body,
+        file
+      );
+      return res
+        .status(200)
+        .json({ success: true, message: "Updated Agent Data", agent });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
   async validatePassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const {agentId}=req.params
-      const agent=await this._AgentUseCase.validatePassword(agentId,req.body.oldPassword)
-      return res.status(200).json({success:true,message:"password validated", agent });
+      const { agentId } = req.params;
+      const agent = await this._AgentUseCase.validatePassword(
+        agentId,
+        req.body.oldPassword
+      );
+      return res
+        .status(200)
+        .json({ success: true, message: "password validated", agent });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
   async updatePassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const {agentId}=req.params
-      const agent=await this._AgentUseCase.updatePassword(agentId,req.body.newPassword)
-      return res.status(200).json({success:true,message:"password updated", agent });
+      const { agentId } = req.params;
+      const agent = await this._AgentUseCase.updatePassword(
+        agentId,
+        req.body.newPassword
+      );
+      return res
+        .status(200)
+        .json({ success: true, message: "password updated", agent });
     } catch (error) {
-      next(error)
+      next(error);
+    }
+  }
+  async getDashboard(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { agentId } = req.params;
+      const { packages, booking, bookingRevenue } =
+        await this._AgentUseCase.getDashboard(agentId);
+        console.log(packages)
+      return res
+        .status(200)
+        .json({ success: true, message: "Dashboard Data", packages,booking,bookingRevenue });
+    } catch (error) {
+      next(error);
     }
   }
 }

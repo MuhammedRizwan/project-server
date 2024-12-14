@@ -12,5 +12,7 @@ const configKeys = {
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+  ADMIN_ID: process.env.ADMIN_ID as string,
+  ADMIN_COMMISION: process.env.ADMIN_COMMISION as string,
 };
 export default configKeys;

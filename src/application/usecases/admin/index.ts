@@ -11,13 +11,15 @@ import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import { PackageRepository } from "../../../domain/entities/package/package";
 import { BookingRepository } from "../../../adapters/repositories/booking.repository";
 import { response } from "express";
+import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 
 export class AdminUseCase {
   private _adminRepository: AdminRepository;
   private _userRepository: UserRepository;
   private _agentRepository: AgentRepository;
   private _packageRepository: PackageRepository;
-  private _bookingRepository:BookingRepository;
+  private _bookingRepository: BookingRepository;
+  private _walletRepository: WalletRepository;
   private _emailService: EmailService;
   private _JwtService: JwtService;
 
@@ -26,7 +28,8 @@ export class AdminUseCase {
     this._agentRepository = Dependencies.Repositories.AgentRepository;
     this._userRepository = Dependencies.Repositories.UserRepository;
     this._packageRepository = Dependencies.Repositories.PackageRepository;
-    this._bookingRepository=Dependencies.Repositories.BookingRepository;
+    this._bookingRepository = Dependencies.Repositories.BookingRepository;
+    this._walletRepository = Dependencies.Repositories.WalletRepository;
     this._emailService = Dependencies.Services.EmailService;
     this._JwtService = Dependencies.Services.JwtService;
   }
@@ -218,6 +221,7 @@ export class AdminUseCase {
       } else {
         await this._emailService.sendRejectionEmail(agent.email);
       }
+      await this._walletRepository.createWallet(agent._id);
       return agent;
     } catch (error) {
       throw error;
@@ -237,12 +241,12 @@ export class AdminUseCase {
       if (!packages) {
         throw new CustomError("Pcakge Not Found", 404);
       }
-      const bookings= await this._bookingRepository.getAllBookingsCount();
-      if(!bookings){
-        throw new CustomError("booking Not Found",404)
+      const bookings = await this._bookingRepository.getAllBookingsCount();
+      if (!bookings) {
+        throw new CustomError("booking Not Found", 404);
       }
-      const unconfirmedagency= await this._agentRepository.unconfirmedagent()     
-      return {users,agent,packages,bookings,unconfirmedagency};
+      const unconfirmedagency = await this._agentRepository.unconfirmedagent();
+      return { users, agent, packages, bookings, unconfirmedagency };
     } catch (error) {
       throw error;
     }
@@ -260,7 +264,8 @@ export class AdminUseCase {
   }
   async getAgentBookingData(agentId: string) {
     try {
-      const agentBookingData = await this._bookingRepository.getAgentBookingData(agentId);
+      const agentBookingData =
+        await this._bookingRepository.getAgentBookingData(agentId);
       if (!agentBookingData) {
         throw new CustomError("No agent booking data found", 404);
       }

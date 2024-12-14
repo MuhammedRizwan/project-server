@@ -1,12 +1,21 @@
 import { AgentRepository, Iagent } from "../../../domain/entities/agent/agent";
+import { BookingRepository } from "../../../domain/entities/booking/booking";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import { OTPRepository } from "../../../domain/entities/OTP/otp";
-import { CloudinaryService, EmailService, GenerateOtp, JwtService, PasswordService } from "../../../domain/entities/services/service";
+import { PackageRepository } from "../../../domain/entities/package/package";
+import {
+  CloudinaryService,
+  EmailService,
+  GenerateOtp,
+  JwtService,
+  PasswordService,
+} from "../../../domain/entities/services/service";
 import { CustomError } from "../../../domain/errors/customError";
-
 
 export class AgentUseCase {
   private _agentRepository: AgentRepository;
+  private _bookingRepository: BookingRepository;
+  private _packageRepository: PackageRepository;
   private _OTPRepository: OTPRepository;
   private _emailService: EmailService;
   private _passwordService: PasswordService;
@@ -16,6 +25,8 @@ export class AgentUseCase {
 
   constructor(Dependencies: Dependencies) {
     this._agentRepository = Dependencies.Repositories.AgentRepository;
+    this._bookingRepository = Dependencies.Repositories.BookingRepository;
+    this._packageRepository = Dependencies.Repositories.PackageRepository;
     this._OTPRepository = Dependencies.Repositories.OTPRepository;
     this._emailService = Dependencies.Services.EmailService;
     this._passwordService = Dependencies.Services.PasswordService;
@@ -72,6 +83,7 @@ export class AgentUseCase {
         agentData.email,
         verificationOtp
       );
+      console.log(agentData);
       const agent = await this._agentRepository.createAgent(agentData);
       if (!agent) {
         throw new CustomError("cannot signup user", 404);
@@ -145,7 +157,7 @@ export class AgentUseCase {
   async updateAgent(
     agentId: string,
     agentData: Iagent,
-    file:  Express.Multer.File | undefined
+    file: Express.Multer.File | undefined
   ) {
     try {
       const image = file
@@ -191,6 +203,32 @@ export class AgentUseCase {
         throw new CustomError("Agent not found", 404);
       }
       return agent;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getDashboard(agentId: string) {
+    try {
+      const packages = await this._packageRepository.getpackageCount(agentId);
+      if (!packages) {
+        throw new CustomError("packages not found", 404);
+      }
+      const booking = await this._bookingRepository.getAgentBookingData(
+        agentId
+      );
+      if (!booking) {
+        throw new CustomError("booking not found", 404);
+      }
+      const bookingRevenue =
+        await this._bookingRepository.getAgentBookingRevenue(agentId);
+      if (!bookingRevenue) {
+        throw new CustomError("revenue not found", 404);
+      }
+      return {
+        packages,
+        booking,
+        bookingRevenue,
+      };
     } catch (error) {
       throw error;
     }

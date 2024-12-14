@@ -4,7 +4,7 @@ import packageRouter from "./package.router";
 import categoryRouter from "./category.router";
 import bookingRouter from "./booking.router";
 import offerRouter from "./offer.router";
-
+import walletRouter from "./wallet.router";
 import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import { agentBlocked } from "../../../../adapters/middleware/block.middleware";
@@ -75,8 +75,13 @@ router.patch(
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.updatePassword(req, res, next)
 );
+router.get(
+  '/dashboard/:agentId',jwtAuth,agentBlocked,
+  (req:Request,res:Response,next:NextFunction)=>controller.agent.getDashboard(req,res,next)
+)
 router.use("/package", jwtAuth, agentBlocked, packageRouter);
 router.use("/category", jwtAuth, agentBlocked, categoryRouter);
 router.use("/booking", jwtAuth, agentBlocked, bookingRouter);
 router.use("/offer", jwtAuth, agentBlocked, offerRouter);
+router.use("/wallet",jwtAuth,walletRouter);
 export default router;

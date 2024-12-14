@@ -71,13 +71,14 @@ export interface BookingRepository {
     pendingbooking: number;
     cancelbooking: number;
   }>;
-  getAgentBookingData(agentId:string): Promise<{
+  getAgentBookingData(agentId: string): Promise<{
     totalbooking: number;
     completed: number;
     ongoing: number;
     pending: number;
     cancel: number;
   }>;
+  getAgentBookingRevenue(agentId: string): Promise<number>;
 }
 
 export interface RazorPay {

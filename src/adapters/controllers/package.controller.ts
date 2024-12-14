@@ -8,10 +8,10 @@ interface Dependencies {
     packageUseCase: packageUseCase;
   };
 }
-export interface filterData{
-  category_id:string,
-  price_range:string,
-  days:string
+export interface filterData {
+  category_id: string;
+  price_range: string;
+  days: string;
 }
 export class PackageController {
   private _packageUseCase: packageUseCase;
@@ -20,11 +20,11 @@ export class PackageController {
   }
   async createPackage(req: Request, res: Response, next: NextFunction) {
     try {
-      const { original_price,agentId } = req.body;
+      const { original_price, agentId } = req.body;
 
       const package_data: Packages = {
         ...req.body,
-        travel_agent_id:agentId,
+        travel_agent_id: agentId,
         offer_price: original_price,
         images: [],
       };
@@ -48,12 +48,24 @@ export class PackageController {
       const limit = isString(req.query.limit)
         ? parseInt(req.query.limit, 10)
         : 12;
-      const categoryId= isString(req.query.categoryId) ? req.query.categoryId : "";
-      const days=isString(req.query.days) ? req.query.days : "";
-      const startRange=isString(req.query.startRange) ? req.query.startRange : "",
-      endRange=isString(req.query.endRange) ? req.query.endRange : ""
+      const categoryId = isString(req.query.categoryId)
+        ? req.query.categoryId
+        : "";
+      const days = isString(req.query.days) ? req.query.days : "";
+      const startRange = isString(req.query.startRange)
+          ? req.query.startRange
+          : "",
+        endRange = isString(req.query.endRange) ? req.query.endRange : "";
       const { packages, totalItems, totalPages, currentPage } =
-        await this._packageUseCase.getAllPackages(search, page, limit,categoryId,days,startRange,endRange);
+        await this._packageUseCase.getAllPackages(
+          search,
+          page,
+          limit,
+          categoryId,
+          days,
+          startRange,
+          endRange
+        );
       return res.status(200).json({
         success: true,
         message: "packages fetched successfully",
@@ -150,6 +162,36 @@ export class PackageController {
         success: true,
         message: "packages fetched successfully",
         packageList,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async updatePackageImage(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { oldPublicId } = req.body;
+      const image = req.file;
+      const imageUrl = await this._packageUseCase.updatePackageImage(
+        image,
+        oldPublicId
+      );
+      return res.status(200).json({
+        success: true,
+        message: "image updated successfully",
+        imageUrl,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async deletePackageImage(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { publicId } = req.body;
+      console.log(req.body)
+      await this._packageUseCase.deletePackageImage(publicId);
+      return res.status(200).json({
+        success: true,
+        message: "image deleted successfully",
       });
     } catch (error) {
       next(error);
