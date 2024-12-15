@@ -22,7 +22,6 @@ import { AgentUseCase } from "../../application/usecases/agent";
 import { AgentVerification } from "../../application/usecases/agent/agentVerifcation";
 import { BookingUseCase } from "../../application/usecases/booking";
 import { CategoryUseCase } from "../../application/usecases/category";
-import { ChatUseCase } from "../../application/usecases/chat";
 import { ChatmessageUseCase } from "../../application/usecases/chatmessage";
 import { CouponUseCase } from "../../application/usecases/coupon/intex";
 import { OfferUseCase } from "../../application/usecases/offer";
@@ -32,6 +31,8 @@ import { ReviewUseCase } from "../../application/usecases/review";
 import { UserUseCase } from "../../application/usecases/user";
 import { Verification } from "../../application/usecases/user/userVerification";
 import { WalletUseCase } from "../../application/usecases/wallet";
+import { SocketUseCase } from "../../application/usecases/socket";
+import { NotificationRepository } from "../../adapters/repositories/notification.repository";
 
 const Repositories = {
   AdminRepository: new AdminRepository(),
@@ -47,6 +48,7 @@ const Repositories = {
   OfferRepository: new OfferRepository(),
   PostRepository: new PostRepository(),
   ReviewRepository: new ReviewRepository(),
+  NotificationRepository: new NotificationRepository(),
 };
 const Services = {
   EmailService: new EmailService(),
@@ -63,7 +65,7 @@ const useCase = {
   AgentVerification: new AgentVerification({ Repositories, Services }),
   BookingUseCase: new BookingUseCase({ Repositories, Services }),
   CategoryUseCase: new CategoryUseCase({ Repositories, Services }),
-  ChatUseCase: new ChatUseCase({ Repositories, Services }),
+  ChatUseCase: new SocketUseCase({ Repositories, Services }),
   ChatmessageUseCase: new ChatmessageUseCase({ Repositories, Services }),
   CouponUseCase: new CouponUseCase({ Repositories, Services }),
   OfferUseCase: new OfferUseCase({ Repositories, Services }),

@@ -1,3 +1,4 @@
+import { Socket } from "socket.io";
 import { AgentRepository, Iagent } from "../../../domain/entities/agent/agent";
 import { BookingRepository } from "../../../domain/entities/booking/booking";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
@@ -90,6 +91,7 @@ export class AgentUseCase {
       if (!agent) {
         throw new CustomError("cannot signup user", 404);
       }
+      
       return agent;
     } catch (error) {
       throw error;

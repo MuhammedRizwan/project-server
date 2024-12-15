@@ -2,8 +2,8 @@
 import { Server as HttpServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 
-import ChatController from "../../adapters/controllers/chat.controller";
 import Depencies from "../dependancies/depencies";
+import SocketController from "../../adapters/controllers/socket.controller";
 
 const Ioconfig = (server: HttpServer) => {
   const io = new SocketIOServer(server, {
@@ -13,7 +13,7 @@ const Ioconfig = (server: HttpServer) => {
     },
   });
 
-  const socketController = new ChatController(io, Depencies);
+  const socketController = new SocketController(io, Depencies);
 
   io.on("connection", (socket) => {
     socketController.onConnection(socket);

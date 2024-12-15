@@ -13,6 +13,7 @@ interface Dependencies {
 export class agentController {
   private _AgentUseCase: AgentUseCase;
   private _AgentVerification: AgentVerification;
+  
   constructor(dependencies: Dependencies) {
     this._AgentUseCase = dependencies.useCase.AgentUseCase;
     this._AgentVerification = dependencies.useCase.AgentVerification;

@@ -1,22 +1,23 @@
 import { Server, Socket } from "socket.io";
-import { ChatUseCase } from "../../application/usecases/chat";
+import { SocketUseCase } from "../../application/usecases/socket";
+
 
 interface Dependencies {
   useCase: {
-    ChatUseCase: ChatUseCase;
+    ChatUseCase: SocketUseCase;
   };
 }
 
-export default class ChatController {
+export default class SocketController {
   private _io: Server;
-  private _chatUseCase: ChatUseCase;
+  private _socketUseCase: SocketUseCase;
   private _userSocketMap: Map<string, string>;
   private _agentSocketMap: Map<string, string>;
   private _adminSocketMap: Map<string, string>;
 
   constructor(io: Server, dependencies: Dependencies) {
     this._io = io;
-    this._chatUseCase = dependencies.useCase.ChatUseCase;
+    this._socketUseCase = dependencies.useCase.ChatUseCase;
     this._userSocketMap = new Map();
     this._agentSocketMap = new Map();
     this._adminSocketMap = new Map();
@@ -59,7 +60,7 @@ export default class ChatController {
         message_type,
         message_time,
       }) => {
-        const savedMessage = await this._chatUseCase.saveMessage(
+        const savedMessage = await this._socketUseCase.saveMessage(
           roomId,
           senderId,
           message,
@@ -126,6 +127,33 @@ export default class ChatController {
         break;
       default:
         console.error(`Invalid role: ${role}`);
+    }
+  }
+  emitToAdmins(event: string, data: any) {
+    for (const [_, socketId] of this._adminSocketMap) {
+      this._io.to(socketId).emit(event, data);
+    }
+  }
+  emitToUsers(event: string, data: any) {
+    for (const [_, socketId] of this._userSocketMap) {
+      this._io.to(socketId).emit(event, data);
+    }
+  }
+  emitToAgents(event: string, data: any) {
+    for (const [_, socketId] of this._agentSocketMap) {
+      this._io.to(socketId).emit(event, data);
+    }
+  }
+  emitToUser(event: string, data: any, userId: string) {
+    const toSocketId = this._userSocketMap.get(userId);
+    if (toSocketId) {
+      this._io.to(toSocketId).emit(event, data);
+    }
+  }
+  emitToAgent(event: string, data: any, userId: string) {
+    const toSocketId = this._agentSocketMap.get(userId);
+    if (toSocketId) {
+      this._io.to(toSocketId).emit(event, data);
     }
   }
 }

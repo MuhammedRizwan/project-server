@@ -4,6 +4,7 @@ import { BookingRepository, RazorPay } from "../booking/booking";
 import { CategoryRepository } from "../category/category";
 import { ChatRepository } from "../chat/chat";
 import { CouponRepository } from "../coupon/coupon";
+import { NotificationRepository } from "../notification/notification";
 import { OfferRepository } from "../offer/offer";
 import { OTPRepository } from "../OTP/otp";
 import { PackageRepository } from "../package/package";
@@ -34,6 +35,7 @@ export interface Dependencies {
     OfferRepository: OfferRepository;
     PostRepository: PostRepository;
     ReviewRepository: ReviewRepository;
+    NotificationRepository: NotificationRepository;
   };
   Services: {
     EmailService: EmailService;
