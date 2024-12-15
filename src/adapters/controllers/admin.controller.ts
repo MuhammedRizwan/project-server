@@ -150,7 +150,7 @@ export class adminController {
   }
   async getDashboard(req: Request, res: Response, next: NextFunction) {
     try {
-      const { users, agent, packages, bookings, unconfirmedagency } =
+      const { users, agent, packages, bookings,revenue, unconfirmedagency } =
         await this._AdminUseCase.getDashboardData();
       return res
         .status(200)
@@ -161,6 +161,7 @@ export class adminController {
           agent,
           packages,
           bookings,
+          revenue,
           unconfirmedagency,
         });
     } catch (error) {
@@ -184,6 +185,16 @@ export class adminController {
       return res.status(200).json({success:true,message:"Fetched agent booking data",bookingData});
     } catch (error) {
       next(error);
+    }
+  }
+  async getBarChartData(req: Request, res: Response, next: NextFunction) {
+    try {
+      const barChartData = await this._AdminUseCase.getBarChartData();
+      return res
+        .status(200)
+        .json({ success: true, message: "Fetched bar chart data", barChartData });
+    } catch (error) {
+      return next(error);
     }
   }
 }

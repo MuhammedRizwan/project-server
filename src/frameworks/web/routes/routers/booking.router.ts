@@ -51,4 +51,9 @@ router.get(
   (req: Request, res: Response, next: NextFunction) =>
     controller.booking.completedTravel(req, res, next)
 );
+router.get(
+  "/new-bookings/:agentId",
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.booking.getNewBooking(req, res, next)
+);
 export default router;

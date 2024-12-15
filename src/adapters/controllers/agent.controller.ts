@@ -21,7 +21,6 @@ export class agentController {
     try {
       const { agency_name, email, phone, location, password } =
         req.body as Iagent;
-        console.log(agency_name)
       const agent = await this._AgentUseCase.signupAgent(
         {
           agency_name,
@@ -188,10 +187,20 @@ export class agentController {
       const { agentId } = req.params;
       const { packages, booking, bookingRevenue } =
         await this._AgentUseCase.getDashboard(agentId);
-        console.log(packages)
       return res
         .status(200)
         .json({ success: true, message: "Dashboard Data", packages,booking,bookingRevenue });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getBarChart(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { agentId } = req.params;
+      const barChartData = await this._AgentUseCase.getBarChart(agentId);
+      return res
+        .status(200)
+        .json({ success: true, message: "Dashboard Data", barChartData });
     } catch (error) {
       next(error);
     }

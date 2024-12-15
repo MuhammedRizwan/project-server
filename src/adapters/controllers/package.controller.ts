@@ -187,7 +187,6 @@ export class PackageController {
   async deletePackageImage(req: Request, res: Response, next: NextFunction) {
     try {
       const { publicId } = req.body;
-      console.log(req.body)
       await this._packageUseCase.deletePackageImage(publicId);
       return res.status(200).json({
         success: true,

@@ -24,42 +24,57 @@ export default class ChatController {
 
   onConnection(socket: Socket) {
     console.log(`Client connected: ${socket.handshake.query.userId}`);
-    const userId=socket.handshake.query.userId
-    const role=socket.handshake.query.role
+    const userId = socket.handshake.query.userId;
+    const role = socket.handshake.query.role;
     switch (role) {
       case "user":
         this._userSocketMap.set(userId as string, socket.id);
+        socket.join("user-room");
         break;
       case "agent":
         this._agentSocketMap.set(userId as string, socket.id);
+        socket.join("agent-room");
         break;
       case "admin":
         this._adminSocketMap.set(userId as string, socket.id);
+        socket.join("admin-room");
         break;
       default:
         console.error(`Invalid role: ${role}`);
         return;
     }
 
-    socket.emit('get-online-users', Array.from(this._userSocketMap.keys()));
+    socket.emit("get-online-users", Array.from(this._userSocketMap.keys()));
 
     socket.on("joined-room", async (roomId) => {
       socket.join(roomId);
     });
-    socket.on("message", async ({ roomId,recieverId, senderId, message,message_type,message_time }) => {
-      const savedMessage = await this._chatUseCase.saveMessage(
+    socket.on(
+      "message",
+      async ({
         roomId,
+        recieverId,
         senderId,
         message,
+        message_type,
         message_time,
-        message_type
-      );
-      const toSocketId = this._userSocketMap.get(recieverId);
-      if (toSocketId) {
-        this._io.to(toSocketId).emit("new-badge",savedMessage)
+      }) => {
+        const savedMessage = await this._chatUseCase.saveMessage(
+          roomId,
+          senderId,
+          message,
+          message_time,
+          message_type
+        );
+        const toSocketId = this._userSocketMap.get(recieverId);
+        if (toSocketId) {
+          this._io.to(toSocketId).emit("new-badge", savedMessage);
+        }
+        this._io
+          .to(String(savedMessage.chatId))
+          .emit("new-message", savedMessage);
       }
-      this._io.to(String(savedMessage.chatId)).emit("new-message", savedMessage);
-    });
+    );
     socket.on("initiate-video-call", ({ to, signalData, myId }) => {
       const toSocketId = this._userSocketMap.get(to);
       if (!toSocketId) return;
@@ -95,10 +110,10 @@ export default class ChatController {
       }
     });
     socket.on("disconnect", () => {
-     this.removeSocket(userId as string, role as string);
+      this.removeSocket(userId as string, role as string);
     });
   }
-   private removeSocket(userId: string, role: string) {
+  private removeSocket(userId: string, role: string) {
     switch (role) {
       case "user":
         this._userSocketMap.delete(userId);

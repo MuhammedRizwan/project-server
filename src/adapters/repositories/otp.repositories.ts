@@ -1,6 +1,6 @@
 import { ObjectId } from "mongoose";
 import { IOTP } from "../../domain/entities/OTP/otp";
-import OTPModel from "../database/models/otp.model";
+import OTPModel from "../database/models/OTP.model";
 
 export class OTPRepository {
   async createOTP(otpData: IOTP):Promise<IOTP>{

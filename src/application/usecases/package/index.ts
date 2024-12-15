@@ -48,7 +48,7 @@ export class packageUseCase {
     startRange: string,
     endRange: string
   ) {
-    const query: any = search
+    const query:any = search
       ? { destinations: { $elemMatch: { $regex: search, $options: "i" } } }
       : {};
     if (categoryId) {

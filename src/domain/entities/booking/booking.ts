@@ -79,6 +79,19 @@ export interface BookingRepository {
     cancel: number;
   }>;
   getAgentBookingRevenue(agentId: string): Promise<number>;
+  gookingData(): Promise<
+    {
+      _id: number; // Month (1-12)
+      totalBookings: number;
+    }[]
+  >;
+  agentBookings(agentId: string): Promise<
+  {
+    _id: number; // Month (1-12)
+    totalBookings: number;
+  }[]
+>;
+getNewBooking(agentId: string): Promise<Booking[] | null>;
 }
 
 export interface RazorPay {

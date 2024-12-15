@@ -12,6 +12,7 @@ import { PackageRepository } from "../../../domain/entities/package/package";
 import { BookingRepository } from "../../../adapters/repositories/booking.repository";
 import { response } from "express";
 import { WalletRepository } from "../../../domain/entities/wallet/wallet";
+import configKeys from "../../../config";
 
 export class AdminUseCase {
   private _adminRepository: AdminRepository;
@@ -245,8 +246,14 @@ export class AdminUseCase {
       if (!bookings) {
         throw new CustomError("booking Not Found", 404);
       }
+      const revenue = await this._walletRepository.getWallet(
+        configKeys.ADMIN_ID
+      );
+      if (!revenue) {
+        throw new CustomError("revenue Not Found", 404);
+      }
       const unconfirmedagency = await this._agentRepository.unconfirmedagent();
-      return { users, agent, packages, bookings, unconfirmedagency };
+      return { users, agent, packages, bookings, revenue, unconfirmedagency };
     } catch (error) {
       throw error;
     }
@@ -270,6 +277,38 @@ export class AdminUseCase {
         throw new CustomError("No agent booking data found", 404);
       }
       return agentBookingData;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getBarChartData() {
+    try {
+      const bookings = await this._bookingRepository.gookingData();
+      if (bookings.length === 0) {
+        throw new CustomError("No booking data found", 404);
+      }
+      const walletTransactions = await this._walletRepository.WalletData();
+      if (walletTransactions.length === 0) {
+        throw new CustomError("No wallet data found", 404);
+      }
+      const data = Array.from({ length: 12 }, (_, index) => {
+        const month = index + 1;
+        const bookingData = bookings.find((b) => b._id === month) || {
+          totalBookings: 0,
+        };
+        const walletData = walletTransactions.find(
+          (w) => w._id === month
+        ) || {
+          totalTransactions: 0,
+        };
+
+        return {
+          month,
+          totalBookings: bookingData.totalBookings,
+          totalTransactions: walletData.totalTransactions,
+        };
+      });
+      return data;
     } catch (error) {
       throw error;
     }

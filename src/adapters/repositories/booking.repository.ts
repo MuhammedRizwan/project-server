@@ -229,9 +229,7 @@ export class BookingRepository {
       throw error;
     }
   }
-  async getAgentBookingData(
-    agentId: string
-  ): Promise<{
+  async getAgentBookingData(agentId: string): Promise<{
     totalbooking: number;
     completed: number;
     ongoing: number;
@@ -253,7 +251,7 @@ export class BookingRepository {
       const pending = await bookingModel.countDocuments({
         travel_agent_id: agentId,
         travel_status: "pending",
-      })
+      });
       const cancel = await bookingModel.countDocuments({
         travel_agent_id: agentId,
         travel_status: "canceled",
@@ -269,11 +267,81 @@ export class BookingRepository {
       throw error;
     }
   }
-  async getAgentBookingRevenue(agentId: string): Promise<number> {  
+  async getAgentBookingRevenue(agentId: string): Promise<number> {
     try {
-      const totalRevenue = await bookingModel.find({ travel_agent_id: agentId,travel_status: "completed" }, { payment_amount:1,});
-      const revenue = totalRevenue.reduce((acc, booking) => acc + booking.payment_amount, 0);
+      const totalRevenue = await bookingModel.find(
+        { travel_agent_id: agentId, travel_status: "completed" },
+        { payment_amount: 1 }
+      );
+      const revenue = totalRevenue.reduce(
+        (acc, booking) => acc + booking.payment_amount,
+        0
+      );
       return Math.floor(revenue);
+    } catch (error) {
+      throw error;
+    }
+  }
+  async gookingData() {
+    try {
+      const year = new Date().getFullYear();
+      const bookings = await bookingModel.aggregate([
+        {
+          $match: {
+            booking_date: {
+              $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+              $lte: new Date(`${year}-12-31T23:59:59.999Z`),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$booking_date" },
+            totalBookings: { $sum: "$payment_amount" },
+          },
+        },
+      ]);
+      return bookings;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async agentBookings(agentId: string) {
+    try {
+      const year = new Date().getFullYear();
+      const agentBookings = await bookingModel.aggregate([
+        {
+          $match: {
+            travel_agent_id: agentId, // Match the travel agent ID
+            booking_date: {
+              $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+              $lte: new Date(`${year}-12-31T23:59:59.999Z`),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$booking_date" },
+            agentBookings: { $sum: 1 },
+          },
+        },
+      ]);
+      return agentBookings;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getNewBooking(agentId: string): Promise<Booking[] | null> {
+    try {
+      const booking = await bookingModel
+        .find({
+          travel_agent_id: agentId,
+          travel_status: "pending",
+          booking_status: "pending",
+        })
+        .sort({ createdAt: -1 })
+        .limit(5).populate('user_id');
+      return booking as unknown as Booking[] | null;
     } catch (error) {
       throw error;
     }

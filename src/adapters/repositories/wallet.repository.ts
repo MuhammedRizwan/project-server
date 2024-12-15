@@ -94,4 +94,66 @@ export class WalletRepository {
       }
     );
   }
+  async WalletData() {
+    try {
+      const year = new Date().getFullYear();
+      const walletTransactions = await walletModel.aggregate([
+        {
+          $unwind: "$transaction",
+        },
+        {
+          $match: {
+            "transaction.transactionType": "credit",
+            "transaction.date": {
+              $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+              $lte: new Date(`${year}-12-31T23:59:59.999Z`),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$transaction.date" },
+            totalTransactions: { $sum: "$transaction.amount" },
+          },
+        },
+      ]);
+      return walletTransactions;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getWalletData(agentId: string): Promise<
+    {
+      _id: number; // Month (1-12)
+      totalTransactions: number;
+    }[]
+  > {
+    try {
+      const year = new Date().getFullYear();
+      const walletTransactions = await walletModel.aggregate([
+        {
+          $unwind: "$transaction",
+        },
+        {
+          $match: {
+            wallet_user: agentId,
+            "transaction.transactionType": "credit",
+            "transaction.date": {
+              $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+              $lte: new Date(`${year}-12-31T23:59:59.999Z`),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$transaction.date" },
+            totalTransactions: { $sum: "$transaction.amount" },
+          },
+        },
+      ]);
+      return walletTransactions;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

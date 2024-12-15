@@ -6,7 +6,7 @@ interface Dependencies {
     BookingUseCase: BookingUseCase;
   };
 }
-const isString = (value: unknown): value is string => typeof value === 'string';
+const isString = (value: unknown): value is string => typeof value === "string";
 export class BookingController {
   private _bookingUseCase: BookingUseCase;
   constructor(dependencies: Dependencies) {
@@ -17,7 +17,7 @@ export class BookingController {
       const booking = await this._bookingUseCase.createBooking(req.body);
       return res
         .status(201)
-        .json({ success:true, message: "Booking Created", booking });
+        .json({ success: true, message: "Booking Created", booking });
     } catch (error) {
       next(error);
     }
@@ -28,7 +28,7 @@ export class BookingController {
       const booking = await this._bookingUseCase.getBooking(bookingId);
       return res
         .status(200)
-        .json({ success:true, message: "Fetched Booking", booking });
+        .json({ success: true, message: "Fetched Booking", booking });
     } catch (error) {
       next(error);
     }
@@ -40,11 +40,25 @@ export class BookingController {
       const limit = isString(req.query.limit)
         ? parseInt(req.query.limit, 10)
         : 3;
-      const { agentId,packageId } = req.params;
-      const {bookingData,totalItems,totalPages,currentPage}= await this._bookingUseCase.getAgentBookings(agentId,packageId,search,page,limit);
+      const { agentId, packageId } = req.params;
+      const { bookingData, totalItems, totalPages, currentPage } =
+        await this._bookingUseCase.getAgentBookings(
+          agentId,
+          packageId,
+          search,
+          page,
+          limit
+        );
       return res
         .status(200)
-        .json({ success:true, message: "Fetched All Bookings",bookingData,totalItems,totalPages,currentPage });
+        .json({
+          success: true,
+          message: "Fetched All Bookings",
+          bookingData,
+          totalItems,
+          totalPages,
+          currentPage,
+        });
     } catch (error) {
       next(error);
     }
@@ -53,14 +67,22 @@ export class BookingController {
     try {
       const search = isString(req.query.search) ? req.query.search : "";
       const page = isString(req.query.page) ? parseInt(req.query.page, 10) : 1;
-      const limit = isString(req.query.limit) ? parseInt(req.query.limit, 10) : 8;
+      const limit = isString(req.query.limit)
+        ? parseInt(req.query.limit, 10)
+        : 8;
 
-      const {bookingData,totalItems,totalPages,currentPage}= await this._bookingUseCase.getAdminBookings(search,
-        page,
-        limit);
+      const { bookingData, totalItems, totalPages, currentPage } =
+        await this._bookingUseCase.getAdminBookings(search, page, limit);
       return res
         .status(200)
-        .json({ status: "success", message: "Fetched All Bookings", filterData:bookingData,totalItems,totalPages,currentPage });
+        .json({
+          status: "success",
+          message: "Fetched All Bookings",
+          filterData: bookingData,
+          totalItems,
+          totalPages,
+          currentPage,
+        });
     } catch (error) {
       next(error);
     }
@@ -71,7 +93,7 @@ export class BookingController {
       const order = await this._bookingUseCase.createRazorpayOrder(amount);
       return res
         .status(200)
-        .json({ success:true, message: "razorpay Created", order });
+        .json({ success: true, message: "razorpay Created", order });
     } catch (error) {
       next(error);
     }
@@ -86,57 +108,104 @@ export class BookingController {
       );
       return res
         .status(200)
-        .json({ success:true, message: "payment verified", successpayment });
+        .json({ success: true, message: "payment verified", successpayment });
     } catch (error) {
       next(error);
     }
   }
-  async getTravelHistory(req:Request,res:Response,next:NextFunction){
+  async getTravelHistory(req: Request, res: Response, next: NextFunction) {
     try {
-      const {userId}=req.params
-      const travelHistory=await this._bookingUseCase.getTravelHistory(userId)
-      return res.status(200).json({success:true,message:"user travel history",travelHistory})
+      const { userId } = req.params;
+      const travelHistory = await this._bookingUseCase.getTravelHistory(userId);
+      return res
+        .status(200)
+        .json({ success: true, message: "user travel history", travelHistory });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
-  async cancelBooking(req:Request,res:Response,next:NextFunction){
+  async cancelBooking(req: Request, res: Response, next: NextFunction) {
     try {
-      const {bookingId}=req.params
-      const {cancellation_reason}=req.body
-      const cancelBooking=await this._bookingUseCase.cancelBooking(bookingId,cancellation_reason)
-      return res.status(200).json({success:true,message:"booking canceled",cancelBooking})
+      const { bookingId } = req.params;
+      const { cancellation_reason } = req.body;
+      const cancelBooking = await this._bookingUseCase.cancelBooking(
+        bookingId,
+        cancellation_reason
+      );
+      return res
+        .status(200)
+        .json({ success: true, message: "booking canceled", cancelBooking });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
-  async changeStatus(req:Request,res:Response,next:NextFunction){
+  async changeStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const {bookingId}=req.params
-      const {status,cancellation_reason}=req.body
-      const changeBookingstatus=await this._bookingUseCase.changeBookingStatus(bookingId,status,cancellation_reason)
-      return res.status(200).json({success:true,message:"booking status updated",changeBookingstatus})
+      const { bookingId } = req.params;
+      const { status, cancellation_reason } = req.body;
+      const changeBookingstatus =
+        await this._bookingUseCase.changeBookingStatus(
+          bookingId,
+          status,
+          cancellation_reason
+        );
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "booking status updated",
+          changeBookingstatus,
+        });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
-  async changeTravelStatus(req:Request,res:Response,next:NextFunction){
+  async changeTravelStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const {bookingId}=req.params
-      const {travel_status}=req.body
-      const changeTravelstatus=await this._bookingUseCase.changeTravelStatus(bookingId,travel_status)
-      return res.status(200).json({success:true,message:"booking status updated",changeTravelstatus})
+      const { bookingId } = req.params;
+      const { travel_status } = req.body;
+      const changeTravelstatus = await this._bookingUseCase.changeTravelStatus(
+        bookingId,
+        travel_status
+      );
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "booking status updated",
+          changeTravelstatus,
+        });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
-  async completedTravel(req:Request,res:Response,next:NextFunction){
-   try {
-    const {userId}=req.params
-    const travelHistory=await this._bookingUseCase.getCompletedTravel(userId)
-    return res.status(200).json({success:true,message:"user completed travel history",travelHistory})
-   } catch (error) {
-    next(error)
-   } 
+  async completedTravel(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId } = req.params;
+      const travelHistory = await this._bookingUseCase.getCompletedTravel(
+        userId
+      );
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "user completed travel history",
+          travelHistory,
+        });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getNewBooking(req: Request, res: Response, next: NextFunction) {
+    try {
+      const{agentId} = req.params
+      console.log(agentId,"hello")
+      const newBooking = await this._bookingUseCase.getNewBooking(agentId);
+      return res
+        .status(200)
+        .json({ success: true, message: "new bookings", newBooking });
+    } catch (error) {
+      next(error);
+    }
   }
 }

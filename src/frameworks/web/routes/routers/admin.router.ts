@@ -73,6 +73,12 @@ router.get(
   (req: Request, res: Response, next: NextFunction) =>
     controller.admin.getAgentBookingData(req, res, next)
 );
+router.get(
+  '/bar-chart-data',
+  jwtAuth,
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.admin.getBarChartData(req, res, next)
+)
 router.use("/category", jwtAuth, categoryRouter);
 router.use("/booking", jwtAuth, bookingRouter);
 router.use("/coupon", jwtAuth, couponRouter);

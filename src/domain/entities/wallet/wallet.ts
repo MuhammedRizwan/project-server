@@ -32,4 +32,16 @@ export interface WalletRepository {
     amount: number,
     reason: string
   ): Promise<void>;
+  WalletData(): Promise<
+    {
+      _id: number; // Month (1-12)
+      totalTransactions: number;
+    }[]
+  >;
+  getWalletData(agentId: string): Promise<
+    {
+      _id: number; // Month (1-12)
+      totalTransactions: number;
+    }[]
+  >;
 }

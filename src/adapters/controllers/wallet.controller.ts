@@ -14,7 +14,6 @@ export class walletController {
   async getAllWallet(req: Request, res: Response, next: NextFunction) {
     try {
       const { userId } = req.params;
-      console.log(userId, "userId");
       const wallet = await this._walletUseCase.getAllWallet(userId);
       return res.status(200).json({
         success: true,

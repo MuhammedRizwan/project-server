@@ -10,8 +10,6 @@ import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import { agentBlocked } from "../../../../adapters/middleware/block.middleware";
 import Depencies from "../../../dependancies/depencies";
 
-
-
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -76,12 +74,23 @@ router.patch(
     controller.agent.updatePassword(req, res, next)
 );
 router.get(
-  '/dashboard/:agentId',jwtAuth,agentBlocked,
-  (req:Request,res:Response,next:NextFunction)=>controller.agent.getDashboard(req,res,next)
-)
+  "/dashboard/:agentId",
+  jwtAuth,
+  agentBlocked,
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.agent.getDashboard(req, res, next)
+);
+router.get(
+  "/bar-chart/:agentId",
+  jwtAuth,
+  agentBlocked,
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.agent.getBarChart(req, res, next)
+);
+
 router.use("/package", jwtAuth, agentBlocked, packageRouter);
 router.use("/category", jwtAuth, agentBlocked, categoryRouter);
 router.use("/booking", jwtAuth, agentBlocked, bookingRouter);
 router.use("/offer", jwtAuth, agentBlocked, offerRouter);
-router.use("/wallet",jwtAuth,walletRouter);
+router.use("/wallet", jwtAuth, agentBlocked, walletRouter);
 export default router;

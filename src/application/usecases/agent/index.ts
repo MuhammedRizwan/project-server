@@ -10,6 +10,7 @@ import {
   JwtService,
   PasswordService,
 } from "../../../domain/entities/services/service";
+import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 import { CustomError } from "../../../domain/errors/customError";
 
 export class AgentUseCase {
@@ -17,6 +18,7 @@ export class AgentUseCase {
   private _bookingRepository: BookingRepository;
   private _packageRepository: PackageRepository;
   private _OTPRepository: OTPRepository;
+  private _walletRepository: WalletRepository;
   private _emailService: EmailService;
   private _passwordService: PasswordService;
   private _JwtService: JwtService;
@@ -28,6 +30,7 @@ export class AgentUseCase {
     this._bookingRepository = Dependencies.Repositories.BookingRepository;
     this._packageRepository = Dependencies.Repositories.PackageRepository;
     this._OTPRepository = Dependencies.Repositories.OTPRepository;
+    this._walletRepository=Dependencies.Repositories.WalletRepository
     this._emailService = Dependencies.Services.EmailService;
     this._passwordService = Dependencies.Services.PasswordService;
     this._JwtService = Dependencies.Services.JwtService;
@@ -83,7 +86,6 @@ export class AgentUseCase {
         agentData.email,
         verificationOtp
       );
-      console.log(agentData);
       const agent = await this._agentRepository.createAgent(agentData);
       if (!agent) {
         throw new CustomError("cannot signup user", 404);
@@ -229,6 +231,33 @@ export class AgentUseCase {
         booking,
         bookingRevenue,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getBarChart(agentId: string) {
+    try {
+      const bookings = await this._bookingRepository.agentBookings(agentId);
+      if (!bookings) {
+        throw new CustomError("revenue not found", 404);
+      }
+      const walletTransactions = await this._walletRepository.getWalletData(agentId);
+      const data = Array.from({ length: 12 }, (_, index) => {
+        const month = index + 1; // Month starts at 1
+        const bookingData = bookings.find((b) => b._id === month) || {
+          totalBookings: 0,
+        };
+        const walletData = walletTransactions.find((w) => w._id === month) || {
+          totalTransactions: 0,
+        };
+
+        return {
+          month,
+          totalBookings: bookingData.totalBookings,
+          totalTransactions: walletData.totalTransactions,
+        };
+      });
+      return data;
     } catch (error) {
       throw error;
     }

@@ -106,7 +106,6 @@ export class BookingUseCase {
       }
       const admincommision =
         (totalPrice * Number(configKeys.ADMIN_COMMISION)) / 100;
-      console.log(admincommision);
       const addAdminWallet = await this._walletRepository.addAdminWallet(
         createdBooking._id as unknown as string,
         configKeys.ADMIN_ID,
@@ -127,7 +126,6 @@ export class BookingUseCase {
         totalPrice - admincommision,
         "user booked a package"
       );
-      console.log(addAgentWallet);
 
       return createdBooking;
     } catch (error) {
@@ -297,7 +295,9 @@ export class BookingUseCase {
         reason
       );
       if (typeof bookingData?.user_id === "object") {
-        const userWallet=await this._walletRepository.getWallet(bookingData.user_id._id as string);
+        const userWallet = await this._walletRepository.getWallet(
+          bookingData.user_id._id as string
+        );
         if (!userWallet) {
           await this._walletRepository.createWallet(bookingData.user_id._id);
         }
@@ -385,6 +385,17 @@ export class BookingUseCase {
         throw new CustomError("couldn't find completed travel", 500);
       }
       return completedTravel;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async getNewBooking(agentId: string) {
+    try {
+      const bookings=await this._bookingRepository.getNewBooking(agentId);
+      if (!bookings) {  
+        throw new CustomError("couldn't find new booking", 500);
+      }
+      return bookings;
     } catch (error) {
       throw error;
     }
