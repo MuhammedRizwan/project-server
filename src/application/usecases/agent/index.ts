@@ -31,7 +31,7 @@ export class AgentUseCase {
     this._bookingRepository = Dependencies.Repositories.BookingRepository;
     this._packageRepository = Dependencies.Repositories.PackageRepository;
     this._OTPRepository = Dependencies.Repositories.OTPRepository;
-    this._walletRepository=Dependencies.Repositories.WalletRepository
+    this._walletRepository = Dependencies.Repositories.WalletRepository;
     this._emailService = Dependencies.Services.EmailService;
     this._passwordService = Dependencies.Services.PasswordService;
     this._JwtService = Dependencies.Services.JwtService;
@@ -91,7 +91,7 @@ export class AgentUseCase {
       if (!agent) {
         throw new CustomError("cannot signup user", 404);
       }
-      
+
       return agent;
     } catch (error) {
       throw error;
@@ -131,6 +131,9 @@ export class AgentUseCase {
     }
     if (agent.admin_verified == "reject") {
       throw new CustomError("Agency were Rejected", 400);
+    }
+    if (agent.admin_verified !== "accept") {
+      throw new CustomError("Agency are not verified", 400);
     }
     const accessToken = this._JwtService.generateAccessToken(agent._id);
     if (!accessToken) {
@@ -243,7 +246,9 @@ export class AgentUseCase {
       if (!bookings) {
         throw new CustomError("revenue not found", 404);
       }
-      const walletTransactions = await this._walletRepository.getWalletData(agentId);
+      const walletTransactions = await this._walletRepository.getWalletData(
+        agentId
+      );
       const data = Array.from({ length: 12 }, (_, index) => {
         const month = index + 1; // Month starts at 1
         const bookingData = bookings.find((b) => b._id === month) || {

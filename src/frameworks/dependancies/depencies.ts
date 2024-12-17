@@ -11,6 +11,7 @@ import { PostRepository } from "../../adapters/repositories/post.repository";
 import { ReviewRepository } from "../../adapters/repositories/review.repository";
 import { UserRepository } from "../../adapters/repositories/user.repositories";
 import { WalletRepository } from "../../adapters/repositories/wallet.repository";
+import { NotificationRepository } from "../../adapters/repositories/notification.repository";
 import { CloudinaryService } from "../services/cloudinaryService";
 import { EmailService } from "../services/emailService";
 import { GenerateOtp } from "../services/genarateOTP";
@@ -32,7 +33,7 @@ import { UserUseCase } from "../../application/usecases/user";
 import { Verification } from "../../application/usecases/user/userVerification";
 import { WalletUseCase } from "../../application/usecases/wallet";
 import { SocketUseCase } from "../../application/usecases/socket";
-import { NotificationRepository } from "../../adapters/repositories/notification.repository";
+import NotificationUseCase from "../../application/usecases/notification";
 
 const Repositories = {
   AdminRepository: new AdminRepository(),
@@ -65,7 +66,7 @@ const useCase = {
   AgentVerification: new AgentVerification({ Repositories, Services }),
   BookingUseCase: new BookingUseCase({ Repositories, Services }),
   CategoryUseCase: new CategoryUseCase({ Repositories, Services }),
-  ChatUseCase: new SocketUseCase({ Repositories, Services }),
+  SocketUseCase: new SocketUseCase({ Repositories, Services }),
   ChatmessageUseCase: new ChatmessageUseCase({ Repositories, Services }),
   CouponUseCase: new CouponUseCase({ Repositories, Services }),
   OfferUseCase: new OfferUseCase({ Repositories, Services }),
@@ -75,6 +76,7 @@ const useCase = {
   UserUseCase: new UserUseCase({ Repositories, Services }),
   Verification: new Verification({ Repositories, Services }),
   WalletUseCase: new WalletUseCase({ Repositories, Services }),
+  NotificationUseCase: new NotificationUseCase({ Repositories, Services }),
 };
 
 const Depencies = {

@@ -11,6 +11,7 @@ import reviewRouter from "./review.router";
 import postRouter from "./post.router";
 import walletRouter from "./wallet.router";
 import chatRouter from "./chat.router";
+import notificationRouter from "./notification.router";
 import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import { userBlocked } from "../../../../adapters/middleware/block.middleware";
@@ -84,5 +85,6 @@ router.use("/wallet",jwtAuth,userBlocked,walletRouter);
 router.use("/review",jwtAuth,userBlocked,reviewRouter);
 router.use("/post",jwtAuth,userBlocked,postRouter);
 router.use("/chat",jwtAuth,userBlocked,chatRouter);
+router.use("/notification",jwtAuth,userBlocked,notificationRouter);
 
 export default router;

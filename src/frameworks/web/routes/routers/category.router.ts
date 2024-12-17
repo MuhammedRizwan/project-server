@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { categoryController } from "../../../../adapters/controllers/category.controller";
-
 import multer from "multer";
 import Depencies from "../../../dependancies/depencies";
 

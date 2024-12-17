@@ -4,6 +4,7 @@ import categoryRouter from "./category.router";
 import bookingRouter from "./booking.router";
 import couponRouter from "./coupon.router";
 import walletRouter from "./wallet.router";
+import notificationRouter from "./notification.router";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import Depencies from "../../../dependancies/depencies";
 
@@ -74,13 +75,14 @@ router.get(
     controller.admin.getAgentBookingData(req, res, next)
 );
 router.get(
-  '/bar-chart-data',
+  "/bar-chart-data",
   jwtAuth,
   (req: Request, res: Response, next: NextFunction) =>
     controller.admin.getBarChartData(req, res, next)
-)
+);
 router.use("/category", jwtAuth, categoryRouter);
 router.use("/booking", jwtAuth, bookingRouter);
 router.use("/coupon", jwtAuth, couponRouter);
-router.use("/wallet",jwtAuth,walletRouter);
+router.use("/wallet", jwtAuth, walletRouter);
+router.use("/notification", jwtAuth, notificationRouter);
 export default router;

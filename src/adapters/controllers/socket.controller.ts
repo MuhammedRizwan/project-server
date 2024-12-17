@@ -1,10 +1,10 @@
 import { Server, Socket } from "socket.io";
 import { SocketUseCase } from "../../application/usecases/socket";
-
+import INotification from "../../domain/entities/notification/notification";
 
 interface Dependencies {
   useCase: {
-    ChatUseCase: SocketUseCase;
+    SocketUseCase: SocketUseCase;
   };
 }
 
@@ -17,7 +17,7 @@ export default class SocketController {
 
   constructor(io: Server, dependencies: Dependencies) {
     this._io = io;
-    this._socketUseCase = dependencies.useCase.ChatUseCase;
+    this._socketUseCase = dependencies.useCase.SocketUseCase;
     this._userSocketMap = new Map();
     this._agentSocketMap = new Map();
     this._adminSocketMap = new Map();
@@ -27,6 +27,7 @@ export default class SocketController {
     console.log(`Client connected: ${socket.handshake.query.userId}`);
     const userId = socket.handshake.query.userId;
     const role = socket.handshake.query.role;
+    console.log(role)
     switch (role) {
       case "user":
         this._userSocketMap.set(userId as string, socket.id);
@@ -110,6 +111,43 @@ export default class SocketController {
         socket.to(toSocketId).emit("video-muted", { isMuted });
       }
     });
+
+    socket.on("to-the-admin", async (data) => {
+      const Notification = await this._socketUseCase.saveAdminNotification(
+        data
+      );
+      this.emitToAdmins("show-notification", Notification);
+    });
+
+    socket.on("to-the-agent", async (data) => {
+      const Notification = await this._socketUseCase.saveNotification(data);
+      const toSocketId = this._agentSocketMap.get(Notification.to);
+      if (toSocketId) {
+        this._io.to(toSocketId).emit("show-notification", Notification);
+      }
+    });
+
+    socket.on("to-agents", async (data) => {
+      const Notification = await this._socketUseCase.saveNotification(data);
+      for (const [_, socketId] of this._agentSocketMap) {
+        this._io.to(socketId).emit("show-notification", Notification);
+      }
+    });
+
+    socket.on("to-users", async (data) => {
+      const Notification = await this._socketUseCase.saveNotification(data);
+      for (const [_, socketId] of this._userSocketMap) {
+        this._io.to(socketId).emit("show-notification", Notification);
+      }
+    });
+    socket.on("to-the-user", async (data) => {
+      const Notification = await this._socketUseCase.saveNotification(data);
+      const toSocketId = this._userSocketMap.get(Notification.to);
+      if (toSocketId) {
+        this._io.to(toSocketId).emit("show-notification", Notification);
+      }
+    });
+
     socket.on("disconnect", () => {
       this.removeSocket(userId as string, role as string);
     });
@@ -129,31 +167,9 @@ export default class SocketController {
         console.error(`Invalid role: ${role}`);
     }
   }
-  emitToAdmins(event: string, data: any) {
+  emitToAdmins(event: string, data: INotification) {
     for (const [_, socketId] of this._adminSocketMap) {
       this._io.to(socketId).emit(event, data);
-    }
-  }
-  emitToUsers(event: string, data: any) {
-    for (const [_, socketId] of this._userSocketMap) {
-      this._io.to(socketId).emit(event, data);
-    }
-  }
-  emitToAgents(event: string, data: any) {
-    for (const [_, socketId] of this._agentSocketMap) {
-      this._io.to(socketId).emit(event, data);
-    }
-  }
-  emitToUser(event: string, data: any, userId: string) {
-    const toSocketId = this._userSocketMap.get(userId);
-    if (toSocketId) {
-      this._io.to(toSocketId).emit(event, data);
-    }
-  }
-  emitToAgent(event: string, data: any, userId: string) {
-    const toSocketId = this._agentSocketMap.get(userId);
-    if (toSocketId) {
-      this._io.to(toSocketId).emit(event, data);
     }
   }
 }
