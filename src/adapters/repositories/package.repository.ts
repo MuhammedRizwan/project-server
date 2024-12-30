@@ -81,7 +81,7 @@ export class PackageRepository {
     return packages as unknown as Packages[];
   }
   async packageCount(query: FilterQuery<Packages>): Promise<number> {
-    const totalItems = await packageModel.countDocuments(query);
+    const totalItems = await packageModel.countDocuments({...query,is_block:false});
     return totalItems;
   }
   async addofferPackage(agentId: string): Promise<Packages[] | null> {

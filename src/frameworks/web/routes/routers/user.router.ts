@@ -77,12 +77,12 @@ router.post('/validate-password/:userId',jwtAuth,userBlocked,(req:Request,res:Re
 router.put('/change-password/:userId',jwtAuth,userBlocked,(req:Request,res:Response,next:NextFunction)=>{
   controller.user.updatePassword(req,res,next)
 })
-router.use("/packages",jwtAuth,userBlocked,packageRouter);
-router.use("/category",jwtAuth,userBlocked,categoryRouter);
+router.use("/packages",userBlocked,packageRouter);
+router.use("/category",userBlocked,categoryRouter);
 router.use("/booking",jwtAuth,userBlocked,bookingRouter);
 router.use("/coupon",jwtAuth,userBlocked,couponRouter);
 router.use("/wallet",jwtAuth,userBlocked,walletRouter);
-router.use("/review",jwtAuth,userBlocked,reviewRouter);
+router.use("/review",userBlocked,reviewRouter);
 router.use("/post",jwtAuth,userBlocked,postRouter);
 router.use("/chat",jwtAuth,userBlocked,chatRouter);
 router.use("/notification",jwtAuth,userBlocked,notificationRouter);

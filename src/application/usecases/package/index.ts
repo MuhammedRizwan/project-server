@@ -78,10 +78,11 @@ export class packageUseCase {
       throw new CustomError("Package not found", 404);
     }
     const totalItems = await this._packageRepository.packageCount(query);
+    console.log(totalItems)
     if (totalItems === 0) {
       throw new CustomError("Packages not found", 404);
     }
-
+    console.log(totalItems,limit,"total Items")
     return {
       packages,
       totalItems,

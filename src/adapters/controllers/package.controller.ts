@@ -66,6 +66,7 @@ export class PackageController {
           startRange,
           endRange
         );
+        console.log(totalPages,"total pages")
       return res.status(200).json({
         success: true,
         message: "packages fetched successfully",
