@@ -2,6 +2,7 @@ import { FilterQuery, Types } from "mongoose";
 import { Coupon } from "../../domain/entities/coupon/coupon";
 import { CustomError } from "../../domain/errors/customError";
 import couponModel from "../database/models/coupon.model";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 export class CouponRepository {
   async createCoupon(coupon: Coupon): Promise<Coupon> {
@@ -15,11 +16,11 @@ export class CouponRepository {
       const completedQuery={...query,...filterData}
       const coupons = await couponModel.find(completedQuery).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
       if (!coupons) {
-        throw new CustomError("Coupons not found", 404);
+        throw new CustomError("Coupons not found", HttpStatusCode.NOT_FOUND);
       }
       return coupons.map((coupon) => ({...coupon.toObject(),_id: coupon._id.toString(), used_by: coupon.used_by.map((id: Types.ObjectId) => id.toString()), }));
     } catch (error) {
-      throw new CustomError("Failed to get coupons", 500);
+      throw new CustomError("Failed to get coupons", HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
   async couponCount(query: FilterQuery<Coupon>,filterData:object): Promise<number> {
@@ -41,7 +42,7 @@ export class CouponRepository {
       { new: true }
     );
     if (!updatedCoupon) {
-      throw new CustomError(`Coupon with ID ${coupon_id} not found.`, 404);
+      throw new CustomError(`Coupon with ID ${coupon_id} not found.`, HttpStatusCode.NOT_FOUND);
     }
     return updatedCoupon;
   }
@@ -56,12 +57,12 @@ export class CouponRepository {
         { new: true }
       );
       if (!updatedCoupon) {
-        throw new CustomError(`Coupon with ID ${coupon_id} not found.`, 404);
+        throw new CustomError(`Coupon with ID ${coupon_id} not found.`, HttpStatusCode.NOT_FOUND);
       }
 
       return updatedCoupon;
     } catch (error) {
-      throw new CustomError("Failed to update coupon", 500);
+      throw new CustomError("Failed to update coupon", HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
   async getUnblockedCoupons(): Promise<Coupon[] | null> {
@@ -81,7 +82,7 @@ export class CouponRepository {
         { new: true }
       );
       if (!updatedCoupon) {
-        throw new CustomError(`Coupon with ID ${coupon_id} not found.`, 404);
+        throw new CustomError(`Coupon with ID ${coupon_id} not found.`, HttpStatusCode.NOT_FOUND);
       }
       return updatedCoupon;
     } catch (error) {

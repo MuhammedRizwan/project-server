@@ -2,6 +2,7 @@ import { FilterQuery, ObjectId } from "mongoose";
 import { Iuser } from "../../domain/entities/user/user";
 import { CustomError } from "../../domain/errors/customError";
 import userModel from "../database/models/user.model";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 export class UserRepository {
   async createUser(user: Iuser): Promise<Iuser> {
@@ -89,7 +90,7 @@ export class UserRepository {
     try {
       const user: Iuser | null = await userModel.findById(id);
       if (!user) {
-        throw new CustomError("user not found", 404);
+        throw new CustomError("user not found", HttpStatusCode.NOT_FOUND);
       }
       return user;
     } catch (error) {
@@ -122,7 +123,7 @@ export class UserRepository {
         { new: true }
       );
       if (!user) {
-        throw new CustomError("user not found", 404);
+        throw new CustomError("user not found", HttpStatusCode.NOT_FOUND);
       }
       return user;
     } catch (error) {
@@ -137,7 +138,7 @@ export class UserRepository {
         { new: true }
       );
       if (!user) {
-        throw new CustomError("user not found", 404);
+        throw new CustomError("user not found", HttpStatusCode.NOT_FOUND);
       }
       return user;
     } catch (error) {
@@ -161,7 +162,7 @@ export class UserRepository {
         profile_picture: 1,
       });
       if (!users) {
-        throw new CustomError("No users found", 404);
+        throw new CustomError("No users found", HttpStatusCode.NOT_FOUND);
       }
       return users;
     } catch (error) {

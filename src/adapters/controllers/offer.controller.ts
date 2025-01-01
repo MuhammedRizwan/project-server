@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { OfferUseCase } from "../../application/usecases/offer";
 import { isString } from "./admin.controller";
 import { CustomError } from "../../domain/errors/customError";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -31,7 +32,7 @@ export class OfferController {
           limit,
           filter
         );
-      res.status(200).json({
+      res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Offers fetched successfully",
         filterData: offers,
@@ -47,7 +48,7 @@ export class OfferController {
     try {
       const offer = await this._OfferUseCase.createOffer(req.body, req.file);
       res
-        .status(201)
+        .status(HttpStatusCode.CREATED)
         .json({ success: true, message: "Offer created successfully", offer });
     } catch (error) {
       next(error);
@@ -58,7 +59,7 @@ export class OfferController {
       const { offerId } = req.params;
       const offer = await this._OfferUseCase.getOffer(offerId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Offer fetched successfully", offer });
     } catch (error) {
       next(error);
@@ -73,7 +74,7 @@ export class OfferController {
         req.file
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Offer updated successfully", offer });
     } catch (error) {
       next(error);
@@ -88,7 +89,7 @@ export class OfferController {
         is_active
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Offer status updated", offer });
     } catch (error) {
       next(error);
@@ -99,7 +100,7 @@ export class OfferController {
       const { agentId } = req.params;
       const packages = await this._OfferUseCase.addofferPackage(agentId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({
           success: true,
           message: "Offer updated successfully",
@@ -113,7 +114,7 @@ export class OfferController {
     try {
       await this._OfferUseCase.executeOffers()
     } catch (error) {
-      throw new CustomError("internal seerver error",500)
+      throw new CustomError("internal seerver error",HttpStatusCode.INTERNAL_SERVER_ERROR)
     }
   }
 }

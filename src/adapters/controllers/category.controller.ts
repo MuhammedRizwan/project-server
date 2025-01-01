@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { CategoryUseCase } from "../../application/usecases/category";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -19,7 +20,7 @@ export class categoryController {
         Document: req.file,
       });
       return res
-        .status(201)
+        .status(HttpStatusCode.CREATED)
         .json({ success:true, message: "Category Created", category });
     } catch (error) {
       next(error);
@@ -38,7 +39,7 @@ export class categoryController {
         limit,
         filter
       );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         status: "success",
         message: "Fetched All Categories",
         filterData:categories,
@@ -57,7 +58,7 @@ export class categoryController {
         id,
         is_block
       );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success:true,
         message: `${
           category.is_block ? "Category Blocked" : "Category Unblocked"
@@ -79,7 +80,7 @@ export class categoryController {
         }
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true, message: "Category Updated", category });
     } catch (error) {
       next(error);
@@ -88,7 +89,7 @@ export class categoryController {
   async getUnblockedCategories(req:Request,res:Response,next:NextFunction){
     try {
       const categories=await this._categoryUseCase.getUnblockedCategories();
-      return res.status(200).json({success:true,message:"Fetched All Categories",categories})
+      return res.status(HttpStatusCode.OK).json({success:true,message:"Fetched All Categories",categories})
     } catch (error) {
       next(error)
     }

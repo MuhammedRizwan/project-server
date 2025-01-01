@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { packageUseCase } from "../../application/usecases/package";
 import { Packages } from "../../domain/entities/package/package";
 import { isString } from "./admin.controller";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -32,7 +33,7 @@ export class PackageController {
         package_data,
         req.files
       );
-      return res.status(201).json({
+      return res.status(HttpStatusCode.CREATED).json({
         success: true,
         message: "package created successfully",
         data: result,
@@ -66,8 +67,7 @@ export class PackageController {
           startRange,
           endRange
         );
-        console.log(totalPages,"total pages")
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "packages fetched successfully",
         packages,
@@ -87,7 +87,7 @@ export class PackageController {
         req.body,
         req.files
       );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "package updated successfully",
         data: result,
@@ -104,7 +104,7 @@ export class PackageController {
         packageId,
         is_block
       );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "package updated successfully",
         Package,
@@ -117,7 +117,7 @@ export class PackageController {
     try {
       const { packageId } = req.params;
       const packageData = await this._packageUseCase.getPackage(packageId);
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "package fetched successfully",
         packageData,
@@ -141,7 +141,7 @@ export class PackageController {
           page,
           limit
         );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "packages fetched successfully",
         packages,
@@ -159,7 +159,7 @@ export class PackageController {
       const packageList = await this._packageUseCase.getSimilarPackages(
         packageId
       );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "packages fetched successfully",
         packageList,
@@ -176,7 +176,7 @@ export class PackageController {
         image,
         oldPublicId
       );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "image updated successfully",
         imageUrl,
@@ -189,7 +189,7 @@ export class PackageController {
     try {
       const { publicId } = req.body;
       await this._packageUseCase.deletePackageImage(publicId);
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "image deleted successfully",
       });

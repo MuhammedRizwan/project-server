@@ -1,5 +1,6 @@
 import { Coupon, CouponRepository } from "../../../domain/entities/coupon/coupon";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 import { CustomError } from "../../../domain/errors/customError";
 
 
@@ -15,11 +16,11 @@ export class CouponUseCase {
         coupon.coupon_code
       )
       if(couponExists) {
-        throw new CustomError("coupon already exists", 409)
+        throw new CustomError("coupon already exists", HttpStatusCode.CONFLICT)
       }
       const createdCoupon = await this._couponRepository.createCoupon(coupon);
       if (!createdCoupon) {
-        throw new CustomError("coupon not created", 500);
+        throw new CustomError("coupon not created", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return createdCoupon;
     } catch (error) {
@@ -31,7 +32,7 @@ export class CouponUseCase {
     try {
       const coupon = await this._couponRepository.getCouponByCode(coupon_code);
       if (!coupon) {
-        throw new CustomError("coupon not found", 404);
+        throw new CustomError("coupon not found", HttpStatusCode.NOT_FOUND);
       }
       return coupon;
     } catch (error) {
@@ -51,11 +52,11 @@ export class CouponUseCase {
         filterData
       );
       if (!coupons) {
-        throw new CustomError("coupons not found", 404);
+        throw new CustomError("coupons not found", HttpStatusCode.NOT_FOUND);
       }
       const totalItems = await this._couponRepository.couponCount(query,filterData);
       if (totalItems === 0) {
-        throw new CustomError("coupons not found", 404);
+        throw new CustomError("coupons not found", HttpStatusCode.NOT_FOUND);
       }
 
       return {
@@ -73,7 +74,7 @@ export class CouponUseCase {
     try {
       const coupon = await this._couponRepository.getCouponById(coupon_id);
       if (!coupon) {
-        throw new CustomError("coupon not found", 404);
+        throw new CustomError("coupon not found", HttpStatusCode.NOT_FOUND);
       }
       return coupon;
     } catch (error) {
@@ -87,7 +88,7 @@ export class CouponUseCase {
         coupon
       );
       if (!couponData) {
-        throw new CustomError("coupon not found", 404);
+        throw new CustomError("coupon not found", HttpStatusCode.NOT_FOUND);
       }
       return couponData;
     } catch (error) {
@@ -104,7 +105,7 @@ export class CouponUseCase {
         is_active
       );
       if (!couponData) {
-        throw new CustomError("coupon not found", 404);
+        throw new CustomError("coupon not found", HttpStatusCode.NOT_FOUND);
       }
       return couponData;
     } catch (error) {
@@ -115,7 +116,7 @@ export class CouponUseCase {
     try {
       const coupons = await this._couponRepository.getUnblockedCoupons();
       if (!coupons) {
-        throw new CustomError("coupons not found", 404);
+        throw new CustomError("coupons not found", HttpStatusCode.NOT_FOUND);
       }
       return coupons;
     } catch (error) {
@@ -126,19 +127,19 @@ export class CouponUseCase {
     try {
       const coupon = await this._couponRepository.getCouponById(coupon_id);
       if (!coupon) {
-        throw new CustomError("coupon not found", 404);
+        throw new CustomError("coupon not found", HttpStatusCode.NOT_FOUND);
       }
       if (coupon.valid_upto) {
         const currentDate = new Date();
         const valid_upto = new Date(coupon.valid_upto);
         if (currentDate > valid_upto) {
-          throw new CustomError("coupon expired", 404);
+          throw new CustomError("coupon expired", HttpStatusCode.NOT_FOUND);
         }
         if (coupon.used_by.includes(user_id)) {
-          throw new CustomError("coupon already used", 404);
+          throw new CustomError("coupon already used", HttpStatusCode.NOT_FOUND);
         }
         if (Number(coupon.min_amount) > totalPrice) {
-          throw new CustomError("coupon min amount not reached", 404);
+          throw new CustomError("coupon min amount not reached", HttpStatusCode.NOT_FOUND);
         }
         let discountAmount = (totalPrice * Number(coupon.percentage)) / 100;
         if (discountAmount > Number(coupon.max_amount)) {

@@ -6,6 +6,7 @@ import { Iuser } from "../../domain/entities/user/user";
 import bookingModel from "../database/models/booking.model";
 import { CustomError } from "../../domain/errors/customError";
 import Review from "../../domain/entities/review/review";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 export class BookingRepository {
   async createBooking(booking: Booking): Promise<Booking | null> {
@@ -121,7 +122,7 @@ export class BookingRepository {
         { new: true }
       );
       if (!booking) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       return booking as unknown as Booking | null;
     } catch (error) {
@@ -139,7 +140,7 @@ export class BookingRepository {
         { new: true }
       );
       if (!booking) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       return booking as unknown as Booking | null;
     } catch (error) {
@@ -165,7 +166,7 @@ export class BookingRepository {
         { new: true }
       );
       if (!booking) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       const populatedBooking = await bookingModel
         .findById(booking._id)
@@ -185,7 +186,7 @@ export class BookingRepository {
         { new: true }
       );
       if (!booking) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       const populatedBooking = await bookingModel
         .findById(booking._id)

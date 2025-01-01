@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { BookingUseCase } from "../../application/usecases/booking";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -16,7 +17,7 @@ export class BookingController {
     try {
       const booking = await this._bookingUseCase.createBooking(req.body);
       return res
-        .status(201)
+        .status(HttpStatusCode.CREATED)
         .json({ success: true, message: "Booking Created", booking });
     } catch (error) {
       next(error);
@@ -27,7 +28,7 @@ export class BookingController {
       const { bookingId } = req.params;
       const booking = await this._bookingUseCase.getBooking(bookingId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Fetched Booking", booking });
     } catch (error) {
       next(error);
@@ -50,7 +51,7 @@ export class BookingController {
           limit
         );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({
           success: true,
           message: "Fetched All Bookings",
@@ -74,7 +75,7 @@ export class BookingController {
       const { bookingData, totalItems, totalPages, currentPage } =
         await this._bookingUseCase.getAdminBookings(search, page, limit);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({
           status: "success",
           message: "Fetched All Bookings",
@@ -92,7 +93,7 @@ export class BookingController {
       const { amount } = req.body;
       const order = await this._bookingUseCase.createRazorpayOrder(amount);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "razorpay Created", order });
     } catch (error) {
       next(error);
@@ -107,7 +108,7 @@ export class BookingController {
         razorpaySignature
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "payment verified", successpayment });
     } catch (error) {
       next(error);
@@ -118,7 +119,7 @@ export class BookingController {
       const { userId } = req.params;
       const travelHistory = await this._bookingUseCase.getTravelHistory(userId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "user travel history", travelHistory });
     } catch (error) {
       next(error);
@@ -133,7 +134,7 @@ export class BookingController {
         cancellation_reason
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "booking canceled", cancelBooking });
     } catch (error) {
       next(error);
@@ -150,7 +151,7 @@ export class BookingController {
           cancellation_reason
         );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({
           success: true,
           message: "booking status updated",
@@ -169,7 +170,7 @@ export class BookingController {
         travel_status
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({
           success: true,
           message: "booking status updated",
@@ -186,7 +187,7 @@ export class BookingController {
         userId
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({
           success: true,
           message: "user completed travel history",
@@ -199,10 +200,9 @@ export class BookingController {
   async getNewBooking(req: Request, res: Response, next: NextFunction) {
     try {
       const{agentId} = req.params
-      console.log(agentId,"hello")
       const newBooking = await this._bookingUseCase.getNewBooking(agentId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "new bookings", newBooking });
     } catch (error) {
       next(error);

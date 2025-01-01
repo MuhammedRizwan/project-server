@@ -2,6 +2,7 @@ import configKeys from "../../../config";
 import { ChatRepository } from "../../../domain/entities/chat/chat";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import INotification, { NotificationRepository } from "../../../domain/entities/notification/notification";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 import { CustomError } from "../../../domain/errors/customError";
 
 export class SocketUseCase {
@@ -27,7 +28,7 @@ export class SocketUseCase {
         message_type
       );
       if (!savedMessage) {
-        throw new CustomError("message not saved", 500);
+        throw new CustomError("message not saved", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return savedMessage;
     } catch (error) {
@@ -40,7 +41,7 @@ export class SocketUseCase {
       data.toModel="Admin"
       const savedNotification = await this._notificationRepository.saveNotification(data);
       if(!savedNotification){
-        throw new CustomError("INotification not saved",500)
+        throw new CustomError("INotification not saved",HttpStatusCode.INTERNAL_SERVER_ERROR)
       }
       return savedNotification
     } catch (error) {
@@ -51,7 +52,7 @@ export class SocketUseCase {
     try {
       const savedNotification = await this._notificationRepository.saveNotification(data);
       if(!savedNotification){
-        throw new CustomError("INotification not saved",500)
+        throw new CustomError("INotification not saved",HttpStatusCode.INTERNAL_SERVER_ERROR)
       }
       return savedNotification
     } catch (error) {

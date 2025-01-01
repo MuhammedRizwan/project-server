@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { UserUseCase } from "../../application/usecases/user";
 import { Iuser } from "../../domain/entities/user/user";
 import { Verification } from "../../application/usecases/user/userVerification";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -26,7 +27,7 @@ export class userController {
         password,
       });
       return res
-        .status(201)
+        .status(HttpStatusCode.CREATED)
         .json({ success:true, message: "User registered ", user });
     } catch (error) {
       return next(error);
@@ -39,7 +40,7 @@ export class userController {
         await this._UserUseCase.signinUser(email, password);
 
       if (!user.is_verified) {
-        return res.status(403).json({
+        return res.status(HttpStatusCode.FORBIDDEN).json({
           success: false,
           message: "Verify the OTP",
           user,
@@ -48,7 +49,7 @@ export class userController {
       }
       req['user'] = {userId:user._id as string};
 
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success:true,
         message: "Logged in successfully",
         user,
@@ -64,15 +65,15 @@ export class userController {
     try {
       const { otp, user } = req.body;
       if (!user) {
-        res.status(404).json({ success:false, message: "User Not Found" });
+        res.status(HttpStatusCode.NOT_FOUND).json({ success:false, message: "User Not Found" });
       }
       if (otp.length != 4) {
-        res.status(400).json({ success:false, message: "Incorrect OTP" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ success:false, message: "Incorrect OTP" });
       }
       const { userData, accessToken, refreshToken } =
         await this._Verification.OTPVerification(otp, user.email);
 
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success:true,
         message: "OTP  Verified",
         user: userData,
@@ -88,7 +89,7 @@ export class userController {
       const { email } = req.body;
       const OTP = await this._Verification.sendOTP(email);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true, message: "Resend OTP", OTP });
     } catch (error) {
       return next(error);
@@ -99,7 +100,7 @@ export class userController {
       const { email, password } = req.body;
       const user = await this._Verification.changePassword(email, password);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true, message: "Password changed", user });
     } catch (error) {
       return next(error);
@@ -117,14 +118,14 @@ export class userController {
       return res.json({ accessToken: accessToken });
     } catch (error) {
       const err = error as Error;
-      return res.status(400).json({ error: err.message });
+      return res.status(HttpStatusCode.BAD_REQUEST).json({ error: err.message });
     }
   }
   async googleLogin(req: Request, res: Response, next: NextFunction) {
     try {
       const { user, accessToken, refreshToken } =await this._UserUseCase.googleLogin(req.body)
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true,message: "Logged in successfully", user, accessToken, refreshToken });
     } catch (error) {
       return next(error);
@@ -134,7 +135,7 @@ export class userController {
     try {
       const {userId}=req.params
       const user=await this._UserUseCase.getProfile(userId)
-      return res.status(200).json({ success:true,message:"user profile", user });
+      return res.status(HttpStatusCode.OK).json({ success:true,message:"user profile", user });
     } catch (error) {
       next(error)
     }
@@ -143,7 +144,7 @@ export class userController {
     try {
       const {userId}=req.params
       const user=await this._UserUseCase.updateProfile(userId,req.body,req.file)
-      return res.status(200).json({success:true,message:"user profile updated", user });
+      return res.status(HttpStatusCode.OK).json({success:true,message:"user profile updated", user });
       
     } catch (error) {
       next(error)
@@ -153,7 +154,7 @@ export class userController {
     try {
       const {userId} = req.params
       const user=await this._UserUseCase.validatePassword(userId,req.body.oldPassword)
-      return res.status(200).json({ success:true,message:"password validated", user });
+      return res.status(HttpStatusCode.OK).json({ success:true,message:"password validated", user });
     }catch(error){
       next(error)
     }
@@ -162,7 +163,7 @@ export class userController {
     try {
       const {userId} = req.params
       const user = await this._UserUseCase.updatePassword(userId,req.body.newPassword)
-      return res.status(200).json({ success:true,message:"password updated", user });
+      return res.status(HttpStatusCode.OK).json({ success:true,message:"password updated", user });
     } catch (error) {
       next(error)
     }

@@ -1,5 +1,6 @@
 import Review from "../../domain/entities/review/review";
 import { Iuser } from "../../domain/entities/user/user";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 import { CustomError } from "../../domain/errors/customError";
 import reviewModel from "../database/models/review.modal";
 
@@ -7,7 +8,7 @@ export class ReviewRepository {
   async createReview(reviewData: Review): Promise<Review> {
     try {
       const reviewDoc = await reviewModel.create(reviewData);
-      if (!reviewDoc) throw new CustomError("Review not created", 500);
+      if (!reviewDoc) throw new CustomError("Review not created", HttpStatusCode.INTERNAL_SERVER_ERROR);
       const review: Review = reviewDoc.toObject() as unknown as Review;
       return review;
     } catch (error) {
@@ -21,7 +22,7 @@ export class ReviewRepository {
         reviewData,
         { new: true }
       );
-      if (!reviewDoc) throw new CustomError("Review not created", 500);
+      if (!reviewDoc) throw new CustomError("Review not created", HttpStatusCode.INTERNAL_SERVER_ERROR);
       const review: Review = reviewDoc.toObject() as unknown as Review;
       return review;
     } catch (error) {
@@ -34,7 +35,7 @@ export class ReviewRepository {
       if (deletedReview) {
         return true;
       } else {
-        throw new CustomError("Review not deleted", 500);
+        throw new CustomError("Review not deleted", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
     } catch (error) {
       throw error;
@@ -43,7 +44,7 @@ export class ReviewRepository {
   async getReviews(packageId: string): Promise<Review[]> {
     try {
       const reviews = await reviewModel.find({ package_id: packageId }).populate<{ user_id: Iuser }>("user_id");
-      if (!reviews) throw new CustomError("Reviews not found", 404);
+      if (!reviews) throw new CustomError("Reviews not found", HttpStatusCode.NOT_FOUND);
       return reviews as unknown as Review[];
     } catch (error) {
       throw error;

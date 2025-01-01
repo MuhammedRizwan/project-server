@@ -1,0 +1,25 @@
+enum SocketEvent {
+  GetOnlineUsers = "get-online-users",
+  JoinedRoom = "joined-room",
+  Message = "message",
+  InitiateVideoCall = "initiate-video-call",
+  IncomingVideoCall = "incomming-video-call",
+  AnswerVideoCall = "answer-video-call",
+  AcceptVideoCall = "accept-video-call",
+  EndVideoCall = "end-video-call",
+  VideoCallEnded = "video-call-ended",
+  AudioMute = "audio-mute",
+  AudioMuted = "audio-muted",
+  VideoMute = "video-mute",
+  VideoMuted = "video-muted",
+  ToTheAdmin = "to-the-admin",
+  ToTheAgent = "to-the-agent",
+  ToAgents = "to-agents",
+  ToUsers = "to-users",
+  ToTheUser = "to-the-user",
+  ShowNotification = "show-notification",
+  NewMessage = "new-message",
+  NewBadge = "new-badge",
+}
+
+export default SocketEvent;

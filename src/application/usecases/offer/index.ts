@@ -2,6 +2,7 @@ import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import Offer, { OfferRepository } from "../../../domain/entities/offer/offer";
 import { PackageRepository, Packages } from "../../../domain/entities/package/package";
 import { CloudinaryService } from "../../../domain/entities/services/service";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 import { CustomError } from "../../../domain/errors/customError";
 
 
@@ -38,7 +39,7 @@ export class OfferUseCase {
         filterData
       );
       if (!offers) {
-        throw new CustomError("Offers not found", 404);
+        throw new CustomError("Offers not found", HttpStatusCode.NOT_FOUND);
       }
       const totalItems = await this._offerRepository.countDocument(
         agentId,
@@ -46,7 +47,7 @@ export class OfferUseCase {
         filterData
       );
       if (totalItems === 0) {
-        throw new CustomError("offer Not Found", 404);
+        throw new CustomError("offer Not Found", HttpStatusCode.NOT_FOUND);
       }
       return {
         offers,
@@ -68,7 +69,7 @@ export class OfferUseCase {
       }
       const newOffer = await this._offerRepository.createOffer(offer);
       if (!newOffer) {
-        throw new CustomError("Offer not created", 500);
+        throw new CustomError("Offer not created", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return newOffer;
     } catch (error) {
@@ -79,7 +80,7 @@ export class OfferUseCase {
     try {
       const offer = await this._offerRepository.getOffer(offerId);
       if (!offer) {
-        throw new CustomError("Offer not found", 404);
+        throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       }
       return offer;
     } catch (error) {
@@ -100,7 +101,7 @@ export class OfferUseCase {
         offer
       );
       if (!updatedOffer) {
-        throw new CustomError("Offer not found", 404);
+        throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       }
       return updatedOffer;
     } catch (error) {
@@ -114,7 +115,7 @@ export class OfferUseCase {
         is_active
       );
       if (!offer) {
-        throw new CustomError("Offer not found", 404);
+        throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       }
       if (offer.is_active) {
         if (offer.valid_from < new Date()) {
@@ -145,7 +146,7 @@ export class OfferUseCase {
     try {
       const packageData = this._PackageRepository.addofferPackage(agentId);
       if (!packageData) {
-        throw new CustomError("package Not found", 404);
+        throw new CustomError("package Not found", HttpStatusCode.NOT_FOUND);
       }
       return packageData;
     } catch (error) {

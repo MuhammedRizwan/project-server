@@ -1,6 +1,7 @@
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import Post, { PostRepository } from "../../../domain/entities/post/post";
 import { CloudinaryService } from "../../../domain/entities/services/service";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 import { CustomError } from "../../../domain/errors/customError";
 
 
@@ -16,7 +17,7 @@ export class PostUseCase {
     try {
       const postData = await this._postRepository.getAllPost();
       if (postData.length == 0) {
-        throw new CustomError("No post found", 404);
+        throw new CustomError("No post found", HttpStatusCode.NOT_FOUND);
       }
       return postData;
     } catch (error) {
@@ -41,7 +42,7 @@ export class PostUseCase {
       }
       const createdPost = this._postRepository.createPost(post);
       if (!createdPost) {
-        throw new CustomError("couldn't create post", 404);
+        throw new CustomError("couldn't create post", HttpStatusCode.NOT_FOUND);
       }
       return createdPost;
     } catch (error) {
@@ -67,7 +68,7 @@ export class PostUseCase {
       }
       const editedPost = this._postRepository.editPost(postId, post);
       if (!editedPost) {
-        throw new CustomError("Cannot Edit Post", 500);
+        throw new CustomError("Cannot Edit Post", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return editedPost;
     } catch (error) {
@@ -78,7 +79,7 @@ export class PostUseCase {
     try {
       const postData = await this._postRepository.userPost(userId);
       if (!postData) {
-        throw new CustomError("cannot fetch post", 404);
+        throw new CustomError("cannot fetch post", HttpStatusCode.NOT_FOUND);
       }
       return postData;
     } catch (error) {
@@ -89,7 +90,7 @@ export class PostUseCase {
     try {
       const postData = await this._postRepository.getPost(postId);
       if (!postData) {
-        throw new CustomError("cannot found Post", 500);
+        throw new CustomError("cannot found Post", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return postData;
     } catch (error) {
@@ -100,7 +101,7 @@ export class PostUseCase {
     try {
       const postData = await this._postRepository.addLike(postId, userId);
       if (!postData) {
-        throw new CustomError("cannot found Post", 500);
+        throw new CustomError("cannot found Post", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return postData;
     } catch (error) {
@@ -111,7 +112,7 @@ export class PostUseCase {
     try {
       const postData = await this._postRepository.removeLike(postId, userId);
       if (!postData) {
-        throw new CustomError("cannot found Post", 500);
+        throw new CustomError("cannot found Post", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return postData;
     } catch (error) {
@@ -126,7 +127,7 @@ export class PostUseCase {
         comment
       );
       if (!postData) {
-        throw new CustomError("cannot found Post", 500);
+        throw new CustomError("cannot found Post", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return postData;
     } catch (error) {
@@ -137,7 +138,7 @@ export class PostUseCase {
     try {
       const postData = await this._postRepository.removeComment(postId, commentId);
       if (!postData) {
-        throw new CustomError("cannot found Post", 500);
+        throw new CustomError("cannot found Post", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return postData;
     } catch (error) {

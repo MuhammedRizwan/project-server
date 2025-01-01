@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../../domain/errors/customError";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 export const errorHandler = (
   err: CustomError | Error,
@@ -15,7 +16,7 @@ export const errorHandler = (
       message: err.message,
     });
   }
-  return res.status(500).json({
+  return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
     status: "error",
     message: "Internal Server Error",
     details: err.message,

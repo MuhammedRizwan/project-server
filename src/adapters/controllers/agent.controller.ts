@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AgentUseCase } from "../../application/usecases/agent";
 import { Iagent } from "../../domain/entities/agent/agent";
 import { AgentVerification } from "../../application/usecases/agent/agentVerifcation";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -34,7 +35,7 @@ export class agentController {
         { Document: req.file }
       );
       return res
-        .status(201)
+        .status(HttpStatusCode.CREATED)
         .json({ success: true, message: "Agency Registered", agent });
     } catch (error) {
       return next(error);
@@ -46,7 +47,7 @@ export class agentController {
       const { agent, accessToken, refreshToken } =
         await this._AgentUseCase.loginAgent(email, password);
       if (!agent.admin_verified) {
-        return res.status(403).json({
+        return res.status(HttpStatusCode.FORBIDDEN).json({
           status: "error",
           message: "Please verify Email",
           agent,
@@ -54,7 +55,7 @@ export class agentController {
         });
       }
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({
           success: true,
           message: "Agency Logged In",
@@ -71,16 +72,16 @@ export class agentController {
     try {
       const { Otp, agent } = req.body;
       if (!agent) {
-        res.status(400).json({ message: "Agency Not Found" });
+        res.status(HttpStatusCode.NOT_FOUND).json({ message: "Agency Not Found" });
       }
       if (Otp.length != 4) {
-        res.status(400).json({ message: "Incorrect OTP" });
+        res.status(HttpStatusCode.NOT_FOUND).json({ message: "Incorrect OTP" });
       }
       const agentData = await this._AgentVerification.OTPVerification(
         Otp,
         agent.email
       );
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "OTP  Verified",
         agent: agentData,
@@ -95,7 +96,7 @@ export class agentController {
       const { email } = req.body;
       const OTPData = await this._AgentVerification.sendOTP(email);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "OTP Resend", OTPData });
     } catch (error) {
       return next(error);
@@ -110,7 +111,7 @@ export class agentController {
         password
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Password Changed", agent });
     } catch (error) {
       return next(error);
@@ -122,10 +123,10 @@ export class agentController {
       const accessToken = await this._AgentVerification.refreshAccessToken(
         req.body.refreshToken
       );
-      return res.status(200).json({ accessToken });
+      return res.status(HttpStatusCode.OK).json({ accessToken });
     } catch (error) {
       const err = error as Error;
-      return res.status(400).json({ error: err.message });
+      return res.status(HttpStatusCode.BAD_REQUEST).json({ error: err.message });
     }
   }
   async getAgent(req: Request, res: Response, next: NextFunction) {
@@ -133,7 +134,7 @@ export class agentController {
       const { agentId } = req.params;
       const agent = await this._AgentUseCase.getAgent(agentId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Fetched Agent Data", agent });
     } catch (error) {
       next(error);
@@ -149,7 +150,7 @@ export class agentController {
         file
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Updated Agent Data", agent });
     } catch (error) {
       next(error);
@@ -163,7 +164,7 @@ export class agentController {
         req.body.oldPassword
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "password validated", agent });
     } catch (error) {
       next(error);
@@ -177,7 +178,7 @@ export class agentController {
         req.body.newPassword
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "password updated", agent });
     } catch (error) {
       next(error);
@@ -189,7 +190,7 @@ export class agentController {
       const { packages, booking, bookingRevenue } =
         await this._AgentUseCase.getDashboard(agentId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Dashboard Data", packages,booking,bookingRevenue });
     } catch (error) {
       next(error);
@@ -200,7 +201,7 @@ export class agentController {
       const { agentId } = req.params;
       const barChartData = await this._AgentUseCase.getBarChart(agentId);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "Dashboard Data", barChartData });
     } catch (error) {
       next(error);

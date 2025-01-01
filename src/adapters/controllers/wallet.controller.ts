@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { WalletUseCase } from "../../application/usecases/wallet";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -15,7 +16,7 @@ export class walletController {
     try {
       const { userId } = req.params;
       const wallet = await this._walletUseCase.getAllWallet(userId);
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Fetched All Wallet",
         wallet,

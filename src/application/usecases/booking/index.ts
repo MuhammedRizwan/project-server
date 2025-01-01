@@ -13,6 +13,7 @@ import { CouponRepository } from "../../../domain/entities/coupon/coupon";
 import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import configKeys from "../../../config";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 
 export class BookingUseCase {
   private _bookingRepository: BookingRepository;
@@ -37,16 +38,16 @@ export class BookingUseCase {
           : booking.package_id._id;
 
       if (!packageId) {
-        throw new CustomError("Invalid package ID", 400);
+        throw new CustomError("Invalid package ID", HttpStatusCode.BAD_REQUEST);
       }
 
       const packageData = await this._packageRepository.getPackage(packageId);
       if (!packageData) {
-        throw new CustomError("Package not found", 404);
+        throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
       }
 
       if (!packageData.travel_agent_id) {
-        throw new CustomError("Travel agent ID is missing", 400);
+        throw new CustomError("Travel agent ID is missing", HttpStatusCode.BAD_REQUEST);
       }
 
       const userId =
@@ -55,7 +56,7 @@ export class BookingUseCase {
           : booking.user_id._id;
 
       if (!userId) {
-        throw new CustomError("User ID is missing", 400);
+        throw new CustomError("User ID is missing", HttpStatusCode.BAD_REQUEST);
       }
 
       let totalPrice = packageData.offer_price * booking.members.length;
@@ -67,7 +68,7 @@ export class BookingUseCase {
         );
 
         if (!couponData) {
-          throw new CustomError("Coupon not found", 404);
+          throw new CustomError("Coupon not found", HttpStatusCode.NOT_FOUND);
         }
 
         booking.coupon_id = couponData._id;
@@ -96,7 +97,7 @@ export class BookingUseCase {
       );
 
       if (!createdBooking) {
-        throw new CustomError("Booking creation failed", 500);
+        throw new CustomError("Booking creation failed", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       const adminWallet = await this._walletRepository.getWallet(
         configKeys.ADMIN_ID
@@ -136,7 +137,7 @@ export class BookingUseCase {
     try {
       const bookingData = await this._bookingRepository.getBooking(bookingId);
       if (!bookingData) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       return bookingData;
     } catch (error) {
@@ -164,11 +165,11 @@ export class BookingUseCase {
         limit
       );
       if (!bookingData) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       const totalItems = await this._bookingRepository.countDocument(query);
       if (totalItems === 0) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       return {
         bookingData,
@@ -193,11 +194,11 @@ export class BookingUseCase {
         limit
       );
       if (!bookingData) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       const totalItems = await this._bookingRepository.countDocument(query);
       if (totalItems === 0) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       return {
         bookingData,
@@ -236,7 +237,7 @@ export class BookingUseCase {
     try {
       const booking = await this._bookingRepository.getTravelHistory(userId);
       if (!booking || booking.length === 0) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       return booking;
     } catch (error) {
@@ -250,13 +251,13 @@ export class BookingUseCase {
     try {
       const bookingData = await this._bookingRepository.getBooking(bookingId);
       if (!bookingData) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       if (bookingData.booking_status === "canceled") {
-        throw new CustomError("booking already canceled", 400);
+        throw new CustomError("booking already canceled", HttpStatusCode.BAD_REQUEST);
       }
       if (new Date(bookingData.start_date) < new Date()) {
-        throw new CustomError("user already travelled", 400);
+        throw new CustomError("user already travelled", HttpStatusCode.BAD_REQUEST);
       }
 
       let refundAmount = (bookingData.package_id as unknown as Packages)
@@ -275,7 +276,7 @@ export class BookingUseCase {
           }
           refundAmount = bookingData.payment_amount - discountAmount;
           if (refundAmount < 0) {
-            throw new CustomError("refund amount cannot be negative", 400);
+            throw new CustomError("refund amount cannot be negative", HttpStatusCode.BAD_REQUEST);
           }
         }
       }
@@ -309,14 +310,14 @@ export class BookingUseCase {
           reason
         );
       } else {
-        throw new CustomError("Invalid user ID", 400);
+        throw new CustomError("Invalid user ID", HttpStatusCode.BAD_REQUEST);
       }
       const cancelBooking = await this._bookingRepository.cancelBooking(
         bookingId,
         cancellation_reason
       );
       if (!cancelBooking) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       return cancelBooking;
     } catch (error) {
@@ -331,13 +332,13 @@ export class BookingUseCase {
     try {
       const booking = await this._bookingRepository.getBooking(bookingId);
       if (!booking) {
-        throw new CustomError("Booking not found", 404);
+        throw new CustomError("Booking not found", HttpStatusCode.NOT_FOUND);
       }
       if (booking.booking_status == "canceled") {
-        throw new CustomError("Booking already canceled", 404);
+        throw new CustomError("Booking already canceled", HttpStatusCode.NOT_FOUND);
       }
       if (booking.travel_status == "completed") {
-        throw new CustomError("Booking already completed", 404);
+        throw new CustomError("Booking already completed", HttpStatusCode.NOT_FOUND);
       }
       const bookingData = await this._bookingRepository.changeBookingStatus(
         bookingId,
@@ -345,7 +346,7 @@ export class BookingUseCase {
         cancellation_reason
       );
       if (!bookingData) {
-        throw new CustomError("Failed to update booking details", 404);
+        throw new CustomError("Failed to update booking details", HttpStatusCode.NOT_FOUND);
       }
       return bookingData;
     } catch (error) {
@@ -359,17 +360,17 @@ export class BookingUseCase {
     try {
       const booking = await this._bookingRepository.getBooking(bookingId);
       if (!booking) {
-        throw new CustomError("Booking not found", 404);
+        throw new CustomError("Booking not found", HttpStatusCode.NOT_FOUND);
       }
       if (booking.travel_status == "completed") {
-        throw new CustomError("Booking already completed", 404);
+        throw new CustomError("Booking already completed", HttpStatusCode.NOT_FOUND);
       }
       const bookingData = await this._bookingRepository.changeTravelStatus(
         bookingId,
         travel_status
       );
       if (!bookingData) {
-        throw new CustomError("Failed to update booking details", 404);
+        throw new CustomError("Failed to update booking details", HttpStatusCode.NOT_FOUND);
       }
       return bookingData;
     } catch (error) {
@@ -382,7 +383,7 @@ export class BookingUseCase {
         userId
       );
       if (!completedTravel) {
-        throw new CustomError("couldn't find completed travel", 500);
+        throw new CustomError("couldn't find completed travel", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return completedTravel;
     } catch (error) {
@@ -393,7 +394,7 @@ export class BookingUseCase {
     try {
       const bookings=await this._bookingRepository.getNewBooking(agentId);
       if (!bookings) {  
-        throw new CustomError("couldn't find new booking", 500);
+        throw new CustomError("couldn't find new booking", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return bookings;
     } catch (error) {

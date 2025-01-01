@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import NotificationUseCase from "../../application/usecases/notification";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Depencies {
   useCase: {
@@ -19,7 +20,7 @@ export default class NotificationController {
         agentId
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "success", notifications });
     } catch (error) {
       next(error);
@@ -31,9 +32,8 @@ export default class NotificationController {
       const notifications = await this._NotificationUseCase.getAgentNotifications(
         userId
       );
-      console.log(notifications)
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "success", notifications });
     } catch (error) {
       next(error);
@@ -46,7 +46,7 @@ export default class NotificationController {
         adminId
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success: true, message: "success", notifications });
     } catch (error) {
       next(error);

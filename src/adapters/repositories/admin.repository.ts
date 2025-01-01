@@ -1,6 +1,7 @@
 import { Iadmin } from "../../domain/entities/admin/admin";
 import adminModel from "../database/models/admin.model";
 import { CustomError } from "../../domain/errors/customError";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 export class AdminRepository {
   async findAdminByEmail(email: string): Promise<Iadmin | null> {
@@ -33,7 +34,7 @@ export class AdminRepository {
     try {
       const admin: Iadmin | null = await adminModel.findOne({ _id: id });
       if (!admin) {
-        throw new CustomError("admin not found", 404);
+        throw new CustomError("admin not found", HttpStatusCode.NOT_FOUND);
       }
       return admin;
     } catch (error) {
@@ -48,7 +49,7 @@ export class AdminRepository {
         { new: true }
       );
       if (!updatedAdmin) {
-        throw new CustomError("admin not found", 404);
+        throw new CustomError("admin not found", HttpStatusCode.NOT_FOUND);
       }
     } catch (error) {
       throw error;

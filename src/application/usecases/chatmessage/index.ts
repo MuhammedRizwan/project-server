@@ -1,6 +1,7 @@
 import { ChatRepository, Message } from "../../../domain/entities/chat/chat";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
 import { Iuser, UserRepository } from "../../../domain/entities/user/user";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 import { CustomError } from "../../../domain/errors/customError";
 
 
@@ -20,7 +21,7 @@ export class ChatmessageUseCase {
         : {};
       const users = await this._userRepository.getContacts(query, userId);
       if (!users) {
-        throw new CustomError("No users found", 404);
+        throw new CustomError("No users found", HttpStatusCode.NOT_FOUND);
       }
       return users;
     } catch (error) {
@@ -35,7 +36,7 @@ export class ChatmessageUseCase {
         : {};
       const chats = await this._chatRepository.getChats(query, userId);
       if (!chats) {
-        throw new CustomError("No users found", 404);
+        throw new CustomError("No users found", HttpStatusCode.NOT_FOUND);
       }
 
       const result = await Promise.all(
@@ -78,7 +79,7 @@ export class ChatmessageUseCase {
     try {
       const room = await this._chatRepository.getRoomById(roomId, userId);
       if (!room) {
-        throw new CustomError("No room found", 404);
+        throw new CustomError("No room found", HttpStatusCode.NOT_FOUND);
       }
 
       return room;

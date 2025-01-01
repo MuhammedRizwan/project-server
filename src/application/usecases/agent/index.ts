@@ -13,6 +13,7 @@ import {
 } from "../../../domain/entities/services/service";
 import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 import { CustomError } from "../../../domain/errors/customError";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 
 export class AgentUseCase {
   private _agentRepository: AgentRepository;
@@ -47,7 +48,7 @@ export class AgentUseCase {
         agentData.email
       );
       if (existUser) {
-        throw new CustomError("user already exists", 409);
+        throw new CustomError("user already exists", HttpStatusCode.CONFLICT);
       }
       let uploadDocumentUrl: string | null = null;
       if (file.Document) {
@@ -55,7 +56,7 @@ export class AgentUseCase {
         if (fileType === "application/pdf") {
           const pdfUrl = await this._CloudinaryService.uploadPDF(file.Document);
           if (!pdfUrl) {
-            throw new CustomError("pdf cannot upload to cloudinary", 500);
+            throw new CustomError("pdf cannot upload to cloudinary", HttpStatusCode.INTERNAL_SERVER_ERROR);
           }
           agentData.DocumentURL = pdfUrl;
         } else if (fileType.startsWith("image/")) {
@@ -63,7 +64,7 @@ export class AgentUseCase {
             file.Document
           );
           if (!imageUrl) {
-            throw new CustomError("image cannot upload to cloudinary", 500);
+            throw new CustomError("image cannot upload to cloudinary", HttpStatusCode.INTERNAL_SERVER_ERROR);
           }
           agentData.DocumentURL = imageUrl;
         }
@@ -74,14 +75,14 @@ export class AgentUseCase {
       );
       const verificationOtp = this._generateOtp.generate();
       if (!verificationOtp) {
-        throw new CustomError("something went wrong", 500);
+        throw new CustomError("something went wrong", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       const createOTP = await this._OTPRepository.createOTP({
         email: agentData.email,
         otp: verificationOtp,
       });
       if (!createOTP) {
-        throw new CustomError("OTP creation failed", 500);
+        throw new CustomError("OTP creation failed", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       await this._emailService.sendVerificationEmail(
         agentData.email,
@@ -89,7 +90,7 @@ export class AgentUseCase {
       );
       const agent = await this._agentRepository.createAgent(agentData);
       if (!agent) {
-        throw new CustomError("cannot signup user", 404);
+        throw new CustomError("cannot signup user", HttpStatusCode.NOT_FOUND);
       }
 
       return agent;
@@ -100,29 +101,29 @@ export class AgentUseCase {
   async loginAgent(email: string, password: string) {
     const agent = await this._agentRepository.findAgentByEmail(email);
     if (!agent) {
-      throw new CustomError("Email Not Found", 404);
+      throw new CustomError("Email Not Found", HttpStatusCode.NOT_FOUND);
     }
     const verifiedPassword = await this._passwordService.verifyPassword(
       password,
       agent.password
     );
     if (!verifiedPassword) {
-      throw new CustomError("Invalid password", 403);
+      throw new CustomError("Invalid password", HttpStatusCode.FORBIDDEN);
     }
     if (agent.is_block) {
-      throw new CustomError("Agency has been Blocked", 403);
+      throw new CustomError("Agency has been Blocked", HttpStatusCode.FORBIDDEN);
     }
     if (!agent.is_verified) {
       const verificationOtp = this._generateOtp.generate();
       if (!verificationOtp) {
-        throw new CustomError("couldn't genarate OTP", 500);
+        throw new CustomError("couldn't genarate OTP", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       const createOTP = await this._OTPRepository.createOTP({
         email: agent.email,
         otp: verificationOtp,
       });
       if (!createOTP) {
-        throw new CustomError("OTP creation failed", 500);
+        throw new CustomError("OTP creation failed", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       await this._emailService.sendVerificationEmail(
         agent.email,
@@ -130,18 +131,18 @@ export class AgentUseCase {
       );
     }
     if (agent.admin_verified == "reject") {
-      throw new CustomError("Agency were Rejected", 400);
+      throw new CustomError("Agency were Rejected", HttpStatusCode.BAD_REQUEST);
     }
     if (agent.admin_verified !== "accept") {
-      throw new CustomError("Agency are not verified", 400);
+      throw new CustomError("Agency are not verified", HttpStatusCode.BAD_REQUEST);
     }
     const accessToken = this._JwtService.generateAccessToken(agent._id);
     if (!accessToken) {
-      throw new CustomError("couldn't genarate token", 500);
+      throw new CustomError("couldn't genarate token", HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
     const refreshToken = this._JwtService.generateRefreshToken(agent._id);
     if (!refreshToken) {
-      throw new CustomError("couldn't genarate token", 500);
+      throw new CustomError("couldn't genarate token", HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
     await this._agentRepository.addRefreshToken(agent._id, refreshToken);
     return {
@@ -154,7 +155,7 @@ export class AgentUseCase {
     try {
       const agent = await this._agentRepository.getAgent(agentId);
       if (!agent) {
-        throw new CustomError("Agent not found", 404);
+        throw new CustomError("Agent not found", HttpStatusCode.NOT_FOUND);
       }
       return agent;
     } catch (error) {
@@ -175,7 +176,7 @@ export class AgentUseCase {
       }
       const agent = await this._agentRepository.updateAgent(agentId, agentData);
       if (!agent) {
-        throw new CustomError("Agent not found", 404);
+        throw new CustomError("Agent not found", HttpStatusCode.NOT_FOUND);
       }
       return agent;
     } catch (error) {
@@ -186,14 +187,14 @@ export class AgentUseCase {
     try {
       const agent = await this._agentRepository.getAgent(agentId);
       if (!agent) {
-        throw new CustomError("Agent not found", 404);
+        throw new CustomError("Agent not found", HttpStatusCode.NOT_FOUND);
       }
       const verifiedPassword = await this._passwordService.verifyPassword(
         password,
         agent.password
       );
       if (!verifiedPassword) {
-        throw new CustomError("Invalid password", 404);
+        throw new CustomError("Invalid password", HttpStatusCode.NOT_FOUND);
       }
       return agent;
     } catch (error) {
@@ -207,7 +208,7 @@ export class AgentUseCase {
         newPassword
       );
       if (!agent) {
-        throw new CustomError("Agent not found", 404);
+        throw new CustomError("Agent not found", HttpStatusCode.NOT_FOUND);
       }
       return agent;
     } catch (error) {
@@ -218,18 +219,18 @@ export class AgentUseCase {
     try {
       const packages = await this._packageRepository.getpackageCount(agentId);
       if (!packages) {
-        throw new CustomError("packages not found", 404);
+        throw new CustomError("packages not found", HttpStatusCode.NOT_FOUND);
       }
       const booking = await this._bookingRepository.getAgentBookingData(
         agentId
       );
       if (!booking) {
-        throw new CustomError("booking not found", 404);
+        throw new CustomError("booking not found", HttpStatusCode.NOT_FOUND);
       }
       const bookingRevenue =
         await this._bookingRepository.getAgentBookingRevenue(agentId);
       if (!bookingRevenue) {
-        throw new CustomError("revenue not found", 404);
+        throw new CustomError("revenue not found", HttpStatusCode.NOT_FOUND);
       }
       return {
         packages,
@@ -244,7 +245,7 @@ export class AgentUseCase {
     try {
       const bookings = await this._bookingRepository.agentBookings(agentId);
       if (!bookings) {
-        throw new CustomError("revenue not found", 404);
+        throw new CustomError("revenue not found", HttpStatusCode.NOT_FOUND);
       }
       const walletTransactions = await this._walletRepository.getWalletData(
         agentId

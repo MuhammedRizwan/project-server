@@ -13,6 +13,7 @@ import { BookingRepository } from "../../../adapters/repositories/booking.reposi
 import { response } from "express";
 import { WalletRepository } from "../../../domain/entities/wallet/wallet";
 import configKeys from "../../../config";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 
 export class AdminUseCase {
   private _adminRepository: AdminRepository;
@@ -38,19 +39,19 @@ export class AdminUseCase {
     try {
       const admin = await this._adminRepository.findAdminByEmail(email);
       if (!admin) {
-        throw new CustomError("Email not found", 404);
+        throw new CustomError("Email not found", HttpStatusCode.NOT_FOUND);
       }
       const verifiedPassword = password === admin.password;
       if (!verifiedPassword) {
-        throw new CustomError("Invalid password", 403);
+        throw new CustomError("Invalid password", HttpStatusCode.FORBIDDEN);
       }
       const accessToken = this._JwtService.generateAccessToken(admin._id);
       if (!accessToken) {
-        throw new CustomError("couldn't genarate token", 500);
+        throw new CustomError("couldn't genarate token", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       const refreshToken = this._JwtService.generateRefreshToken(admin._id);
       if (!refreshToken) {
-        throw new CustomError("couldn't genarate token", 500);
+        throw new CustomError("couldn't genarate token", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       await this._adminRepository.addRefreshToken(admin._id, refreshToken);
       return {
@@ -67,24 +68,24 @@ export class AdminUseCase {
       try {
         const incommingRefreshToken = token;
         if (!incommingRefreshToken) {
-          throw new CustomError("Invalid refresh token", 401);
+          throw new CustomError("Invalid refresh token", HttpStatusCode.UNAUTHORIZED);
         }
         const decoded = this._JwtService.verifyRefreshToken(
           incommingRefreshToken
         );
         if (!decoded) {
-          throw new CustomError("Invalid refresh token", 401);
+          throw new CustomError("Invalid refresh token", HttpStatusCode.UNAUTHORIZED);
         }
         const admin = await this._adminRepository.getAdmin(decoded.userId);
         if (!admin) {
-          throw new CustomError("Invalid refresh token", 401);
+          throw new CustomError("Invalid refresh token", HttpStatusCode.UNAUTHORIZED);
         }
         if (incommingRefreshToken !== admin?.refreshToken) {
-          throw new CustomError("Invalid refresh token", 401);
+          throw new CustomError("Invalid refresh token", HttpStatusCode.UNAUTHORIZED);
         }
         const accessToken = this._JwtService.generateAccessToken(admin?._id);
         if (!accessToken) {
-          throw new CustomError("token Error", 500);
+          throw new CustomError("token Error", HttpStatusCode.INTERNAL_SERVER_ERROR);
         }
         return accessToken;
       } catch (err) {
@@ -116,14 +117,14 @@ export class AdminUseCase {
         filterData
       );
       if (!users || users.length === 0) {
-        throw new CustomError("No users found", 404);
+        throw new CustomError("No users found", HttpStatusCode.NOT_FOUND);
       }
       const totalItems = await this._userRepository.countUsers(
         query,
         filterData
       );
       if (totalItems === 0) {
-        throw new CustomError("No users found", 404);
+        throw new CustomError("No users found", HttpStatusCode.NOT_FOUND);
       }
       return {
         users,
@@ -139,7 +140,7 @@ export class AdminUseCase {
     try {
       const user = await this._userRepository.changeUserStatus(id, is_block);
       if (!user) {
-        throw new CustomError("User status not updated", 500);
+        throw new CustomError("User status not updated", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return user;
     } catch (error) {
@@ -167,14 +168,14 @@ export class AdminUseCase {
         filterData
       );
       if (!agencies || agencies.length === 0) {
-        throw new CustomError("No agencies found", 404);
+        throw new CustomError("No agencies found", HttpStatusCode.NOT_FOUND);
       }
       const totalItems = await this._agentRepository.countAgencies(
         query,
         filterData
       );
       if (totalItems === 0) {
-        throw new CustomError("No agencies found", 404);
+        throw new CustomError("No agencies found", HttpStatusCode.NOT_FOUND);
       }
       return {
         agencies,
@@ -190,7 +191,7 @@ export class AdminUseCase {
     try {
       const agent = await this._agentRepository.changeAgentStatus(id, is_block);
       if (!agent) {
-        throw new CustomError("Agent status not updated", 500);
+        throw new CustomError("Agent status not updated", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       return agent;
     } catch (error) {
@@ -201,7 +202,7 @@ export class AdminUseCase {
     try {
       const agent = await this._agentRepository.getAgent(id);
       if (!agent) {
-        throw new CustomError("Agent not found", 404);
+        throw new CustomError("Agent not found", HttpStatusCode.NOT_FOUND);
       }
       return agent;
     } catch (error) {
@@ -215,7 +216,7 @@ export class AdminUseCase {
         admin_verified
       );
       if (!agent) {
-        throw new CustomError("Agent verification failed", 500);
+        throw new CustomError("Agent verification failed", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       if (admin_verified === "accept") {
         await this._emailService.sendAcceptanceEmail(agent.email);
@@ -232,25 +233,25 @@ export class AdminUseCase {
     try {
       const users = await this._userRepository.getAllUsersCount();
       if (!users) {
-        throw new CustomError("User Not Found", 404);
+        throw new CustomError("User Not Found", HttpStatusCode.NOT_FOUND);
       }
       const agent = await this._agentRepository.getAllAgentCount();
       if (!agent) {
-        throw new CustomError("Agent Not Found", 404);
+        throw new CustomError("Agent Not Found", HttpStatusCode.NOT_FOUND);
       }
       const packages = await this._packageRepository.getAllPackageCount();
       if (!packages) {
-        throw new CustomError("Pcakge Not Found", 404);
+        throw new CustomError("Pcakge Not Found", HttpStatusCode.NOT_FOUND);
       }
       const bookings = await this._bookingRepository.getAllBookingsCount();
       if (!bookings) {
-        throw new CustomError("booking Not Found", 404);
+        throw new CustomError("booking Not Found", HttpStatusCode.NOT_FOUND);
       }
       const revenue = await this._walletRepository.getWallet(
         configKeys.ADMIN_ID
       );
       if (!revenue) {
-        throw new CustomError("revenue Not Found", 404);
+        throw new CustomError("revenue Not Found", HttpStatusCode.NOT_FOUND);
       }
       const unconfirmedagency = await this._agentRepository.unconfirmedagent();
       return { users, agent, packages, bookings, revenue, unconfirmedagency };
@@ -262,7 +263,7 @@ export class AdminUseCase {
     try {
       const agents = await this._agentRepository.getAllagent();
       if (!agents) {
-        throw new CustomError("Agent Not Found", 404);
+        throw new CustomError("Agent Not Found", HttpStatusCode.NOT_FOUND);
       }
       return agents;
     } catch (error) {
@@ -274,7 +275,7 @@ export class AdminUseCase {
       const agentBookingData =
         await this._bookingRepository.getAgentBookingData(agentId);
       if (!agentBookingData) {
-        throw new CustomError("No agent booking data found", 404);
+        throw new CustomError("No agent booking data found", HttpStatusCode.NOT_FOUND);
       }
       return agentBookingData;
     } catch (error) {
@@ -285,11 +286,11 @@ export class AdminUseCase {
     try {
       const bookings = await this._bookingRepository.gookingData();
       if (bookings.length === 0) {
-        throw new CustomError("No booking data found", 404);
+        throw new CustomError("No booking data found", HttpStatusCode.NOT_FOUND);
       }
       const walletTransactions = await this._walletRepository.WalletData();
       if (walletTransactions.length === 0) {
-        throw new CustomError("No wallet data found", 404);
+        throw new CustomError("No wallet data found", HttpStatusCode.NOT_FOUND);
       }
       const data = Array.from({ length: 12 }, (_, index) => {
         const month = index + 1;

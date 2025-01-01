@@ -1,6 +1,7 @@
 import walletModel from "../database/models/wallet.model";
 import Wallet from "../../domain/entities/wallet/wallet";
 import { CustomError } from "../../domain/errors/customError";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Transaction {
   bookingId: string;
@@ -41,7 +42,7 @@ export class WalletRepository {
       );
 
       if (!updatedWallet) {
-        throw new CustomError("Wallet not found for the given user", 404);
+        throw new CustomError("Wallet not found for the given user", HttpStatusCode.NOT_FOUND);
       }
 
       return updatedWallet as unknown as Wallet;

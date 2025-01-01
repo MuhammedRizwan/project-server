@@ -2,6 +2,7 @@ import { PackageRepository, Packages } from "../../../domain/entities/package/pa
 import { CustomError } from "../../../domain/errors/customError";
 import { CloudinaryService } from "../../../domain/entities/services/service";
 import { Dependencies } from "../../../domain/entities/depencies/depencies";
+import HttpStatusCode from "../../../domain/enum/httpstatus";
 
 
 export class packageUseCase {
@@ -28,14 +29,14 @@ export class packageUseCase {
     }
     const newPackage = await this._packageRepository.createPackage(package_data);
     if (!newPackage) {
-      throw new CustomError("Package creation failed", 500);
+      throw new CustomError("Package creation failed", HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
     return newPackage;
   }
   async getPackage(id: string) {
     const packageData = await this._packageRepository.getPackage(id);
     if (!packageData) {
-      throw new CustomError("Package not found", 404);
+      throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
     }
     return packageData;
   }
@@ -75,14 +76,12 @@ export class packageUseCase {
       limit
     );
     if (!packages) {
-      throw new CustomError("Package not found", 404);
+      throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
     }
     const totalItems = await this._packageRepository.packageCount(query);
-    console.log(totalItems)
     if (totalItems === 0) {
-      throw new CustomError("Packages not found", 404);
+      throw new CustomError("Packages not found", HttpStatusCode.NOT_FOUND);
     }
-    console.log(totalItems,limit,"total Items")
     return {
       packages,
       totalItems,
@@ -105,7 +104,7 @@ export class packageUseCase {
     );
 
     if (!editedPackage) {
-      throw new CustomError("Package not found", 404);
+      throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
     }
     return editedPackage;
   }
@@ -115,7 +114,7 @@ export class packageUseCase {
       isBlock
     );
     if (!updatedPackage) {
-      throw new CustomError("Package not found", 404);
+      throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
     }
     return updatedPackage;
   }
@@ -135,11 +134,11 @@ export class packageUseCase {
       limit
     );
     if (!packages) {
-      throw new CustomError("Package not found", 404);
+      throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
     }
     const totalItems = await this._packageRepository.packageCount(query);
     if (totalItems === 0) {
-      throw new CustomError("coupons not found", 404);
+      throw new CustomError("coupons not found", HttpStatusCode.NOT_FOUND);
     }
 
     return {
@@ -153,13 +152,13 @@ export class packageUseCase {
     try {
       const packages = await this._packageRepository.getPackage(packageId);
       if (!packages) {
-        throw new CustomError("Package not found", 404);
+        throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
       }
       const similarPackages = await this._packageRepository.getsimilarPackages(
         packages.offer_price
       );
       if (!similarPackages) {
-        throw new CustomError("Similar packages not found", 404);
+        throw new CustomError("Similar packages not found", HttpStatusCode.NOT_FOUND);
       }
       return similarPackages;
     } catch (error) {
@@ -170,7 +169,7 @@ export class packageUseCase {
     try {
       const imageUrl = await this._cloudinaryService.updateImage(image,publicId);
       if (!imageUrl) {
-        throw new CustomError("Package not found", 404);
+        throw new CustomError("Package not found", HttpStatusCode.NOT_FOUND);
       }
       return imageUrl;
     } catch (error) {

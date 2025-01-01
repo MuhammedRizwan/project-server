@@ -1,4 +1,5 @@
 import Offer from "../../domain/entities/offer/offer";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 import { CustomError } from "../../domain/errors/customError";
 import offerModel from "../database/models/offer.model";
 
@@ -17,7 +18,7 @@ export class OfferRepository {
         .skip((page - 1) * limit)
         .limit(limit)
         .sort({ createdAt: -1 });
-      if (!offers) throw new CustomError("Offers not found", 404);
+      if (!offers) throw new CustomError("Offers not found", HttpStatusCode.NOT_FOUND);
       return offers as unknown as Offer[];
     } catch (error) {
       throw error;
@@ -26,7 +27,7 @@ export class OfferRepository {
   async createOffer(offer: Offer): Promise<Offer> {
     try {
       const createOffer = await offerModel.create(offer);
-      if (!createOffer) throw new CustomError("Offer not created", 500);
+      if (!createOffer) throw new CustomError("Offer not created", HttpStatusCode.INTERNAL_SERVER_ERROR);
       return createOffer as unknown as Offer;
     } catch (error) {
       throw error;
@@ -44,7 +45,7 @@ export class OfferRepository {
   async getOffer(offerId: string): Promise<Offer> {
     try {
       const offer = await offerModel.findOne({_id:offerId}).populate('package_id');
-      if (!offer) throw new CustomError("Offer not found", 404);
+      if (!offer) throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       return offer as unknown as Offer;
     } catch (error) {
       throw error;
@@ -57,7 +58,7 @@ export class OfferRepository {
       });
 
       if (!updatedOffer) {
-        throw new CustomError("Offer not found", 404);
+        throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       }
 
       return updatedOffer as unknown as Offer;
@@ -77,7 +78,7 @@ export class OfferRepository {
       ).populate('package_id');
 
       if (!updatedOffer) {
-        throw new CustomError("Offer not found", 404);
+        throw new CustomError("Offer not found", HttpStatusCode.NOT_FOUND);
       }
 
       return updatedOffer as unknown as Offer;

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { CouponUseCase } from "../../application/usecases/coupon/intex";
+import HttpStatusCode from "../../domain/enum/httpstatus";
 
 interface Dependencies {
   useCase: {
@@ -18,7 +19,7 @@ export class CouponController {
       const coupon = req.body;
       const couponData = await this._couponuseCase.createCoupon(coupon);
       return res
-        .status(201)
+        .status(HttpStatusCode.CREATED)
         .json({ success:true, message: "Coupon Created", couponData });
     } catch (error) {
       next(error);
@@ -34,7 +35,7 @@ export class CouponController {
         const filter=isString(req.query.filter) ? req.query.filter : "";
       const { coupons, totalItems, totalPages, currentPage } =
         await this._couponuseCase.getAllCoupons(search, page, limit,filter);
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success:true,
         message: "All coupons",
         filterData: coupons,
@@ -55,7 +56,7 @@ export class CouponController {
         coupon
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true, message: "Coupon Edited", couponData });
     } catch (error) {
       next(error);
@@ -63,11 +64,11 @@ export class CouponController {
   }
   async blockCoupon(req: Request, res: Response, next: NextFunction) {
     try {
-      const couponId = req.params.couponId;
+      const {couponId} = req.params;
       const { is_active } = req.body;
       const coupons = await this._couponuseCase.blockCoupon(couponId, is_active);
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true, message: "Coupon Blocked", coupons });
     } catch (error) {
       next(error);
@@ -77,7 +78,7 @@ export class CouponController {
     try {
       const coupons = await this._couponuseCase.getUnblockedCoupons();
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true, message: "Unblocked coupons", coupons });
     } catch (error) {
       next(error);
@@ -93,7 +94,7 @@ export class CouponController {
         totalPrice
       );
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ success:true, message: "coupon validated", discountAmount });
     } catch (error) {
       next(error);
