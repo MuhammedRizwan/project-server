@@ -1,4 +1,4 @@
 .env
 \node_modules
 \dist
-src\frameworks\web\access.log
+\access.log
