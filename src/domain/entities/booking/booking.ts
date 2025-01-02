@@ -22,6 +22,7 @@ export interface Booking {
   payment_status: "pending" | "paid" | "refunded";
   booking_status: "pending" | "confirmed" | "canceled";
   travel_status: "pending" | "on-going" | "completed" | "canceled";
+  payment_method: "razorpay" | "wallet";
   coupon_id?: string;
   start_date: string;
   booking_date: string;
@@ -86,12 +87,12 @@ export interface BookingRepository {
     }[]
   >;
   agentBookings(agentId: string): Promise<
-  {
-    _id: number; // Month (1-12)
-    totalBookings: number;
-  }[]
->;
-getNewBooking(agentId: string): Promise<Booking[] | null>;
+    {
+      _id: number; // Month (1-12)
+      totalBookings: number;
+    }[]
+  >;
+  getNewBooking(agentId: string): Promise<Booking[] | null>;
 }
 
 export interface RazorPay {

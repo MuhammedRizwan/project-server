@@ -16,4 +16,14 @@ export class WalletUseCase {
     }
     return wallet;
   }
+  async checkBalance(user_id: string, amount: number) {
+    const wallet = await this.walletRepository.getWallet(user_id);
+    if (!wallet) {
+      throw new CustomError("Wallet Not Found", HttpStatusCode.NOT_FOUND);
+    }
+    if (wallet.walletBalance < amount) {
+      throw new CustomError("Insufficient Balance", HttpStatusCode.BAD_REQUEST);
+    }
+    return wallet;
+  }
 }

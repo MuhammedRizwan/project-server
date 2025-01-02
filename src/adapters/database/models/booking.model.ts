@@ -29,6 +29,11 @@ const bookingSchema = new Schema(
       enum: ["pending", "paid", "refunded"],
       required: true,
     },
+    payment_method: {
+      type: String,
+      enum: ["razorpay", "wallet"],
+      required: true,
+    },
     payment_id: { type: String },
     booking_status: {
       type: String,

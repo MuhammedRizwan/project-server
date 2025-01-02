@@ -11,6 +11,8 @@ const controller = {
 router.get("/:userId", (req: Request, res: Response, next: NextFunction) =>
   controller.wallet.getAllWallet(req, res, next)
 );
-
+router.post('/check-balance', (req: Request, res: Response, next: NextFunction) =>
+  controller.wallet.checkBalance(req, res, next)
+);
 
 export default router;

@@ -25,4 +25,18 @@ export class walletController {
       next(error);
     }
   }
+  async checkBalance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId,amount } = req.body;
+      console.log(userId,amount)
+      const wallet = await this._walletUseCase.checkBalance(userId,amount);
+      return res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: "Fetched All Wallet",
+        wallet,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

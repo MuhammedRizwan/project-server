@@ -99,6 +99,19 @@ export class BookingUseCase {
       if (!createdBooking) {
         throw new CustomError("Booking creation failed", HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
+      if(createdBooking.payment_method ==='wallet'){
+        const wallet = await this._walletRepository.getWallet(userId);
+        if (!wallet) {
+          await this._walletRepository.createWallet(userId);
+        }
+        await this._walletRepository.debitWallet(
+          createdBooking._id as unknown as string,
+          userId,
+          totalPrice,
+          "user booked a package"
+        );
+      }
+
       const adminWallet = await this._walletRepository.getWallet(
         configKeys.ADMIN_ID
       );
