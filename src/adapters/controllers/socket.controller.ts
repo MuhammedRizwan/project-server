@@ -28,15 +28,42 @@ export default class SocketController {
     console.log(`Client connected: ${socket.handshake.query.userId}`);
     const userId = socket.handshake.query.userId as string;
     const role = socket.handshake.query.role as string;
+    switch (role) {
+      case "user":
+        this._userSocketMap.set(userId as string, socket.id);
+        socket.join("user-room");
+        break;
+      case "agent":
+        this._agentSocketMap.set(userId as string, socket.id);
+        socket.join("agent-room");
+        break;
+      case "admin":
+        this._adminSocketMap.set(userId as string, socket.id);
+        socket.join("admin-room");
+        break;
+      default:
+        console.error(`Invalid role: ${role}`);
+        return;
+    }
 
-    socket.emit(SocketEvent.GetOnlineUsers, Array.from(this._userSocketMap.keys()));
+    socket.emit(
+      SocketEvent.GetOnlineUsers,
+      Array.from(this._userSocketMap.keys())
+    );
 
     socket.on(SocketEvent.JoinedRoom, async (roomId) => {
       socket.join(roomId);
     });
 
     socket.on(SocketEvent.Message, async (data) => {
-      const { roomId, recieverId, senderId, message, message_type, message_time } = data;
+      const {
+        roomId,
+        recieverId,
+        senderId,
+        message,
+        message_type,
+        message_time,
+      } = data;
       const savedMessage = await this._socketUseCase.saveMessage(
         roomId,
         senderId,
@@ -55,10 +82,11 @@ export default class SocketController {
 
     socket.on(SocketEvent.InitiateVideoCall, ({ to, signalData, myId }) => {
       const toSocketId = this._userSocketMap.get(to);
-      if (!toSocketId) return;
-      this._io
+      if (toSocketId) {
+        this._io
         .to(toSocketId)
-        .emit(SocketEvent.IncomingVideoCall, { signalData, from: myId });
+          .emit(SocketEvent.IncomingVideoCall, { signalData, from: myId });
+      }
     });
 
     socket.on(SocketEvent.AnswerVideoCall, (data) => {
@@ -90,7 +118,9 @@ export default class SocketController {
     });
 
     socket.on(SocketEvent.ToTheAdmin, async (data) => {
-      const Notification = await this._socketUseCase.saveAdminNotification(data);
+      const Notification = await this._socketUseCase.saveAdminNotification(
+        data
+      );
       this.emitToAdmins(SocketEvent.ShowNotification, Notification);
     });
 
@@ -98,7 +128,9 @@ export default class SocketController {
       const Notification = await this._socketUseCase.saveNotification(data);
       const toSocketId = this._agentSocketMap.get(Notification.to);
       if (toSocketId) {
-        this._io.to(toSocketId).emit(SocketEvent.ShowNotification, Notification);
+        this._io
+          .to(toSocketId)
+          .emit(SocketEvent.ShowNotification, Notification);
       }
     });
 
@@ -120,7 +152,9 @@ export default class SocketController {
       const Notification = await this._socketUseCase.saveNotification(data);
       const toSocketId = this._userSocketMap.get(Notification.to);
       if (toSocketId) {
-        this._io.to(toSocketId).emit(SocketEvent.ShowNotification, Notification);
+        this._io
+          .to(toSocketId)
+          .emit(SocketEvent.ShowNotification, Notification);
       }
     });
 

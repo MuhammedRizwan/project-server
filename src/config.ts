@@ -14,5 +14,6 @@ const configKeys = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
   ADMIN_ID: process.env.ADMIN_ID as string,
   ADMIN_COMMISION: process.env.ADMIN_COMMISION as string,
+  FRONT_URL: process.env.FRONT_URL as string,
 };
 export default configKeys;

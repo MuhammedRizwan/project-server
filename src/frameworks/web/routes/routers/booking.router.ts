@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { BookingController } from "../../../../adapters/controllers/booking.controller";
 import Depencies from "../../../dependancies/depencies";
+import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
+import { booking_payload } from "../../../../domain/validator/user-validator";
 
 const router = Router();
 const controller = {
@@ -9,7 +11,7 @@ const controller = {
 router.get("/admin", (req: Request, res: Response, next: NextFunction) =>
   controller.booking.getAdminBookings(req, res, next)
 );
-router.post("/", (req: Request, res: Response, next: NextFunction) =>
+router.post("/",validateSchema(booking_payload), (req: Request, res: Response, next: NextFunction) =>
   controller.booking.createBooking(req, res, next)
 );
 router.get("/:bookingId", (req: Request, res: Response, next: NextFunction) =>

@@ -7,6 +7,8 @@ import walletRouter from "./wallet.router";
 import notificationRouter from "./notification.router";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import Depencies from "../../../dependancies/depencies";
+import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
+import { admin_login } from "../../../../domain/validator/admin-validator";
 
 const router = Router();
 
@@ -14,7 +16,7 @@ const controller = {
   admin: new adminController(Depencies),
 };
 
-router.post("/login", (req: Request, res: Response, next: NextFunction) =>
+router.post("/login",validateSchema(admin_login) ,(req: Request, res: Response, next: NextFunction) =>
   controller.admin.loginAdmin(req, res, next)
 );
 router.post("/refresh-token", (req: Request, res: Response) =>

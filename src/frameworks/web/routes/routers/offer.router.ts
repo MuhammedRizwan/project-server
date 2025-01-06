@@ -2,6 +2,8 @@ import { NextFunction, Request, Response, Router } from "express";
 import multer from "multer";
 import { OfferController } from "../../../../adapters/controllers/offer.controller";
 import Depencies from "../../../dependancies/depencies";
+import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
+import { offer_schema } from "../../../../domain/validator/agent-validator";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -16,6 +18,7 @@ router.get("/:agentId", (req: Request, res: Response, next: NextFunction) =>
 router.post(
   "/add-offer",
   upload.single("image"),
+  validateSchema(offer_schema),
   (req: Request, res: Response, next: NextFunction) =>
     controller.offer.createOffer(req, res, next)
 );
@@ -27,6 +30,7 @@ router.get(
 router.put(
   "/update-offer/:offerId",
   upload.single("image"),
+  validateSchema(offer_schema),
   (req: Request, res: Response, next: NextFunction) =>
     controller.offer.updateOffer(req, res, next)
 );

@@ -10,6 +10,15 @@ import multer from "multer";
 import jwtAuth from "../../../../adapters/middleware/jwtAuth.middleware";
 import { agentBlocked } from "../../../../adapters/middleware/block.middleware";
 import Depencies from "../../../dependancies/depencies";
+import { validateSchema } from "../../../../adapters/middleware/validator.middleware";
+import {
+  agent_login,
+  agent_password_reset_validate,
+  agent_password_validate,
+  agent_passwordValidation,
+  agent_profile,
+  agent_signup,
+} from "../../../../domain/validator/agent-validator";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -18,11 +27,15 @@ const controller = {
   agent: new agentController(Depencies),
 };
 
-router.post("/login", (req: Request, res: Response, next: NextFunction) =>
-  controller.agent.loginAgent(req, res, next)
+router.post(
+  "/login",
+  validateSchema(agent_login),
+  (req: Request, res: Response, next: NextFunction) =>
+    controller.agent.loginAgent(req, res, next)
 );
 router.post(
   "/signup",
+  validateSchema(agent_signup),
   upload.single("document"),
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.createAgent(req, res, next)
@@ -40,6 +53,7 @@ router.post("/sendotp", (req: Request, res: Response, next: NextFunction) =>
 );
 router.post(
   "/changepassword",
+  validateSchema(agent_passwordValidation),
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.changePassword(req, res, next)
 );
@@ -56,21 +70,24 @@ router.put(
   jwtAuth,
   agentBlocked,
   upload.single("profile_picture"),
+  validateSchema(agent_profile),
   (req: Request, res: Response, next: NextFunction) => {
     controller.agent.updateAgent(req, res, next);
   }
 );
 router.post(
-  "validate-password/:agentId",
+  "/validate-password/:agentId",
   jwtAuth,
   agentBlocked,
+  validateSchema(agent_password_validate),
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.validatePassword(req, res, next)
 );
 router.patch(
-  "`/change-password/:agentId",
+  "/change-password/:agentId",
   jwtAuth,
   agentBlocked,
+  validateSchema(agent_password_reset_validate),
   (req: Request, res: Response, next: NextFunction) =>
     controller.agent.updatePassword(req, res, next)
 );
