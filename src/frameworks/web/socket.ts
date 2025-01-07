@@ -8,7 +8,7 @@ import configKeys from "../../config";
 const Ioconfig = (server: HttpServer) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin:[configKeys.FRONT_URL, "http://localhost:3000"] ,
+      origin: "*",
       methods: ["GET", "POST"],
     },
   });
