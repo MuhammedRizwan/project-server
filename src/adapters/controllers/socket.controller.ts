@@ -81,6 +81,7 @@ export default class SocketController {
     });
 
     socket.on(SocketEvent.InitiateVideoCall, ({ to, signalData, myId }) => {
+      console.log("signalData", signalData, "myId", myId, "to", to);
       const toSocketId = this._userSocketMap.get(to);
       if (toSocketId) {
         this._io
