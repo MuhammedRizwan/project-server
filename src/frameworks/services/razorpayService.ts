@@ -2,16 +2,17 @@ import Razorpay from "razorpay";
 import { CustomError } from "../../domain/errors/customError";
 import crypto from "crypto";
 import HttpStatusCode from "../../domain/enum/httpstatus";
+import configKeys from "../../config";
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID as string,
-  key_secret: process.env.RAZORPAY_SECRET_ID,
+  key_id:configKeys.RAZORPAY_KEYID,
+  key_secret:configKeys.RAZORPAY_SECRETKEY
 });
 const generatedSignature = (
   razorpayOrderId: string,
   razorpayPaymentId: string
 ) => {
-  const keySecret = process.env.RAZORPAY_SECRET_ID as string;
+  const keySecret = configKeys.RAZORPAY_SECRETKEY
 
   const sig = crypto
     .createHmac("sha256", keySecret)

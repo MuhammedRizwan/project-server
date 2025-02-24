@@ -1,4 +1,5 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
+
 dotenv.config();
 
 const configKeys = {
@@ -15,5 +16,7 @@ const configKeys = {
   ADMIN_ID: process.env.ADMIN_ID as string,
   ADMIN_COMMISION: process.env.ADMIN_COMMISION as string,
   FRONT_URL: process.env.FRONT_URL as string,
+  RAZORPAY_KEYID:process.env.RAZORPAY_KEY_ID as string,
+  RAZORPAY_SECRETKEY:process.env.RAZORPAY_SECRET_ID as string,
 };
 export default configKeys;
